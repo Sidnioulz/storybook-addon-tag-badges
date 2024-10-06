@@ -1,2 +1,2 @@
-// make it work with --isolatedModules
-export default {}
+export * from './utils'
+export { defaultConfig } from './defaultConfig'
