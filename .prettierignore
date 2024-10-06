@@ -1,0 +1,23 @@
+# This file is generated.
+.github/dependabot.yml
+
+# We do want to lint other dotfiles.
+!.\*
+
+.gitignore
+.eslintignore
+.prettierignore
+
+/scripts
+
+pnpm-lock.yaml
+dist/
+\*.tgz
+coverage/
+node_modules/
+storybook-static/
+build-storybook.log
+.DS_Store
+.env
+.idea
+.vscode
