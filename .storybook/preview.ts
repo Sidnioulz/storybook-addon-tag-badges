@@ -17,6 +17,20 @@ const preview: Preview = {
       theme: themes.dark,
       toc: true,
     },
+    tagBadges: {
+      display: {
+        sidebar: true,
+        toolbar: true,
+      },
+      match: [
+        {
+          tags: 'foo',
+          badge: {
+            text: 'The foo',
+          },
+        },
+      ],
+    },
   },
   initialGlobals: {
     background: { value: 'dark' },

@@ -3,7 +3,7 @@ import type { HashEntry } from '@storybook/manager-api'
 import { WithTooltip } from '@storybook/components'
 import { styled, useTheme } from '@storybook/theming'
 
-import type { BadgeConfigOrBadgeFn } from 'src/schemas/badge'
+import type { BadgeOrBadgeFn } from '../schemas/badge'
 
 interface BadgeProps {
   context: 'sidebar' | 'toolbar'
@@ -17,7 +17,7 @@ interface BadgeProps {
   tooltip?: string
 }
 interface WithBadgeProps {
-  badgeConfig: BadgeConfigOrBadgeFn
+  badgeConfig: BadgeOrBadgeFn
   entry: HashEntry
   tag: string
   context: 'sidebar' | 'toolbar'

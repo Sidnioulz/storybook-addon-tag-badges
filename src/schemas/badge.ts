@@ -1,6 +1,6 @@
 import { z } from 'zod'
 
-export const BadgeConfigSchema = z.object({
+export const BadgeSchema = z.object({
   text: z.string(),
   bgColor: z.string().optional(),
   borderColor: z.string().optional(),
@@ -8,20 +8,20 @@ export const BadgeConfigSchema = z.object({
   tooltip: z.string().optional(),
 })
 
-export const BadgeConfigOrBadgeFnSchema = z.union([
+export const BadgeOrBadgeFnSchema = z.union([
   z
     .function()
     .args(z.object({ entry: z.object({}), tag: z.string() }))
-    .returns(BadgeConfigSchema),
-  BadgeConfigSchema,
+    .returns(BadgeSchema),
+  BadgeSchema,
 ])
 
 /**
  * TODO doc
  */
-export type BadgeConfig = z.infer<typeof BadgeConfigSchema>
+export type Badge = z.infer<typeof BadgeSchema>
 
 /**
  * TODO doc
  */
-export type BadgeConfigOrBadgeFn = z.infer<typeof BadgeConfigOrBadgeFnSchema>
+export type BadgeOrBadgeFn = z.infer<typeof BadgeOrBadgeFnSchema>

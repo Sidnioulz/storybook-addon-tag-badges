@@ -1,2 +1,2 @@
-export * from './utils'
-export { defaultConfig } from './defaultConfig'
+export * from 'src/utils/tag'
+export { defaultConfig } from 'src/defaultConfig'
