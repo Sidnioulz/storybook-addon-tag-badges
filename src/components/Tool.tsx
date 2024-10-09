@@ -7,12 +7,13 @@ import type { Parameters } from 'src/schemas/parameters'
 export const Tool = function MyAddonSelector({ api }: { api: API }) {
   const badges = api.getCurrentParameter<string[]>('badges') ?? []
   const parameters = api.getCurrentParameter<Parameters>(KEY) ?? {}
+  const storyData = api.getCurrentStoryData()
 
   const badgesToDisplay = useMemo(() => {
     if (parameters?.display?.toolbar) {
-      console.log('TODO')
+      console.log(storyData)
 
-      return []
+      return ['badger', 'badger']
     }
 
     return []
