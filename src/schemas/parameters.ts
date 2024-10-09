@@ -1,19 +1,20 @@
 import { z } from 'zod'
 import { BadgeOrBadgeFnSchema } from 'src/schemas/badge'
-import { TagsSchema } from 'src/schemas/tags'
+import { TagPatternsSchema } from 'src/schemas/tags'
+import { ItemTypeSchema } from './itemType'
 
-export const ParametersSchema = z.object({
-  display: z.object({
-    sidebar: z.boolean().optional().default(true),
-    toolbar: z.boolean().optional().default(true),
+export const ParametersSchema = z.array(
+  z.object({
+    display: z
+      .object({
+        sidebar: z.array(ItemTypeSchema).optional(),
+        toolbar: z.array(ItemTypeSchema).optional(),
+      })
+      .optional(),
+    tags: TagPatternsSchema,
+    badge: BadgeOrBadgeFnSchema,
   }),
-  match: z.array(
-    z.object({
-      tags: TagsSchema,
-      badge: BadgeOrBadgeFnSchema,
-    }),
-  ),
-})
+)
 
 /**
  * TODO doc

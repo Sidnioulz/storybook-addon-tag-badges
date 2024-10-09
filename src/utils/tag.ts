@@ -1,4 +1,4 @@
-import type { Tags } from 'src/schemas/tags'
+import type { TagPatterns } from '../schemas/tags'
 
 /**
  * TODO doc
@@ -7,10 +7,10 @@ import type { Tags } from 'src/schemas/tags'
  */
 export function getTagParts(tag: string): {
   prefix: string
-  suffix: string | undefined
+  suffix: string | null
 } {
   const [prefix, ...rest] = tag.split(':')
-  return { prefix, suffix: rest.join(':') }
+  return { prefix, suffix: rest.join(':') || null }
 }
 
 /**
@@ -27,28 +27,33 @@ export function getTagPrefix(tag: string): string {
  * @param tag
  * @returns
  */
-export function getTagSuffix(tag: string): string | undefined {
+export function getTagSuffix(tag: string): string | null {
   return getTagParts(tag).suffix
 }
 
 /**
  * TODO doc
  * @param tag
- * @param config
+ * @param patterns
  * @returns
  */
-export function matchTag(tag: string, config: Tags): boolean {
-  const normalisedConfig = [config].flat()
-  for (const config of normalisedConfig) {
-    if (typeof config === 'string') {
-      if (tag.match(config)) {
+export function matchTag(tag: string, patterns: TagPatterns): boolean {
+  const normalisedPatterns = [patterns].flat()
+  for (const pattern of normalisedPatterns) {
+    if (typeof pattern === 'string' || pattern instanceof RegExp) {
+      if (tag.match(pattern)) {
         return true
       }
     } else {
-      const prefix = config.prefix ?? '[^:]+'
-      const suffix = config.suffix ?? '.+'
+      const { prefix, suffix } = getTagParts(tag)
+      const prefixPattern = pattern.prefix ?? '[^:]+'
+      const suffixPattern = pattern.suffix ?? '.+'
 
-      if (tag.match(new RegExp(`^${prefix}:${suffix}$`))) {
+      if (
+        prefix.match(prefixPattern) &&
+        ((suffix && suffixPattern) || (!suffix && !suffixPattern)) &&
+        suffix?.match(suffixPattern)
+      ) {
         return true
       }
     }
@@ -63,6 +68,6 @@ export function matchTag(tag: string, config: Tags): boolean {
  * @param config
  * @returns
  */
-export function matchTags(tags: string[], config: Tags): string[] {
+export function matchTags(tags: string[], config: TagPatterns): string[] {
   return tags.filter((tag) => matchTag(tag, config))
 }
