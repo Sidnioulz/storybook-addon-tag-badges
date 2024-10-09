@@ -9,8 +9,8 @@ export function getTagParts(tag: string): {
   prefix: string
   suffix: string | undefined
 } {
-  const [prefix, suffix] = tag.split(':')
-  return { prefix, suffix }
+  const [prefix, ...rest] = tag.split(':')
+  return { prefix, suffix: rest.join(':') }
 }
 
 /**
