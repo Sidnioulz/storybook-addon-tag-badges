@@ -2,7 +2,7 @@
   <picture style="display: flex; flex-direction: column; align-items: center;">
     <source src="./static/addon-example.avif" type="image/avif" />
     <img style="border-radius: 1rem;"
-      src="./static/static/addon-example.png"
+      src="./static/addon-example.png"
       alt="Example of the addon in use, showing badges next to component entries in the sidebar."
       loading="lazy"
       decoding="async"
@@ -44,10 +44,10 @@ This here addon uses [tags](https://storybook.js.org/docs/writing-stories/tags) 
 |   Feature                 : | storybook-addon-tag-badges | storybook-addon-badges     |
 | --------------------------: | -------------------------- | -------------------------- |
 |      Show badges in toolbar | ✅                          | ✅                          |
-|      Show badges in sidebar | ✅                          | ⚠️ (only for current story) |
+|      Show badges in sidebar | ✅                          | ⚠️ *only for current story* |
 | Define badges based on tags | ✅                          | ❌                          |
 |     Per-story customisation | ❌                          | ✅                          |
-|             Tooltip support | ⚠️ (only in toolbar)        | ✅                          |
+|             Tooltip support | ⚠️ *only in toolbar*        | ✅                          |
 |            Storybook >= 8.4 | ✅                          | ✅                          |
 |            Storybook <  8.3 | ❌                          | ✅                          |
 
@@ -76,15 +76,55 @@ export default {
 
 ## Usage
 
-TODO: example with tags
+
+### Default Config
+
+### Component Badges
+To set badges for a component (and its child stories), define `tags` in the component's meta:
+
+```ts
+// src/components/Button.stories.ts
+import type { Meta, StoryObj } from '@storybook/react'
+import { Button } from './Button'
+
+const meta: Meta<typeof Button> = {
+  title: 'Example/Button',
+  component: Button,
+  tags: ['autodocs', 'version:1.0.0', 'new'],
+}
+```
+
+### Story Badges
+To add badges to a specific story, add `tags` to the story export itself:
+
+```ts
+// src/components/Button.stories.ts
+// TODO
+```
+
+### Docs Badges
+To set badges for a docs entry, pass a `tags` array to the [`docs` parameter](https://storybook.js.org/docs/writing-stories/parameters):
+
+```ts
+import type { Meta, StoryObj } from '@storybook/react'
+import { Button } from './Button'
+
+const meta: Meta<typeof Button> = {
+  title: 'Example/Button',
+  component: Button,
+  parameters: {
+    docs: {
+      tags: ['outdated'],
+    },
+  },
+}
+```
 
 ## Limitations
 
 TODO: explain why cant use per story parameters
 
 ## Configuration
-
-### Default Config
 
 ### Customise Badge Config
 
