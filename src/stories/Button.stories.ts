@@ -10,12 +10,7 @@ const meta: Meta<typeof Button> = {
     backgroundColor: { control: 'color' },
     onClick: fn(),
   },
-  parameters: {
-    docs: {
-      tags: ['new'],
-    },
-  },
-  tags: ['autodocs', 'rc', 'version:1.0.0rc'],
+  tags: ['autodocs', 'new', 'version:1.0.0'],
 }
 
 export default meta
