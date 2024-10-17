@@ -45,6 +45,7 @@
 - [Default Config](#-default-config)
 - [Usage](#-usage)
 - [Customise Badge Config](#️-customise-badge-config)
+- [Workflow Examples](#-workflow-examples)
 - [Limitations](#-limitations)
 - [Contributing](#-contributing)
 - [Support](#-support)
@@ -180,6 +181,7 @@ import {
 
 addons.setConfig({
   tagBadges: [
+    // Add an entry that matches 'frog' and displays a cool badge in the sidebar only
     {
       tags: 'frog',
       badge: {
@@ -190,7 +192,7 @@ addons.setConfig({
       },
       display: {
         sidebar: ['component'],
-        toolbar: true,
+        toolbar: false,
       },
     },
     // Place the default config after your custom matchers.
@@ -199,151 +201,62 @@ addons.setConfig({
 })
 ```
 
----
+Let's now walk through the different properties of `tagBadges`. Each object in `tagBadges` represents a list of tags to match, and where a match is found, a badge configuration to use and places where the badge should be displayed.
 
----
+### Tags
 
----
+The `tags` property defines the tag patterns for which a badge will be displayed. It can be a single pattern or an array of patterns.
 
----
+A tag pattern can be:
 
----
-
----
+| Pattern type                   | Description                                | Example pattern        | Match outcome      |
+| ------------------------------ | ------------------------------------------ | ---------------------- | ------------------ |
+| `string`                       | Exact match                                | `'new'`                | `'new'`            |
+| `RegExp`                       | Regular Expression                         | `/v\d+\d+\d+/`         | `'v1.0.0'`         |
+| `{ prefix: string \| RegExp }` | Match part of a tag before a `:` separator | `{ prefix: 'status' }` | `'status:done'`    |
+| `{ prefix: string \| RegExp }` | Match part of a tag after a `:` separator  | `{ suffix: 'a11y' }`   | `'compliant:a11y'` |
 
 ---
 
 ### Display
 
-The `display` property in the badge configuration controls where and for what type of content the badges are rendered. It has two sub-properties:
+The `display` property controls where and for what type of content the badges are rendered. It has two sub-properties: `sidebar` and `toolbar`. In the sidebar, tags may be displayed for component, docs or story entries. In the toolbar, they may be set for docs or story entries (as other entry types aren't displayable outside the sidebar).
 
-- `sidebar`: Controls the display of badges in the sidebar.
-- `toolbar`: Controls the display of badges in the toolbar.
+Each of these sub-properties can be set to:
 
-Each of these can be set to:
+| Type            | Description                        | Example    | Sidebar outcome                  | Toolbar outcome     |
+| --------------- | ---------------------------------- | ---------- | -------------------------------- | ------------------- |
+| `ø` _(not set)_ | Use default behaviour              |            | `['component']`                  | `['docs', 'story']` |
+| `false`         | Never display tag                  | `false`    | `[]`                             | `[]`                |
+| `true`          | Always display tag                 | `true`     | `['component', 'docs', 'story']` | `['docs', 'story']` |
+| `string`        | Display only for one type of entry | `'docs'`   | `['docs']`                       | `['docs']`          |
+| `string[]`      | Display for a list of entry types  | `['docs']` | `['docs']`                       | `['docs']`          |
 
-- `true`: Displays for any type of item.
-- `false`: Never displays.
-- A string or array of strings: Each string represents a type of HashEntry for which the badge will be shown (e.g., 'docs', 'story', 'component').
-
-Example:
-
-```ts
-// .storybook/manager.ts
-import { addons } from '@storybook/manager-api'
-import {
-  defaultConfig,
-  type TagBadgeParameters,
-} from 'storybook-addon-tag-badges'
-
-addons.setConfig({
-  tagBadges: [
-    {
-      tags: 'custom-badge',
-      badge: {
-        text: 'Custom',
-        bgColor: '#ff0000',
-        fgColor: '#ffffff',
-      },
-      display: {
-        sidebar: ['component', 'story'],
-        toolbar: true,
-      },
-    },
-    ...defaultConfig,
-  ] satisfies TagBadgeParameters,
-})
-```
-
-This configuration would display the 'Custom' badge in the sidebar for components and stories, and in the toolbar for all types of content when the 'custom-badge' tag is present.
-
-### Tag
-
-The `tags` property in the badge configuration defines the string, RegExp, or tag structures to match against for this badge config to be used. It can be a single pattern or an array of patterns.
-
-A tag pattern can be:
-
-- A string: Exact match for the tag.
-- A RegExp: For more complex matching patterns.
-- An object with `prefix` and/or `suffix` properties: To match only the beginning or end of a tag.
-
-Examples:
-
-```ts
-// .storybook/manager.ts
-import { addons } from '@storybook/manager-api'
-import {
-  defaultConfig,
-  type TagBadgeParameters,
-} from 'storybook-addon-tag-badges'
-
-addons.setConfig({
-  tagBadges: [
-    // String match
-    {
-      tags: 'new-feature',
-      badge: { text: 'New Feature' },
-    },
-    // RegExp match
-    {
-      tags: /^version:\d+\.\d+\.\d+$/,
-      badge: ({ tag }) => ({ text: tag.split(':')[1] }),
-    },
-    // Prefix/suffix match
-    {
-      tags: { prefix: 'status:' },
-      badge: ({ tag }) => ({ text: tag.split(':')[1] }),
-    },
-    // Array of patterns
-    {
-      tags: ['beta', { suffix: '-test' }, /^v\d+/],
-      badge: { text: 'Testing', bgColor: '#ffff00' },
-    },
-    ...defaultConfig,
-  ] satisfies TagBadgeParameters,
-})
-```
+---
 
 ### Badge
 
 The `badge` property defines the appearance and content of the badge to display. It can be either a static object or a function that dynamically generates the badge based on the matched content and tag.
 
-Static badge object:
+#### Static Badge Object
 
-```ts
-// .storybook/manager.ts
-import { addons } from '@storybook/manager-api'
-import {
-  defaultConfig,
-  type TagBadgeParameters,
-} from 'storybook-addon-tag-badges'
+The object has the following properties:
 
-addons.setConfig({
-  tagBadges: [
-    {
-      tags: 'important',
-      badge: {
-        text: 'Important',
-        bgColor: '#ff0000',
-        fgColor: '#ffffff',
-        borderColor: '#000000',
-        tooltip: 'This is an important component',
-      },
-    },
-    ...defaultConfig,
-  ] satisfies TagBadgeParameters,
-})
-```
+| Name            | Type      | Description                                                       | Example                  |
+| --------------- | --------- | ----------------------------------------------------------------- | ------------------------ |
+| **text**        | `string`  | The text displayed in the badge (required).                       | 'New'                    |
+| **bgColor**     | `string?` | The CSS property passed to `background-color`.                    | '#aea'                   |
+| **fgColor**     | `string?` | The CSS property passed to `color`.                               | '#2f2'                   |
+| **borderColor** | `string?` | A border colour, rendered as a CSS box-shadow.                    | '#2f2'                   |
+| **tooltip**     | `string?` | A tooltip text shown when clicking the badge in the toolbar only. | 'This component is new!' |
 
 #### Dynamic Badge Functions
 
-Dynamic badge functions allow you to customize the badge based on the current entry and matched tag. This is particularly useful for creating badges that adapt to specific tag content or entry properties.
+Dynamic badge functions allow you to customize the badge based on the current entry and matched tag. They must return a valid badge object as documented above. They receive an object parameter with the following properties:
 
-The function receives an object with the following properties:
-
-- `entry`: The current HashEntry (component, story, etc.).
-- `getTagParts`, `getTagPrefix`, `getTagSuffix`: Utility functions to extract parts of the tag.
-- `tag`: The matched tag string.
+- `entry`: The current HashEntry (component, story, etc.), with an `id` and/or `name`, a `type`, and `tags`
+- `getTagParts`, `getTagPrefix`, `getTagSuffix`: Utility functions to extract parts of the tag
+- `tag`: The matched tag string
 
 Example of a dynamic badge function:
 
@@ -358,13 +271,14 @@ import {
 addons.setConfig({
   tagBadges: [
     {
-      tags: /^version:/,
+      tags: { prefix: 'version' },
       badge: ({ entry, getTagSuffix, tag }) => {
         const version = getTagSuffix(tag, 'version:')
+        const isUnstable = version.startsWith('0')
         return {
           text: `v${version}`,
-          bgColor: entry.type === 'story' ? '#e0f0ff' : '#f0e0ff',
-          tooltip: `Version ${version} - ${entry.name}`,
+          bgColor: version.startsWith('0') ? '#f0ccff' : '#cce0ff',
+          tooltip: `Version ${version}${isUnstable ? ' (unstable)' : ''}`,
         }
       },
     },
@@ -373,21 +287,28 @@ addons.setConfig({
 })
 ```
 
-This function creates a version badge that changes color based on whether it's applied to a story or another type of entry, and includes the entry name in the tooltip.
+## 📝 Workflow Examples
 
----
+> [!CAUTION]
+> TODO
 
----
+### Market Segmentation
 
----
+-> TODO: show config that would create a prefixed badge for market:B2B and market:B2C
 
----
+### Editorial/Brand Components
 
----
+gradient branded
 
----
+### Middleware Integrations
 
----
+-> TODO: show config that would create badges for stories that showcase specific uses of a Form component, in the sidebar, e.g. integration:redux, integration:zod, integration:pure-html
+
+compliance:a11y compliance:brand
+uses:cache
+uses:network
+uses:store
+uses:database
 
 ## 🐌 Limitations
 
