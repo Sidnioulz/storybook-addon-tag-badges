@@ -85,20 +85,26 @@ export const Badge: React.FC<BadgeProps> = ({
   )
 }
 
+export function getBadgeProps(
+  config: BadgeOrBadgeFn,
+  entry: HashEntry,
+  tag: string,
+): Omit<BadgeProps, 'context'> {
+  const props =
+    typeof config === 'function'
+      ? config({ entry, getTagParts, getTagPrefix, getTagSuffix, tag })
+      : config
+
+  return props
+}
+
 export const WithBadge: React.FC<WithBadgeProps> = ({
   config,
   entry,
   tag,
   ...restProps
 }) => {
-  console.log(config, typeof config)
-
-  const cfg =
-    typeof config === 'function'
-      ? config({ entry, getTagParts, getTagPrefix, getTagSuffix, tag })
-      : config
-
-  console.log('badge cfg', tag, cfg)
+  const cfg = getBadgeProps(config, entry, tag)
 
   return <Badge {...cfg} {...restProps} />
 }
