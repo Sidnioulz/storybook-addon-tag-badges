@@ -141,14 +141,14 @@ describe('display', () => {
       ).toBeTruthy()
     })
 
-    it('should display component in the toolbar by default', () => {
+    it('should NOT display component in the toolbar by default', () => {
       expect(
         shouldDisplay({
           config: { display: DISPLAY_DEFAULTS },
           type: 'component',
           context: 'toolbar',
         }),
-      ).toBeTruthy()
+      ).toBeFalsy()
     })
 
     it('should return false on root type', () => {
