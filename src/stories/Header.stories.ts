@@ -6,15 +6,14 @@ const meta: Meta<typeof Header> = {
   title: 'Example/Header',
   component: Header,
   argTypes: {
-    backgroundColor: { control: 'color' },
     onLogin: fn(),
     onLogout: fn(),
     onCreateAccount: fn(),
   },
   parameters: {
-    // More on Story layout: https://storybook.js.org/docs/react/configure/story-layout
     layout: 'fullscreen',
   },
+  tags: ['new', 'version:1.0.0'],
 }
 
 export default meta

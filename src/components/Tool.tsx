@@ -1,40 +1,63 @@
-import React, { memo, useCallback, useEffect } from 'react'
-import { useGlobals, type API } from 'storybook/internal/manager-api'
-import { IconButton } from 'storybook/internal/components'
-import { ADDON_ID, KEY, TOOL_ID } from '../constants'
-import { LightningIcon } from '@storybook/icons'
+import React, { type FC } from 'react'
+import { addons, type API } from '@storybook/manager-api'
 
-export const Tool = memo(function MyAddonSelector({ api }: { api: API }) {
-  const [globals, updateGlobals, storyGlobals] = useGlobals()
+import { KEY, TOOL_ID } from '../constants'
+import { type TagBadgeParameters } from '../types/TagBadgeParameters'
+import { WithBadge } from './Badge'
+import { styled } from '@storybook/theming'
+import { useBadgesToDisplay } from 'src/useBadgesToDisplay'
+interface ToolProps {
+  api: API
+}
 
-  const isLocked = KEY in storyGlobals
-  const isActive = !!globals[KEY]
+const Separator = styled.div`
+  content: ' ';
+  width: 1px;
+  height: 20px;
+  background: rgba(255, 255, 255, 0.1);
+  margin-left: 2px;
+  margin-right: 2px;
+  display: inline-block;
+`
 
-  const toggle = useCallback(() => {
-    updateGlobals({
-      [KEY]: !isActive,
-    })
-  }, [isActive])
+const Root = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 6px;
 
-  useEffect(() => {
-    api.setAddonShortcut(ADDON_ID, {
-      label: 'Toggle Measure [O]',
-      defaultShortcut: ['O'],
-      actionName: 'outline',
-      showInMenu: false,
-      action: toggle,
-    })
-  }, [toggle, api])
+  &:last-child div:last-child {
+    display: none;
+  }
+`
 
-  return (
-    <IconButton
-      key={TOOL_ID}
-      active={isActive}
-      disabled={isLocked}
-      title="Enable my addon"
-      onClick={toggle}
-    >
-      <LightningIcon />
-    </IconButton>
+export const Tool: FC<ToolProps> = function Tool({ api }) {
+  const { [KEY]: parameters } = addons.getConfig() as {
+    [KEY]: TagBadgeParameters
+  }
+  const storyData = api.getCurrentStoryData()
+  const { tags, type } = storyData ?? {}
+
+  const badgesToDisplay = useBadgesToDisplay({
+    context: 'toolbar',
+    parameters,
+    tags,
+    type,
+  })
+
+  return badgesToDisplay.length ? (
+    <Root key={TOOL_ID}>
+      {badgesToDisplay.map(({ badge, tag }) => (
+        <WithBadge
+          config={badge}
+          context="toolbar"
+          entry={storyData}
+          key={tag}
+          tag={tag}
+        />
+      ))}
+      <Separator />
+    </Root>
+  ) : (
+    ''
   )
-})
+}

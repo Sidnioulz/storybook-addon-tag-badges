@@ -8,3 +8,4 @@ build-storybook.log
 .idea
 .vscode
 .eslintcache
+coverage

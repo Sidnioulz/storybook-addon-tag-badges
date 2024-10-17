@@ -3,7 +3,8 @@ import type { HashEntry } from '@storybook/manager-api'
 import { WithTooltip } from '@storybook/components'
 import { styled, useTheme } from '@storybook/theming'
 
-import type { BadgeConfigOrBadgeFn } from 'src/schemas/badge'
+import type { BadgeOrBadgeFn } from '../types/Badge'
+import { getTagParts, getTagPrefix, getTagSuffix } from '../utils/tag'
 
 interface BadgeProps {
   context: 'sidebar' | 'toolbar'
@@ -17,20 +18,24 @@ interface BadgeProps {
   tooltip?: string
 }
 interface WithBadgeProps {
-  badgeConfig: BadgeConfigOrBadgeFn
+  config: BadgeOrBadgeFn
   entry: HashEntry
   tag: string
   context: 'sidebar' | 'toolbar'
 }
 
+const WithTooltipPatched = styled(WithTooltip)`
+  line-height: 1px;
+`
+
 const BadgeUI = styled.div<
-  Pick<BadgeProps, 'bgColor' | 'borderColor' | 'fgColor'>
->(({ as, bgColor, borderColor, fgColor, theme }) => ({
+  Pick<BadgeProps, 'bgColor' | 'borderColor' | 'fgColor' | 'context'>
+>(({ as, bgColor, borderColor, fgColor, context, theme }) => ({
   display: 'inline-block',
   fontSize: 11,
   lineHeight: '.75rem',
   alignSelf: 'center',
-  padding: '4px 12px',
+  padding: context === 'sidebar' ? '3px 8px' : '4px 12px',
   border: 'none',
   cursor: as === 'button' ? 'help' : 'initial',
   borderRadius: '3em',
@@ -39,7 +44,7 @@ const BadgeUI = styled.div<
   boxShadow:
     theme.base === 'light'
       ? `inset 0 0 0 1px ${borderColor ?? `color-mix(in oklab, ${fgColor ?? theme.color.dark} 10%, transparent 90%)`}`
-      : (borderColor ?? 'none'),
+      : `inset 0 0 0 1px ${borderColor ?? 'none'}`,
   color: fgColor ?? theme.color.dark,
 }))
 
@@ -60,40 +65,39 @@ export const Badge: React.FC<BadgeProps> = ({
 
   return (
     <Fragment>
-      {!tooltip && (
-        <BadgeUI {...restProps} theme={theme}>
+      {!tooltip || context == 'sidebar' ? (
+        <BadgeUI {...restProps} context={context} theme={theme}>
           {text}
         </BadgeUI>
-      )}
-      {tooltip && (
-        <WithTooltip
+      ) : (
+        <WithTooltipPatched
           closeOnOutsideClick
-          placement={context === 'sidebar' ? 'right' : 'bottom'}
+          placement={'bottom'}
           tooltip={<TooltipUI>{tooltip}</TooltipUI>}
-          // tooltip={<TooltipMessage desc={tooltip} links={[{
-          //   title: 'Click me',
-          //   onClick: () => window.open('https://google.fr', 'blank')
-          // }]} />}
         >
-          <BadgeUI as="button" {...restProps} theme={theme}>
+          <BadgeUI as="button" {...restProps} context={context} theme={theme}>
             {text}
           </BadgeUI>
-        </WithTooltip>
+        </WithTooltipPatched>
       )}
     </Fragment>
   )
 }
 
 export const WithBadge: React.FC<WithBadgeProps> = ({
-  badgeConfig,
+  config,
   entry,
   tag,
   ...restProps
 }) => {
+  console.log(config, typeof config)
+
   const cfg =
-    typeof badgeConfig === 'function'
-      ? badgeConfig({ entry, tag })
-      : badgeConfig
+    typeof config === 'function'
+      ? config({ entry, getTagParts, getTagPrefix, getTagSuffix, tag })
+      : config
+
+  console.log('badge cfg', tag, cfg)
 
   return <Badge {...cfg} {...restProps} />
 }

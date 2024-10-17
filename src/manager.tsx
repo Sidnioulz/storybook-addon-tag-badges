@@ -1,15 +1,32 @@
 import React from 'react'
-import { addons, types } from 'storybook/internal/manager-api'
+import { addons, types } from '@storybook/manager-api'
 
+import { Sidebar } from './components/Sidebar'
 import { Tool } from './components/Tool'
-import { ADDON_ID, TAB_ID, TOOL_ID } from './constants'
+import { ADDON_ID, KEY, TOOL_ID } from './constants'
+import { defaultConfig } from './defaultConfig'
 
 addons.register(ADDON_ID, (api) => {
   addons.add(TOOL_ID, {
     type: types.TOOL,
-    title: 'My addon',
-    match: ({ viewMode, tabId }) =>
-      !!((viewMode && viewMode.match(/^(story)$/)) || tabId === TAB_ID),
+    title: 'Tag Badges',
     render: () => <Tool api={api} />,
   })
+})
+
+addons.setConfig({
+  [KEY]: defaultConfig,
+  sidebar: {
+    renderLabel: (item) => {
+      if (
+        item.type !== 'story' &&
+        item.type !== 'docs' &&
+        item.type !== 'component'
+      ) {
+        return
+      }
+
+      return <Sidebar item={item} />
+    },
+  },
 })
