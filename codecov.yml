@@ -1,0 +1,4 @@
+component_management:
+  default_rules:
+    paths:
+      - '.'
