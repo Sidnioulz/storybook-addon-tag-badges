@@ -37,10 +37,11 @@ export function getTagSuffix(tag: string): string | null {
 }
 
 /**
- * TODO doc
- * @param tag
- * @param patterns
- * @returns
+ * Checks if a given tag matches any of the provided patterns.
+ * Patterns can be regular expressions, strings, or objects with prefix and suffix patterns.
+ * @param tag The tag to match against the patterns.
+ * @param patterns The pattern or patterns to match the tag against.
+ * @returns `true` if the tag matches any of the patterns, `false` otherwise.
  */
 export function matchTag(tag: string, patterns: TagPatterns): boolean {
   const normalisedPatterns = [patterns].flat()
@@ -72,10 +73,10 @@ export function matchTag(tag: string, patterns: TagPatterns): boolean {
 }
 
 /**
- * TODO doc
- * @param tags
- * @param config
- * @returns
+ * Filters an array of tags based on the provided pattern configuration.
+ * @param tags An array of tags to filter.
+ * @param config The pattern configuration to match tags against.
+ * @returns An array of tags that match the given pattern configuration.
  */
 export function matchTags(tags: string[], config: TagPatterns): string[] {
   return tags.filter((tag) => matchTag(tag, config))
