@@ -4,21 +4,19 @@ import { defaultConfig } from '../src/index'
 import type { TagBadgeParameters } from '../src/types/TagBadgeParameters'
 
 addons.setConfig({
-  // tagBadges: defaultConfig satisfies TagBadgeParameters,
   tagBadges: [
     ...defaultConfig,
     {
-      tags: 'new',
+      tags: 'frog',
       badge: {
-        text: 'New!',
-        bgColor: '#00e256',
-        borderColor: '#006b0b',
-        fgColor: '#001c13',
-        tooltip: 'This component is brand new!',
+        text: 'Frog 🐸',
+        bgColor: '#001c13',
+        fgColor: '#e0eb0b',
+        tooltip: 'This component can catch flies!',
       },
       display: {
         sidebar: ['component'],
-        toolbar: ['component', 'docs', 'story'],
+        toolbar: false,
       },
     },
   ] satisfies TagBadgeParameters,
