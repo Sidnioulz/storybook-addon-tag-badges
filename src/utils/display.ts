@@ -1,8 +1,7 @@
-import { ArrayElement } from '../types/ArrayElement'
-import { TagBadgeParameters } from '../types/TagBadgeParameters'
 import { HashEntry } from '@storybook/manager-api'
-import { ItemType } from 'src/types/itemType'
-import { Display } from 'src/types/DisplayOption'
+import type { ArrayElement } from '../types/ArrayElement'
+import type { TagBadgeParameters } from '../types/TagBadgeParameters'
+import type { Display } from '../types/DisplayOption'
 
 export interface ShouldDisplayOptions {
   config: Partial<ArrayElement<TagBadgeParameters>>
@@ -12,13 +11,13 @@ export interface ShouldDisplayOptions {
 
 export const DISPLAY_DEFAULTS = {
   sidebar: ['component'],
-  toolbar: ['component', 'docs', 'story'],
+  toolbar: ['docs', 'story'],
 } satisfies Display
 
 function normaliseDisplayProperty(
-  value: boolean | ItemType | ItemType[] | undefined,
-  defaultValue: ItemType[],
-): ItemType[] {
+  value: boolean | HashEntry['type'] | HashEntry['type'][] | undefined,
+  defaultValue: HashEntry['type'][],
+): HashEntry['type'][] {
   if (value === undefined) {
     return [...defaultValue]
   }
@@ -35,8 +34,8 @@ function normaliseDisplayProperty(
 }
 
 export function normaliseDisplay(display?: Display): {
-  sidebar: ItemType[]
-  toolbar: ItemType[]
+  sidebar: HashEntry['type'][]
+  toolbar: HashEntry['type'][]
 } {
   return {
     sidebar: normaliseDisplayProperty(
@@ -51,7 +50,15 @@ export function normaliseDisplay(display?: Display): {
 }
 
 /**
- * TODO doc
+ * Determines whether a badge should be displayed based on the provided config
+ * and based on the display context (toolbar, sidebar).
+ *
+ * @param options The options to determine display.
+ * @param options.config The configuration for the badge.
+ * @param options.context The context where the badge might be displayed.
+ * @param options.type The type of the current entry.
+ *
+ * @returns {boolean} `true` if the badge should be displayed, `false` otherwise.
  */
 export function shouldDisplay({ config, context, type }: ShouldDisplayOptions) {
   if (type === 'root') {
