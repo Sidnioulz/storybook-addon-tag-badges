@@ -1,75 +1,132 @@
-# Storybook Addon Vue support for MDX
+<div align="center">
+  <picture style="display: flex; flex-direction: column; align-items: center;">
+    <source src="./static/addon-example.avif" type="image/avif" />
+    <img style="border-radius: 1rem;"
+      src="./static/static/addon-example.png"
+      alt="Example of the addon in use, showing badges next to component entries in the sidebar."
+      loading="lazy"
+      decoding="async"
+      height="247"
+    />
+  </picture>
 
-Use Vue components inside MDX files, as if they were React components.
+  <h1>Storybook Addon - Tag Badges</h1>
+  
+  <p>
+    This addon displays badges in the <a href="https://storybook.js.org/docs/configure/user-interface/sidebar-and-urls">sidebar</a> and <a href="https://storybook.js.org/docs/essentials/toolbars-and-globals">toolbar</a> of the Storybook UI, next to <code>component</code>, <code>docs</code> or <code>story</code> entries, based on the <a href="https://storybook.js.org/docs/writing-stories/tags">tags</a> defined in your content. Badges can be customised to support your team's workflows.
+  </p>
+  
+  <p>
+    <img src="https://img.shields.io/badge/status-stable-4cc71e" alt="Status: Stable" />
+    <a href="https://github.com/Sidnioulz/storybook-addon-tag-badges/commits"><img src="https://img.shields.io/github/commit-activity/m/Sidnioulz/storybook-addon-tag-badges" alt="commit activity" /></a>
+    <a href="https://github.com/Sidnioulz/storybook-addon-tag-badges/commits"><img src="https://img.shields.io/github/last-commit/Sidnioulz/storybook-addon-tag-badges" alt="last commit" /></a>
+    <a href="https://github.com/Sidnioulz/storybook-addon-tag-badges/issues/"><img src="https://img.shields.io/github/issues/Sidnioulz/storybook-addon-tag-badges" alt="open issues" /></a>
+    <a href="https://github.com/Sidnioulz/storybook-addon-tag-badges/actions/workflows/github-code-scanning/codeql"><img src="https://github.com/Sidnioulz/storybook-addon-tag-badges/actions/workflows/github-code-scanning/codeql/badge.svg?branch=main" alt="CodeQL status" /></a>
+    <a href="https://github.com/Sidnioulz/storybook-addon-tag-badges/actions/workflows/continuous-integration.yml"><img src="https://github.com/Sidnioulz/storybook-addon-tag-badges/actions/workflows/continuous-integration.yml/badge.svg?branch=main" alt="CI status" /></a>
+    <a href="https://codecov.io/gh/Sidnioulz/storybook-addon-tag-badges"><img src="https://codecov.io/gh/Sidnioulz/storybook-addon-tag-badges/graph/badge.svg?token=4SX3N57XH3" alt="code coverage" /></a>
+    <a href="https://github.com/Sidnioulz/storybook-addon-tag-badges/graphs/contributors"><img src="https://img.shields.io/github/contributors/Sidnioulz/storybook-addon-tag-badges" alt="contributors" /></a>
+    <a href="https://github.com/Sidnioulz/storybook-addon-tag-badges/blob/main/CODE_OF_CONDUCT.md"><img src="https://img.shields.io/badge/Contributor%20Covenant-2.1-4baaaa.svg" alt="code of conduct: contributor covenant 2.1" /></a>
+    <a href="https://github.com/Sidnioulz/storybook-addon-tag-badges/blob/main/LICENSE"><img src="https://img.shields.io/github/license/Sidnioulz/storybook-addon-tag-badges.svg" alt="license" /></a>
+    <a href="https://github.com/Sidnioulz/storybook-addon-tag-badges/network/members"><img src="https://img.shields.io/github/forks/Sidnioulz/storybook-addon-tag-badges" alt="forks" /></a>
+    <a href="https://github.com/Sidnioulz/storybook-addon-tag-badges/stargazers"><img src="https://img.shields.io/github/stars/Sidnioulz/storybook-addon-tag-badges" alt="stars" /></a>
+    <a href="https://github.com/sponsors/Sidnioulz"><img src="https://img.shields.io/badge/sponsor-30363D?logo=GitHub-Sponsors&logoColor=#EA4AAA" alt="sponsor this project" /></a>
+  </p>
+</div>
 
-## Limitations
+---
 
-This addon is in its early stages, the following limitations apply:
+## Which badge addon should I use?
 
-- Only works with Vue 3 and Storybook 8 (for Storybook 7, use v0.1.5)
-- Components must be locally imported into MDX files
-- Provide/Inject has not been tested yet but should work
-- **Customisation APIs may change in the future**
+Other addons have been written to display badges in Storybook. In particular, this here addon is a rewrite of [storybook-addon-badges](https://storybook.js.org/addons/@geometricpanda/storybook-addon-badges), which has a large following.
 
-There is also a known bug when running Storybook locally. Sometimes, the first page load of a MDX page with Vue components can crash because Storybook does not properly execute the code defined in `beforeVueAppMount`. This is probably due to how Storybook parses and runs the preview file, but the bug does not occur at all in production builds. You can work around this bug by refreshing the browser tab once, and it will successfully run on the second load.
+This here addon uses [tags](https://storybook.js.org/docs/writing-stories/tags) as a data source to display badges, rather than dedicated [story parameters](https://storybook.js.org/docs/writing-stories/parameters) like storybook-addon-badges does. This architectural choice opens up new possibilities, but also prevents some features from the original addon from working. The table below summarises the differences between both addons.
+
+|   Feature                 : | storybook-addon-tag-badges | storybook-addon-badges     |
+| --------------------------: | -------------------------- | -------------------------- |
+|      Show badges in toolbar | ✅                          | ✅                          |
+|      Show badges in sidebar | ✅                          | ⚠️ (only for current story) |
+| Define badges based on tags | ✅                          | ❌                          |
+|     Per-story customisation | ❌                          | ✅                          |
+|             Tooltip support | ⚠️ (only in toolbar)        | ✅                          |
+|            Storybook >= 8.4 | ✅                          | ✅                          |
+|            Storybook <  8.3 | ❌                          | ✅                          |
+
 
 ## Installation
 
 ```sh
-yarn add -D storybook-addon-vue-mdx
+yarn add -D storybook-addon-tag-badges
 ```
 
-In your `.storybook/main.js` file, add the following:
+```sh
+npm install -D storybook-addon-tag-badges
+```
 
-```js
+```sh
+pnpm install -D storybook-addon-tag-badges
+```
+
+In your `.storybook/main.ts` file, add the following:
+
+```ts
 export default {
-  addons: ['storybook-addon-vue-mdx'],
+  addons: ['storybook-addon-tag-badges'],
 }
 ```
 
 ## Usage
 
-In a `Sample.mdx` file, import the component you need, and use it using Vue JSX syntax:
+TODO: example with tags
 
-```mdx
-import MyComponent from 'path-to-components/MyComponent.vue'
+## Limitations
 
-<MyComponent>bla bla</MyComponent>
-```
+TODO: explain why cant use per story parameters
 
-The Vue JSX syntax is [documented by Vue](https://vuejs.org/guide/extras/render-function.html#jsx-tsx). Pay particular attention to [the syntax for passing slots](https://vuejs.org/guide/extras/render-function.html#passing-slots).
+## Configuration
 
-## Customising the Vue app context
+### Default Config
 
-This addon uses [veaury](https://github.com/devilwjp/veaury) to render Vue components in a React JSX context. In particular, the addon calls `applyPureVueInReact`. You may pass options to this function by defining `globals` in your `.storybook/preview.js` file, like so:
+### Customise Badge Config
 
-```js
-const globals = {
-  vueMdx: {
-    beforeVueAppMount(app) {
-      app.use(myCustomPlugin)
+
+In your `.storybook/manager.ts` file, add the following:
+
+```ts
+import { addons } from '@storybook/manager-api'
+import { defaultConfig, type TagBadgeParameters } from 'storybook-addon-tag-badges'
+
+addons.setConfig({
+  tagBadges: [
+    {
+      tags: 'frog',
+      badge: {
+        text: 'Frog 🐸',
+        bgColor: '#001c13',
+        fgColor: '#e0eb0b',
+        tooltip: 'This component can catch flies!',
+      },
+      display: {
+        sidebar: ['component'],
+        toolbar: true,
+      },
     },
-  },
-}
-
-export default {
-  globals,
-}
+    // Place the default config last so that
+    // your custom matchers match first.
+    ...defaultConfig,
+  ] satisfies TagBadgeParameters,
+})
 ```
-
-You may also directly import and use Veaury's `applyVueInReact` as per Veaury's [own documentation](https://github.com/devilwjp/veaury).
 
 ## Development scripts
 
-- `yarn start` runs babel in watch mode and starts Storybook
-- `yarn build` builds and packages the addon code
-- `yarn pack:local` makes a local tarball to be used as a NPM dependency elsewhere
+- `pnpm start` starts the local Storybook
+- `pnpm build` builds and packages the addon code
+- `pnpm pack:local` makes a local tarball to be used as a NPM dependency elsewhere
+- `pnpm test` runs unit tests
 
 ## Bug reports
 
-Before reporting a bug, please thoroughly check Veaury's documentation and list of issues for matching issues.
-
-To report a bug, please use GitHub issues on this repository, making sure to include a working Minimal Working Example. For instance, you could use [storybook.new](https://new-storybook.netlify.app/) to bootstrap a reproduction environment.
+To report a bug, please use GitHub issues on this repository, making sure to include a working Minimal Working Example. You may use [storybook.new](https://new-storybook.netlify.app/) to bootstrap a reproduction environment.
 
 ### Migrating to a later Storybook version
 

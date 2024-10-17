@@ -3,9 +3,22 @@ import type { TagBadgeParameters } from './types/TagBadgeParameters'
 
 export const defaultConfig: TagBadgeParameters = [
   {
+    tags: 'frog',
+    badge: {
+      text: 'Frog 🐸',
+      bgColor: '#001c13',
+      fgColor: '#e0eb0b',
+      tooltip: 'This component can catch flies!',
+    },
     display: {
       sidebar: ['component'],
-      toolbar: ['component', 'story', 'docs'],
+      toolbar: true,
+    },
+  },
+  {
+    display: {
+      sidebar: ['component'],
+      toolbar: ['story', 'docs'],
     },
     tags: 'new',
     badge: {
@@ -39,9 +52,9 @@ export const defaultConfig: TagBadgeParameters = [
     ],
     badge: {
       text: '{{suffix}}',
-      bgColor: 'hsl(194, 100%, 64%)',
-      borderColor: 'hsl(194, 100%, 34%)',
-      fgColor: 'hsl(194, 100%, 12%)',
+      bgColor: 'hsl(257, 100%, 64%)',
+      borderColor: 'hsl(257, 100%, 34%)',
+      fgColor: 'hsl(257, 100%, 12%)',
     },
   },
   {
@@ -51,7 +64,7 @@ export const defaultConfig: TagBadgeParameters = [
     badge: ({ tag }) => {
       const version = getTagSuffix(tag)
       const isExperimental = version?.startsWith('0')
-      const hue = isExperimental ? 66 : 120
+      const hue = isExperimental ? 66 : 194
 
       return {
         text: `${version}`,

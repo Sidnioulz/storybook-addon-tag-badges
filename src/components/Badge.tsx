@@ -37,7 +37,8 @@ const BadgeUI = styled.div<
   alignSelf: 'center',
   padding: context === 'sidebar' ? '3px 8px' : '4px 12px',
   border: 'none',
-  cursor: as === 'button' ? 'help' : 'initial',
+  cursor:
+    as === 'button' ? 'help' : context === 'sidebar' ? 'cursor' : 'initial',
   borderRadius: '3em',
   fontWeight: theme.typography.weight.bold,
   background: bgColor ?? theme.color.mediumlight,

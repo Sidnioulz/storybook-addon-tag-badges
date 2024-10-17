@@ -15,7 +15,7 @@ const meta: Meta<typeof Button> = {
       tags: ['new'],
     },
   },
-  tags: ['autodocs', 'rc', 'version:1.0.0rc'],
+  tags: ['autodocs', 'rc', 'version:1.0.0'],
 }
 
 export default meta
