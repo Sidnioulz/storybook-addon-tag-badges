@@ -81,11 +81,11 @@ describe('display', () => {
       expect(
         normaliseDisplay({
           sidebar: ['component'],
-          toolbar: ['component', 'docs'],
+          toolbar: ['docs'],
         }),
       ).toMatchObject({
         sidebar: ['component'],
-        toolbar: ['component', 'docs'],
+        toolbar: ['docs'],
       })
     })
   })
