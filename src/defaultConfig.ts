@@ -1,47 +1,69 @@
 import { getTagSuffix } from './utils/tag'
 import type { TagBadgeParameters } from './types/TagBadgeParameters'
 
+function upperFirst(str: string): string {
+  return str[0].toUpperCase() + str.slice(1)
+}
+
 export const defaultConfig: TagBadgeParameters = [
   {
     display: {
       sidebar: ['component'],
-      toolbar: ['component', 'story', 'docs'],
+      toolbar: ['story', 'docs'],
     },
     tags: 'new',
     badge: {
-      text: 'New!',
-      bgColor: 'hsl(168, 100%, 64%)',
-      borderColor: 'hsl(168, 100%, 34%)',
-      fgColor: 'hsl(168, 100%, 12%)',
-      tooltip: 'This component was released recently!',
+      text: 'New',
+      bgColor: 'hsl(130, 100%, 74%)',
+      borderColor: 'hsl(130, 100%, 34%)',
+      fgColor: 'hsl(130, 100%, 6%)',
     },
   },
-  // {
-  //   tags: ['alpha', 'beta', 'rc'],
-  //   badge: ({ tag }) => {
-  //     console.log('hi', tag)
-  //     return {
-  //       text: `Unstable: ${tag}`,
-  //       bgColor: 'hsl(44, 100%, 64%)',
-  //       borderColor: 'hsl(44, 100%, 34%)',
-  //       fgColor: 'hsl(44, 100%, 12%)',
-  //     }
-  //   },
-  // },
   {
-    tags: [
-      {
-        prefix: 'group',
-      },
-      {
-        prefix: 'category',
-      },
-    ],
+    tags: ['alpha', 'beta', 'rc', 'experimental'],
+    badge: ({ tag }) => {
+      return {
+        text: tag === 'rc' ? 'Release candidate' : upperFirst(tag),
+        bgColor: 'hsl(257, 100%, 84%)',
+        borderColor: 'hsl(257, 100%, 64%)',
+        fgColor: 'hsl(257, 100%, 12%)',
+      }
+    },
+  },
+  {
+    tags: 'deprecated',
     badge: {
-      text: '{{suffix}}',
-      bgColor: 'hsl(194, 100%, 64%)',
-      borderColor: 'hsl(194, 100%, 34%)',
-      fgColor: 'hsl(194, 100%, 12%)',
+      text: 'Deprecated',
+      bgColor: 'hsl(36, 100%, 74%)',
+      borderColor: 'hsl(36, 100%, 34%)',
+      fgColor: 'hsl(36, 100%, 12%)',
+    },
+  },
+  {
+    tags: 'outdated',
+    badge: {
+      text: 'Outdated',
+      bgColor: 'hsl(12, 100%, 74%)',
+      borderColor: 'hsl(12, 100%, 34%)',
+      fgColor: 'hsl(12, 100%, 12%)',
+    },
+  },
+  {
+    tags: 'danger',
+    badge: {
+      text: 'Danger',
+      bgColor: 'hsl(0, 100%, 44%)',
+      borderColor: 'hsl(0, 100%, 64%)',
+      fgColor: 'hsl(0, 100%, 94%)',
+    },
+  },
+  {
+    tags: ['code-only'],
+    badge: {
+      text: 'Code Only',
+      bgColor: 'hsl(84, 0%, 84%)',
+      borderColor: 'hsl(84, 0%, 34%)',
+      fgColor: 'hsl(84, 0%, 12%)',
     },
   },
   {
@@ -51,11 +73,11 @@ export const defaultConfig: TagBadgeParameters = [
     badge: ({ tag }) => {
       const version = getTagSuffix(tag)
       const isExperimental = version?.startsWith('0')
-      const hue = isExperimental ? 66 : 120
+      const hue = isExperimental ? 66 : 194
 
       return {
         text: `${version}`,
-        bgColor: `hsl(${hue}, 100%, 64%)`,
+        bgColor: `hsl(${hue}, 100%, 74%)`,
         borderColor: `hsl(${hue}, 100%, 34%)`,
         fgColor: `hsl(${hue}, 100%, 12%)`,
         tooltip: `Version ${version}${isExperimental ? '. Experimental!' : ''}`,
