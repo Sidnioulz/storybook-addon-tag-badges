@@ -1,3 +1,15 @@
+# v0.0.7 (Sat Oct 19 2024)
+
+#### ⚠️ Pushed to `main`
+
+- docs(readme): Repair README toc ([@Sidnioulz](https://github.com/Sidnioulz))
+
+#### Authors: 1
+
+- Steve Dodier-Lazaro ([@Sidnioulz](https://github.com/Sidnioulz))
+
+---
+
 # v0.0.6 (Sat Oct 19 2024)
 
 #### ⚠️ Pushed to `main`
