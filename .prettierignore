@@ -21,3 +21,5 @@ build-storybook.log
 .env
 .idea
 .vscode
+
+README.md
