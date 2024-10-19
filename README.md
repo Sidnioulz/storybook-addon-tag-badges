@@ -39,18 +39,38 @@
 
 <!-- no toc -->
 
-- [Table of Contents](#-table-of-contents)
-- [Which badge addon should I use?](#-which-badge-addon-should-i-use)
-- [Installation](#-installation)
-- [Default Config](#-default-config)
-- [Usage](#-usage)
-- [Customise Badge Config](#️-customise-badge-config)
-- [Workflow Examples](#-workflow-examples)
-- [Limitations](#-limitations)
-- [Contributing](#-contributing)
-- [Support](#-support)
-- [Contact](#️-contact)
-- [Acknowledgments](#-acknowledgments)
+- [📔 Table of Contents](#-table-of-contents)
+- [🤔 Which badge addon should I use?](#-which-badge-addon-should-i-use)
+- [📦 Installation](#-installation)
+- [🏁 Default Config](#-default-config)
+  - [Preconfigured Badges](#preconfigured-badges)
+  - [Display Logic](#display-logic)
+- [👀 Usage](#-usage)
+  - [Component Badges](#component-badges)
+  - [Story Badges](#story-badges)
+  - [Docs Badges](#docs-badges)
+- [🛠️ Customise Badge Config](#️-customise-badge-config)
+  - [Tags](#tags)
+  - [Display](#display)
+  - [Badge](#badge)
+    - [Static Badge Object](#static-badge-object)
+    - [Dynamic Badge Functions](#dynamic-badge-functions)
+- [📝 Workflow Examples](#-workflow-examples)
+- [🐌 Limitations](#-limitations)
+  - [Per-Story Config](#per-story-config)
+  - [Component tags](#component-tags)
+- [👩🏽‍💻 Contributing](#-contributing)
+  - [Code of Conduct](#code-of-conduct)
+  - [Developer Certificate of Origin](#developer-certificate-of-origin)
+  - [Getting Started](#getting-started)
+  - [Useful commands](#useful-commands)
+  - [Migrating to a later Storybook version](#migrating-to-a-later-storybook-version)
+  - [Release System](#release-system)
+- [🆘 Support](#-support)
+- [✉️ Contact](#️-contact)
+- [💛 Acknowledgments](#-acknowledgments)
+  - [Thanks](#thanks)
+  - [Built With](#built-with)
 
 ## 🤔 Which badge addon should I use?
 
@@ -273,7 +293,7 @@ addons.setConfig({
     {
       tags: { prefix: 'version' },
       badge: ({ entry, getTagSuffix, tag }) => {
-        const version = getTagSuffix(tag, 'version:')
+        const version = getTagSuffix(tag)
         const isUnstable = version.startsWith('0')
         return {
           text: `v${version}`,
@@ -289,26 +309,23 @@ addons.setConfig({
 
 ## 📝 Workflow Examples
 
-> [!CAUTION]
-> TODO
+This repository contains examples on how to support various workflows with Storybook badges:
 
-### Market Segmentation
+- Market segmentation
+- Separating functional from branded components
+- Compliance state for checks like a11y, brand, QA
+- Component composition patterns
+- Use of external dependencies
+- Smart components
 
--> TODO: show config that would create a prefixed badge for market:B2B and market:B2C
+To see these in action, check out the repository and run the local Storybook instance:
 
-### Editorial/Brand Components
-
-gradient branded
-
-### Middleware Integrations
-
--> TODO: show config that would create badges for stories that showcase specific uses of a Form component, in the sidebar, e.g. integration:redux, integration:zod, integration:pure-html
-
-compliance:a11y compliance:brand
-uses:cache
-uses:network
-uses:store
-uses:database
+```sh
+git clone https://github.com/Sidnioulz/storybook-addon-tag-badges.git
+cd storybook-addon-tag-badges
+pnpm i
+pnpm start
+```
 
 ## 🐌 Limitations
 
