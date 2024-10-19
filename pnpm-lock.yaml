@@ -124,9 +124,6 @@ importers:
       lint-staged:
         specifier: ^15.2.10
         version: 15.2.10
-      node^22:
-        specifier: link:@types/node^22
-        version: link:@types/node^22
       npm-run-all:
         specifier: ^4.1.5
         version: 4.1.5
