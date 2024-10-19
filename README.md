@@ -38,39 +38,18 @@
 ## 📔 Table of Contents
 
 <!-- no toc -->
-
-- [📔 Table of Contents](#-table-of-contents)
-- [🤔 Which badge addon should I use?](#-which-badge-addon-should-i-use)
-- [📦 Installation](#-installation)
-- [🏁 Default Config](#-default-config)
-  - [Preconfigured Badges](#preconfigured-badges)
-  - [Display Logic](#display-logic)
-- [👀 Usage](#-usage)
-  - [Component Badges](#component-badges)
-  - [Story Badges](#story-badges)
-  - [Docs Badges](#docs-badges)
-- [🛠️ Customise Badge Config](#️-customise-badge-config)
-  - [Tags](#tags)
-  - [Display](#display)
-  - [Badge](#badge)
-    - [Static Badge Object](#static-badge-object)
-    - [Dynamic Badge Functions](#dynamic-badge-functions)
-- [📝 Workflow Examples](#-workflow-examples)
-- [🐌 Limitations](#-limitations)
-  - [Per-Story Config](#per-story-config)
-  - [Component tags](#component-tags)
-- [👩🏽‍💻 Contributing](#-contributing)
-  - [Code of Conduct](#code-of-conduct)
-  - [Developer Certificate of Origin](#developer-certificate-of-origin)
-  - [Getting Started](#getting-started)
-  - [Useful commands](#useful-commands)
-  - [Migrating to a later Storybook version](#migrating-to-a-later-storybook-version)
-  - [Release System](#release-system)
-- [🆘 Support](#-support)
-- [✉️ Contact](#️-contact)
-- [💛 Acknowledgments](#-acknowledgments)
-  - [Thanks](#thanks)
-  - [Built With](#built-with)
+- [Table of Contents](#-table-of-contents)
+- [Which badge addon should I use?](#-which-badge-addon-should-i-use)
+- [Installation](#-installation)
+- [Default Config](#-default-config)
+- [Usage](#-usage)
+- [Customise Badge Config](#️-customise-badge-config)
+- [Workflow Examples](#-workflow-examples)
+- [Limitations](#-limitations)
+- [Contributing](#-contributing)
+- [Support](#-support)
+- [Contact](#️-contact)
+- [Acknowledgments](#-acknowledgments)
 
 ## 🤔 Which badge addon should I use?
 
@@ -80,13 +59,13 @@ This architectural choice opens up new possibilities, but also prevents some fea
 
 |                             | storybook-addon-tag-badges | [storybook-addon-badges](https://storybook.js.org/addons/@geometricpanda/storybook-addon-badges) |
 | --------------------------: | -------------------------- | ------------------------------------------------------------------------------------------------ |
-|      Show badges in toolbar | ✅                         | ✅                                                                                               |
-|      Show badges in sidebar | ✅                         | ⚠️ _only for current story_                                                                      |
-| Define badges based on tags | ✅                         | ❌                                                                                               |
-|     Per-story customisation | ❌                         | ✅                                                                                               |
-|             Tooltip support | ⚠️ _only in toolbar_       | ✅                                                                                               |
-|            Storybook >= 8.4 | ✅                         | ✅                                                                                               |
-|             Storybook < 8.3 | ❌                         | ✅                                                                                               |
+|      Show badges in toolbar | ✅                          | ✅                                                                                                |
+|      Show badges in sidebar | ✅                          | ⚠️ _only for current story_                                                                       |
+| Define badges based on tags | ✅                          | ❌                                                                                                |
+|     Per-story customisation | ❌                          | ✅                                                                                                |
+|             Tooltip support | ⚠️ _only in toolbar_        | ✅                                                                                                |
+|            Storybook >= 8.4 | ✅                          | ✅                                                                                                |
+|             Storybook < 8.3 | ❌                          | ✅                                                                                                |
 
 ## 📦 Installation
 
