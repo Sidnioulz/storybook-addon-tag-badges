@@ -9,7 +9,8 @@ export default defineConfig({
       include: [
         'src/**/*.{mjs,mjsx,js,jsx,ts,tsx}',
         '!src/stories/**',
-        '!src/**/*.stories.ts',
+        '!src/examples/**',
+        '!src/**/*.stories.{ts,tsx}',
       ],
       provider: 'istanbul',
     },

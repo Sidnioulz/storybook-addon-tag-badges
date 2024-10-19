@@ -10,8 +10,8 @@ import {
   composition,
   dependencies,
   smartComponents,
-} from '../sampleWorkflows'
-import { mockEntry } from './__fixtures__/HashEntry'
+} from '../examples/sampleWorkflows'
+import { mockEntry } from '../examples/__fixtures__/HashEntry'
 import { TagBadgeParameters } from 'src/types/TagBadgeParameters'
 import { styled } from '@storybook/theming'
 import toSource from 'tosource'

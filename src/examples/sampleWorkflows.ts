@@ -1,5 +1,5 @@
 import { themes } from '@storybook/theming'
-import type { TagBadgeParameters } from './types/TagBadgeParameters'
+import type { TagBadgeParameters } from '../types/TagBadgeParameters'
 
 export const byMarket: TagBadgeParameters = [
   {
