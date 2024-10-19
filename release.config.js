@@ -16,7 +16,7 @@ export default {
     [
       '@semantic-release/github',
       {
-        assets: ['dist/**', 'README.md', '*.js', '*.d.ts'],
+        assets: ['dist/**', 'README.md', 'manager.js', 'preview.js'],
       },
     ],
     '@semantic-release/npm',

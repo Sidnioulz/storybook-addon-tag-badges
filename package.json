@@ -20,6 +20,11 @@
       "import": "./dist/index.js",
       "require": "./dist/index.cjs"
     },
+    "./manager": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/manager.js",
+      "require": "./dist/manager.cjs"
+    },
     "./preview": {
       "types": "./dist/index.d.ts",
       "import": "./dist/preview.js",
@@ -29,8 +34,8 @@
   "files": [
     "dist/**/*",
     "README.md",
-    "*.js",
-    "*.d.ts"
+    "manager.js",
+    "preview.js"
   ],
   "bundler": {
     "exportEntries": [
