@@ -13,12 +13,7 @@ export default {
       },
     ],
     '@semantic-release/release-notes-generator',
-    [
-      '@semantic-release/github',
-      {
-        assets: ['dist/**', 'README.md', 'manager.js', 'preview.js'],
-      },
-    ],
+    '@semantic-release/github',
     '@semantic-release/npm',
   ],
 }
