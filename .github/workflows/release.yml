@@ -6,6 +6,12 @@ on:
     types:
       - completed
 
+permissions:
+  contents: write
+  issues: write
+  pull-requests: write
+  id-token: write
+
 jobs:
   release:
     runs-on: ubuntu-latest
@@ -14,13 +20,6 @@ jobs:
       matrix:
         node-version: [22]
     steps:
-      - name: 'Generate GitHub token'
-        id: create_token
-        uses: tibdex/github-app-token@v2
-        with:
-          app_id: ${{ secrets.RELEASE_APP_ID }}
-          private_key: ${{ secrets.RELEASE_APP_PRIVATE_KEY }}
-
       - name: Checkout
         uses: actions/checkout@v4
 
@@ -44,7 +43,7 @@ jobs:
 
       - name: Create Release
         env:
-          GITHUB_TOKEN: ${{ steps.create_token.outputs.token }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: |
           pnpm release

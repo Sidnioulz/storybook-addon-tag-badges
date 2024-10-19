@@ -359,8 +359,7 @@ If you want to migrate the addon to support the latest version of Storyboook, yo
 
 ### Release System
 
-> [!CAUTION]
-> TODO
+This package auto-releases on pushes to `main` with [semantic-release](https://github.com/semantic-release/semantic-release). No changelog is maintained and the version number in `package.json` is not synchronised.
 
 ## 🆘 Support
 
@@ -386,6 +385,7 @@ Project Link: [https://github.com/Sidnioulz/storybook-addon-tag-badges](https://
 [![ESLint](https://img.shields.io/badge/ESLint-4b32c3?logo=eslint&logoColor=white)](https://eslint.org/)
 [![GitHub](https://img.shields.io/badge/GitHub-0d1117?logo=github&logoColor=white)](https://github.com/solutions/ci-cd)
 [![Prettier](https://img.shields.io/badge/Prettier-f8bc45?logo=prettier&logoColor=black)](https://prettier.io/)
+[![Semantic-Release](https://img.shields.io/badge/semantic--release-cccccc?logo=semantic-release&logoColor=black)](https://github.com/semantic-release/semantic-release)
 [![Storybook](https://cdn.jsdelivr.net/gh/storybookjs/brand@main/badge/badge-storybook.svg)](https://storybook.js.org/)
 [![tsup](https://img.shields.io/badge/tsup-fde047)](https://tsup.egoist.dev/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-3178c6?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
