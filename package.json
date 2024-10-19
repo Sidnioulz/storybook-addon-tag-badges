@@ -1,6 +1,6 @@
 {
   "name": "storybook-addon-tag-badges",
-  "version": "0.0.6",
+  "version": "0.0.7",
   "description": "Display Storybook tags as badges in the sidebar and toolbar.",
   "keywords": [
     "storybook-addons",
