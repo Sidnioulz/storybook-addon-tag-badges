@@ -20,16 +20,13 @@
       "import": "./dist/index.js",
       "require": "./dist/index.cjs"
     },
-    "./manager": {
-      "types": "./dist/index.d.ts",
-      "import": "./dist/manager.js",
-      "require": "./dist/manager.cjs"
-    },
+    "./manager": "./dist/manager.js",
     "./preview": {
       "types": "./dist/index.d.ts",
       "import": "./dist/preview.js",
       "require": "./dist/preview.cjs"
-    }
+    },
+    "./package.json": "./package.json"
   },
   "files": [
     "dist/**/*",
