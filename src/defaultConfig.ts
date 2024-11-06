@@ -1,9 +1,4 @@
-import { getTagSuffix } from './utils/tag'
 import type { TagBadgeParameters } from './types/TagBadgeParameters'
-
-function upperFirst(str: string): string {
-  return str[0].toUpperCase() + str.slice(1)
-}
 
 export const defaultConfig: TagBadgeParameters = [
   {
@@ -22,6 +17,9 @@ export const defaultConfig: TagBadgeParameters = [
   {
     tags: ['alpha', 'beta', 'rc', 'experimental'],
     badge: ({ tag }) => {
+      const upperFirst = (str: string): string =>
+        str[0].toUpperCase() + str.slice(1)
+
       return {
         text: tag === 'rc' ? 'Release candidate' : upperFirst(tag),
         bgColor: 'hsl(257, 100%, 84%)',
@@ -70,7 +68,7 @@ export const defaultConfig: TagBadgeParameters = [
     tags: {
       prefix: 'version',
     },
-    badge: ({ tag }) => {
+    badge: ({ getTagSuffix, tag }) => {
       const version = getTagSuffix(tag)
       const isExperimental = version?.startsWith('0')
       const hue = isExperimental ? 66 : 194
