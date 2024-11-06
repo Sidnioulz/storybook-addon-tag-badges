@@ -48,9 +48,22 @@ describe('Badge', () => {
       expect(badge).toBeInTheDocument()
     })
 
-    it('renders as a button in the toolbar when tooltip is set', async () => {
+    it('renders as a button in the toolbar when tooltip is set as string', async () => {
       const text = 'Tooltip Badge'
       const tooltip = 'This is a tooltip'
+      renderWithTheme(<Badge context="toolbar" text={text} tooltip={tooltip} />)
+
+      const badge = await screen.findByText(text)
+      expect(badge).toBeInTheDocument()
+      expect(badge.tagName).toBe('BUTTON')
+    })
+
+    it('renders as a button in the toolbar when tooltip is set as TooltipMessage props', async () => {
+      const text = 'Tooltip Badge'
+      const tooltip = {
+        title: 'Tooltip Title',
+        desc: 'Tooltip Description',
+      }
       renderWithTheme(<Badge context="toolbar" text={text} tooltip={tooltip} />)
 
       const badge = await screen.findByText(text)

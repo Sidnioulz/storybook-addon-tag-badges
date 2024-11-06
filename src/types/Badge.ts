@@ -1,3 +1,5 @@
+import type { ComponentProps } from 'react'
+import type { TooltipMessage } from '@storybook/components'
 import type { HashEntry } from '@storybook/manager-api'
 import { getTagParts, getTagPrefix, getTagSuffix } from 'src/utils/tag'
 
@@ -14,7 +16,7 @@ export interface Badge {
   /** The foreground (text) colour of the badge (optional). */
   fgColor?: string
   /** The tooltip text to display when hovering over the badge (optional). */
-  tooltip?: string
+  tooltip?: string | ComponentProps<typeof TooltipMessage>
 }
 
 /**

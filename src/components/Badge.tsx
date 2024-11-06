@@ -1,22 +1,15 @@
 import React, { Fragment } from 'react'
 import type { HashEntry } from '@storybook/manager-api'
-import { WithTooltip } from '@storybook/components'
+import { WithTooltip, TooltipMessage } from '@storybook/components'
 import { styled, useTheme } from '@storybook/theming'
 
-import type { BadgeOrBadgeFn } from '../types/Badge'
+import type { Badge as BadgeConfigType, BadgeOrBadgeFn } from '../types/Badge'
 import { getTagParts, getTagPrefix, getTagSuffix } from '../utils/tag'
 
-interface BadgeProps {
+interface BadgeProps extends BadgeConfigType {
   context: 'sidebar' | 'toolbar'
-  /**
-   * The content of the Badge
-   */
-  text: string
-  bgColor?: string
-  borderColor?: string
-  fgColor?: string
-  tooltip?: string
 }
+
 interface WithBadgeProps {
   config: BadgeOrBadgeFn
   entry: HashEntry
@@ -74,7 +67,13 @@ export const Badge: React.FC<BadgeProps> = ({
         <WithTooltipPatched
           closeOnOutsideClick
           placement={'bottom'}
-          tooltip={<TooltipUI>{tooltip}</TooltipUI>}
+          tooltip={
+            typeof tooltip === 'string' ? (
+              <TooltipUI>{tooltip}</TooltipUI>
+            ) : (
+              <TooltipMessage {...tooltip} />
+            )
+          }
         >
           <BadgeUI as="button" {...restProps} context={context} theme={theme}>
             {text}

@@ -44,7 +44,6 @@
 - [Default Config](#-default-config)
 - [Usage](#-usage)
 - [Customise Badge Config](#️-customise-badge-config)
-- [Sidebar Label Customisations](#️sidebar-label-customisations)
 - [Workflow Examples](#-workflow-examples)
 - [Limitations](#-limitations)
 - [Contributing](#-contributing)
@@ -243,13 +242,14 @@ The `badge` property defines the appearance and content of the badge to display.
 
 The object has the following properties:
 
-| Name            | Type      | Description                                                       | Example                  |
-| --------------- | --------- | ----------------------------------------------------------------- | ------------------------ |
-| **text**        | `string`  | The text displayed in the badge (required).                       | 'New'                    |
-| **bgColor**     | `string?` | The CSS property passed to `background-color`.                    | '#aea'                   |
-| **fgColor**     | `string?` | The CSS property passed to `color`.                               | '#2f2'                   |
-| **borderColor** | `string?` | A border colour, rendered as a CSS box-shadow.                    | '#2f2'                   |
-| **tooltip**     | `string?` | A tooltip text shown when clicking the badge in the toolbar only. | 'This component is new!' |
+| Name            | Type                             | Description                                    | Example                                                                                           |
+| --------------- | -------------------------------- | ---------------------------------------------- | ------------------------------------------------------------------------------------------------- |
+| **text**        | `string`                         | The text displayed in the badge (required).    | 'New'                                                                                             |
+| **bgColor**     | `string?`                        | The CSS property passed to `background-color`. | '#aea'                                                                                            |
+| **fgColor**     | `string?`                        | The CSS property passed to `color`.            | '#2f2'                                                                                            |
+| **borderColor** | `string?`                        | A border colour, rendered as a CSS box-shadow. | '#2f2'                                                                                            |
+| **tooltip**     | `string \| TooltipMessageProps?` | A tooltip shown on click in the toolbar only.  | `'This component is new!'` or `{ title: 'New Component', desc: 'Recently added to the library' }` |
+
 
 #### Dynamic Badge Functions
 
@@ -288,7 +288,20 @@ addons.setConfig({
 })
 ```
 
-## Sidebar Label Customisations
+### Tooltip
+
+Badges may have a tooltip when displayed in the toolbar. The tooltip is disabled in the sidebar to avoid conflicting with the sidebar's function, though feedback is welcome on this.
+
+You may pass a string to tooltips for a simple tooltip. You may also pass the same objects used by [Storybook's `TooltipMessage`](https://5ccbc373887ca40020446347-idzavsdems.chromatic.com/?path=/docs/tooltip-tooltipmessage--docs):
+
+* `title`: The title of the tooltip *[string]*
+* `desc`: Secondary text for the tooltip *[string]*
+* `links`: An optional array of link objects displayed as buttons *[object[]]*
+  * `title`: The title of the link
+  * `href`: The URL to which the link points (navigates in-place)
+  * `onClick`: A callback when the link is clicked (can be used to navigate in a new browser tab)
+
+### Sidebar Label Customisations
 
 This addon uses the [sidebar `renderLabel` feature](https://storybook.js.org/docs/configure/user-interface/sidebar-and-urls) to display badges in the sidebar. If you define it for other purposes in your Storybook instance, it will conflict with this addon and sidebar badges won't show.
 

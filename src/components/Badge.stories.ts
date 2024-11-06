@@ -26,6 +26,10 @@ const meta: Meta<typeof Badge> = {
       options: ['sidebar', 'toolbar'],
       description: 'Whether the badge renders in the sidebar or toolbar',
     },
+    tooltip: {
+      description: 'Tooltip content; either as string or TooltipMessage props',
+      control: false,
+    },
   },
   tags: ['autodocs'],
   parameters: {
@@ -62,10 +66,46 @@ export const ColorAndBorders: Story = {
   },
 }
 
-export const Tooltip: Story = {
+export const SimpleTooltip: Story = {
   args: {
     context: 'toolbar',
     text: 'Text',
-    tooltip: 'This badge has a tooltip!',
+    tooltip: 'This badge has a simple string tooltip!',
+  },
+}
+
+export const RichTooltip: Story = {
+  args: {
+    context: 'toolbar',
+    text: 'Text',
+    tooltip: {
+      title: 'Rich Tooltip',
+      desc: 'This badge uses a TooltipMessage component with title and description',
+    },
+  },
+}
+
+export const RichTooltipWithLink: Story = {
+  args: {
+    context: 'toolbar',
+    text: 'Text',
+    tooltip: {
+      title: 'Rich Tooltip',
+      desc: 'This badge uses a TooltipMessage component with title and description',
+      links: [
+        {
+          title: 'Storybook',
+          href: 'https://storybook.js.org/',
+        },
+      ],
+    },
+  },
+}
+
+export const SidebarBadge: Story = {
+  args: {
+    context: 'sidebar',
+    text: 'Text',
+    tooltip: 'Tooltips are disabled in the sidebar',
   },
 }
