@@ -10,7 +10,7 @@ const meta: Meta<typeof Page> = {
     // More on Story layout: https://storybook.js.org/docs/react/configure/story-layout
     layout: 'fullscreen',
   },
-  tags: ['beta'],
+  tags: ['frog'],
 }
 
 export default meta

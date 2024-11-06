@@ -13,7 +13,7 @@ const meta: Meta<typeof Header> = {
   parameters: {
     layout: 'fullscreen',
   },
-  tags: ['new', 'version:1.0.0'],
+  tags: ['new'],
 }
 
 export default meta
