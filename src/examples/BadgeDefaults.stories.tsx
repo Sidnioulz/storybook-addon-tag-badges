@@ -1,8 +1,8 @@
 import type { Meta, StoryObj } from '@storybook/react'
 
-import { Badge, getBadgeProps } from './Badge'
+import { Badge, getBadgeProps } from '../components/Badge'
 import { defaultConfig } from '../defaultConfig'
-import { mockEntry } from '../examples/__fixtures__/HashEntry'
+import { mockEntry } from './__fixtures__/HashEntry'
 
 const meta: Meta<typeof Badge> = {
   title: 'Addon/Default Config',

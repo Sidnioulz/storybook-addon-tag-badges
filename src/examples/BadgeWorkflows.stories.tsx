@@ -2,7 +2,7 @@ import React from 'react'
 import type { Meta, StoryObj } from '@storybook/react'
 import { Title, Stories } from '@storybook/blocks'
 
-import { Badge, getBadgeProps } from './Badge'
+import { Badge, getBadgeProps } from '../components/Badge'
 import {
   brandComponents,
   byMarket,
@@ -10,8 +10,8 @@ import {
   composition,
   dependencies,
   smartComponents,
-} from '../examples/sampleWorkflows'
-import { mockEntry } from '../examples/__fixtures__/HashEntry'
+} from './sampleWorkflows'
+import { mockEntry } from './__fixtures__/HashEntry'
 import { TagBadgeParameters } from 'src/types/TagBadgeParameters'
 import { styled } from '@storybook/theming'
 import toSource from 'tosource'
