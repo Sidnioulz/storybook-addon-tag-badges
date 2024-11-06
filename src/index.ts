@@ -1,5 +1,7 @@
 export * from './utils/tag'
 export { defaultConfig } from './defaultConfig'
+export { renderLabel } from './renderLabel'
+export { Sidebar } from './components/Sidebar'
 
 export type { Badge, BadgeOrBadgeFn } from './types/Badge'
 export type { Display } from './types/DisplayOption'

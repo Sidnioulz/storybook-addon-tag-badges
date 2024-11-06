@@ -1,9 +1,20 @@
+import React from 'react'
 import { addons } from '@storybook/manager-api'
 
-import { defaultConfig } from '../src/index'
+import { defaultConfig, renderLabel, Sidebar } from '../src/index'
 import type { TagBadgeParameters } from '../src/types/TagBadgeParameters'
+import { API_HashEntry } from '@storybook/types'
 
 addons.setConfig({
+  sidebar: {
+    renderLabel: (item: API_HashEntry) => {
+      if (item.name.startsWith('Addon')) {
+        return <Sidebar item={item}>🌟 Addon</Sidebar>
+      }
+
+      return renderLabel(item)
+    },
+  },
   tagBadges: [
     ...defaultConfig,
     {

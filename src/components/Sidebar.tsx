@@ -1,10 +1,6 @@
-import React, { type FC } from 'react'
+import React, { type FC, type ReactNode } from 'react'
 import { addons } from '@storybook/manager-api'
-import type {
-  API_ComponentEntry,
-  API_DocsEntry,
-  API_StoryEntry,
-} from '@storybook/types'
+import type { API_HashEntry } from '@storybook/types'
 import { styled } from '@storybook/theming'
 
 import { KEY } from '../constants'
@@ -13,13 +9,8 @@ import { useBadgesToDisplay } from '../useBadgesToDisplay'
 import { WithBadge } from './Badge'
 
 interface SidebarProps {
-  item: API_DocsEntry | API_StoryEntry | API_ComponentEntry
-}
-
-function printTitleOrName(
-  item: API_DocsEntry | API_StoryEntry | API_ComponentEntry,
-) {
-  return item.name
+  children: ReactNode
+  item: API_HashEntry
 }
 
 const Container = styled.div`
@@ -29,9 +20,17 @@ const Container = styled.div`
   margin-right: 32px;
 `
 
-export const Sidebar: FC<SidebarProps> = ({ item }) => {
+export const Sidebar: FC<SidebarProps> = ({ children, item }) => {
   const { [KEY]: parameters } = addons.getConfig() as {
     [KEY]: TagBadgeParameters
+  }
+
+  if (
+    item.type !== 'component' &&
+    item.type !== 'docs' &&
+    item.type !== 'story'
+  ) {
+    return children
   }
 
   const badgesToDisplay = useBadgesToDisplay({
@@ -43,7 +42,7 @@ export const Sidebar: FC<SidebarProps> = ({ item }) => {
 
   return (
     <Container>
-      {printTitleOrName(item)}
+      {children}
       {badgesToDisplay.length ? (
         <WithBadge
           config={badgesToDisplay[0].badge}

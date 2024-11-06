@@ -44,6 +44,7 @@
 - [Default Config](#-default-config)
 - [Usage](#-usage)
 - [Customise Badge Config](#️-customise-badge-config)
+- [Sidebar Label Customisations](#️sidebar-label-customisations)
 - [Workflow Examples](#-workflow-examples)
 - [Limitations](#-limitations)
 - [Contributing](#-contributing)
@@ -84,6 +85,7 @@ pnpm install -D storybook-addon-tag-badges
 In your `.storybook/main.ts` file, add the following:
 
 ```ts
+// .storybook/main.ts
 export default {
   addons: ['storybook-addon-tag-badges'],
 }
@@ -286,6 +288,39 @@ addons.setConfig({
 })
 ```
 
+## Sidebar Label Customisations
+
+This addon uses the [sidebar `renderLabel` feature](https://storybook.js.org/docs/configure/user-interface/sidebar-and-urls) to display badges in the sidebar. If you define it for other purposes in your Storybook instance, it will conflict with this addon and sidebar badges won't show.
+
+To show badges for items that aren't customised by your own `renderLabel` logic, you may import the addon's own `renderLabel` function and call it at the end of your function.
+
+```tsx
+// .storybook/manager.ts
+import { addons } from '@storybook/manager-api'
+import type { API_HashEntry } from '@storybook/types'
+import { renderLabel, Sidebar } from 'storybook-addon-tag-badges'
+
+addons.setConfig({
+  sidebar: {
+    renderLabel: (item: API_HashEntry) => {
+      // Customise your own items, with no badge support.
+      if (item.name === 'Support') {
+        return '🛟 Get Support'
+      }
+
+      // Customise items with badge support by wrapping in Sidebar.
+      if (item.type === 'docs') {
+        return <Sidebar item={item}>{item.name} [doc]</Sidebar>
+      }
+
+      // Badges for every item not customised by you.
+      return renderLabel(item)
+    },
+  }
+})
+```
+
+
 ## 📝 Workflow Examples
 
 This repository contains examples on how to support various workflows with Storybook badges:
@@ -314,7 +349,7 @@ This addon does not support changing the badge config for a specific story, and 
 
 As a result, we need to create sidebar tags without access to story-specific data. This addon uses the [core addon API](https://storybook.js.org/docs/addons/addons-api#core-addon-api) to read your configuration, and so the way to customise the rendering of a specific badge is to use [dynamic badge functions](<(#dynamic-badge-functions)>). Those functions can exploit a story's ID, title, or tag content to customise the rendered badge, as examples below will show.
 
-### Component tags
+### Component Tags
 
 In Storybook, your MDX and CSF files are converted to `docs`, `component`, `group` and `story` entries to render the sidebar, each with their own semantics. `docs` and `story` entries directly inherit the tags defined in `parameters.docs.tags` and in the [CSF `meta`](https://storybook.js.org/docs/api/csf#default-export), respectively.
 
