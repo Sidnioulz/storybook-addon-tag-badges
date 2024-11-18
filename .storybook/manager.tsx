@@ -14,6 +14,11 @@ addons.setConfig({
 
       return renderLabel(item)
     },
+    filters: {
+      patterns: (item) => {
+        return !item.tags?.includes('chromatic-only')
+      },
+    },
   },
   tagBadges: [
     ...defaultConfig,
