@@ -44,6 +44,7 @@
 - [Default Config](#-default-config)
 - [Usage](#-usage)
 - [Customise Badge Config](#️-customise-badge-config)
+- [Sidebar Config](#️-sidebar-config)
 - [Workflow Examples](#-workflow-examples)
 - [Limitations](#-limitations)
 - [Contributing](#-contributing)
@@ -301,7 +302,7 @@ You may pass a string to tooltips for a simple tooltip. You may also pass the sa
   * `href`: The URL to which the link points (navigates in-place)
   * `onClick`: A callback when the link is clicked (can be used to navigate in a new browser tab)
 
-### Sidebar Label Customisations
+## Sidebar Config
 
 This addon uses the [sidebar `renderLabel` feature](https://storybook.js.org/docs/configure/user-interface/sidebar-and-urls) to display badges in the sidebar. If you define it for other purposes in your Storybook instance, it will conflict with this addon and sidebar badges won't show.
 
@@ -329,6 +330,21 @@ addons.setConfig({
       // Badges for every item not customised by you.
       return renderLabel(item)
     },
+  }
+})
+```
+
+Likewise, if you define configuration for the `sidebar` option without including `renderLabel`, the render function defined by this addon will be overwritten, and badges won't show in the sidebar. Import and add the `renderLabel` function like so:
+
+```tsx
+// .storybook/manager.ts
+import { addons } from '@storybook/manager-api'
+import { renderLabel } from 'storybook-addon-tag-badges'
+
+addons.setConfig({
+  sidebar: {
+    /* your own changes here... */
+    renderLabel,
   }
 })
 ```
