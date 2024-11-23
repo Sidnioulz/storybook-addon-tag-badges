@@ -1,5 +1,5 @@
 import React, { type FC, type ReactNode } from 'react'
-import { addons } from '@storybook/manager-api'
+import { addons, useStorybookApi } from '@storybook/manager-api'
 import type { API_HashEntry } from '@storybook/types'
 import { styled } from '@storybook/theming'
 
@@ -24,6 +24,7 @@ export const Sidebar: FC<SidebarProps> = ({ children, item }) => {
   const { [KEY]: parameters } = addons.getConfig() as {
     [KEY]: TagBadgeParameters
   }
+  const api = useStorybookApi()
 
   if (
     item.type !== 'component' &&
@@ -33,9 +34,19 @@ export const Sidebar: FC<SidebarProps> = ({ children, item }) => {
     return children
   }
 
+  let parentTags
+  if (item.parent) {
+    const parentItem = api.resolveStory(item.parent)
+    if (parentItem && parentItem.type !== 'root') {
+      // @ts-expect-error group entry tags hasn't yet been merged on SB.
+      parentTags = parentItem.tags
+    }
+  }
+
   const badgesToDisplay = useBadgesToDisplay({
     context: 'sidebar',
     parameters,
+    parentTags,
     tags: item.tags,
     type: item.type,
   })
