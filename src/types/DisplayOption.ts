@@ -5,7 +5,19 @@ import { API_HashEntry } from '@storybook/types'
  * If `false`, never displays. If a string or string array, each string is a type of HashEntry
  * for which the badge will be shown (e.g. 'docs' or 'story').
  */
-export type DisplayOption<T> = boolean | T | T[]
+export type DisplayOptionItem<T> =
+  | boolean
+  | number
+  | { depth: number; exactDepth?: boolean; type?: T }
+  | { depth?: number; exactDepth?: boolean; type: T }
+  | T
+
+/**
+ * Display options for badges in a part of the UI. If `true`, displays for any type of item.
+ * If `false`, never displays. If a string or string array, each string is a type of HashEntry
+ * for which the badge will be shown (e.g. 'docs' or 'story').
+ */
+export type DisplayOption<T> = DisplayOptionItem<T> | DisplayOptionItem<T>[]
 
 /**
  * The types of HashEntries for which badges will be displayed in different parts of the Storybook UI.

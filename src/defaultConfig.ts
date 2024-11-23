@@ -2,10 +2,6 @@ import type { TagBadgeParameters } from './types/TagBadgeParameters'
 
 export const defaultConfig: TagBadgeParameters = [
   {
-    display: {
-      sidebar: ['component'],
-      toolbar: ['story', 'docs'],
-    },
     tags: 'new',
     badge: {
       text: 'New',

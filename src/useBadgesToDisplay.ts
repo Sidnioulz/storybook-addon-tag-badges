@@ -8,6 +8,7 @@ import { BadgeOrBadgeFn } from './types/Badge'
 
 interface UseBadgesToDisplayOptions {
   context: 'sidebar' | 'toolbar'
+  depth?: number
   parameters: TagBadgeParameters
   tags: string[]
   type: API_ComponentEntry['type'] | API_LeafEntry['type']
@@ -17,13 +18,14 @@ type BadgesToDisplay = { badge: BadgeOrBadgeFn; tag: string }[]
 
 export function useBadgesToDisplay({
   context,
+  depth,
   parameters,
   tags,
   type,
 }: UseBadgesToDisplayOptions): BadgesToDisplay {
   return useMemo(() => {
     return (parameters || [])
-      .filter((config) => shouldDisplay({ context, config, type }))
+      .filter((config) => shouldDisplay({ context, config, depth, type }))
       .flatMap((config) =>
         matchTags(tags, config.tags).map((tag) => ({
           badge: config.badge,
@@ -36,5 +38,5 @@ export function useBadgesToDisplay({
         }
         return acc
       }, [])
-  }, [parameters, tags, type])
+  }, [parameters, depth, tags, type])
 }

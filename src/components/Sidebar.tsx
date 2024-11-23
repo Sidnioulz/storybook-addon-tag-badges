@@ -35,6 +35,7 @@ export const Sidebar: FC<SidebarProps> = ({ children, item }) => {
 
   const badgesToDisplay = useBadgesToDisplay({
     context: 'sidebar',
+    depth: item.depth,
     parameters,
     tags: item.tags,
     type: item.type,
