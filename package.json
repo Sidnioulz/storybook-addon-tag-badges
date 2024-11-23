@@ -9,7 +9,7 @@
   ],
   "repository": {
     "type": "git",
-    "url": "git+ssh://git@github.com/Sidnioulz/storybook-addon-tag-badges.git"
+    "url": "git+https://github.com/Sidnioulz/storybook-addon-tag-badges.git"
   },
   "type": "module",
   "author": "Steve Dodier-Lazaro <sidnioulz@gmail.com>",

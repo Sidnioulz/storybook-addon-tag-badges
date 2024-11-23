@@ -109,7 +109,7 @@ This addon comes with a default config, allowing you to get started immediately 
 
 ### Display Logic
 
-By default, all tags are always displayed on the toolbar, but they're only displayed for component entries in the sidebar.
+By default, all tags are always displayed on the toolbar, but they're only displayed in the sidebar for component entries, and for docs or story entries that appear at the top-level. They are not displayed in docs or story entries inside a component or group entry.
 
 Besides, the addon is limited to one badge per entry in the sidebar. Badges placed first in the configuration will be displayed in priority. For example, the `new` badge will be displayed before the `code-only` badge.
 
@@ -221,17 +221,36 @@ A tag pattern can be:
 
 ### Display
 
-The `display` property controls where and for what type of content the badges are rendered. It has two sub-properties: `sidebar` and `toolbar`. In the sidebar, tags may be displayed for component, docs or story entries. In the toolbar, they may be set for docs or story entries (as other entry types aren't displayable outside the sidebar).
+The `display` property controls where and for what type of content the badges are rendered. It has two sub-properties: `sidebar` and `toolbar`. In the sidebar, tags may be displayed for component, group, docs or story entries. In the toolbar, they may be set for docs or story entries (as other entry types aren't displayable outside the sidebar).
 
-Each of these sub-properties can be set to:
+The following entry types are rendered by Storybook:
 
-| Type            | Description                        | Example    | Sidebar outcome                  | Toolbar outcome     |
-| --------------- | ---------------------------------- | ---------- | -------------------------------- | ------------------- |
-| `ø` _(not set)_ | Use default behaviour              |            | `['component']`                  | `['docs', 'story']` |
-| `false`         | Never display tag                  | `false`    | `[]`                             | `[]`                |
-| `true`          | Always display tag                 | `true`     | `['component', 'docs', 'story']` | `['docs', 'story']` |
-| `string`        | Display only for one type of entry | `'docs'`   | `['docs']`                       | `['docs']`          |
-| `string[]`      | Display for a list of entry types  | `['docs']` | `['docs']`                       | `['docs']`          |
+| Icon                              | Name      | Description                                                                |
+| --------------------------------- | --------- | -------------------------------------------------------------------------- |
+| ![](./static/entry-story.svg)     | story     | One of the component stories written in your CSF files.                    |
+| ![](./static/entry-docs.svg)      | docs      | A documentation page generated through MDX files or autodocs.              |
+| ![](./static/entry-component.svg) | component | The grouping of a component's stories and autodocs page.                   |
+| ![](./static/entry-group.svg)     | group     | A generic group containing unattached MDX docs, stories and/or components. |
+
+To control where badges are shown, you pass conditions to the `sidebar` and `toolbar` keys. You can either specify a single condition, or an array of conditions (in which case matching any condition causes the badge to display).
+
+Conditions can either specify the type of entry you want to display badges for, or, whether to allow badges for any tag that isn't already displayed by a parent entry (e.g. in the top-level component in the sidebar). Tags inherited from parents are skipped in the default configuration; otherwise, every single story would have a tag when you add tags to a CSF meta export, which would be verbose.
+
+A condition takes two properties in its full form:
+
+| Property        | Description                                                                                          | Type     | Example value |
+| --------------- | ---------------------------------------------------------------------------------------------------- | -------- | ------------- |
+| `type`          | The type of entry to match                                                                           | `string` | `'docs'`      |
+| `skipInherited` | Whether to skip showing the badge if a parent entry in the UI already shows a badge for the same tag | `string` | `true`        |
+
+Syntax shortcuts are supported, and summarised in the table below:
+
+| Type            | Description                                                       | Example  | Sidebar outcome                                                                                                   | Toolbar outcome                         |
+| --------------- | ----------------------------------------------------------------- | -------- | ----------------------------------------------------------------------------------------------------------------- | --------------------------------------- |
+| `ø` _(not set)_ | Use default behaviour                                             |          | `[{ skipInherited: true }, { type: 'component', skipInherited: false }, { type: 'group', skipInherited: false }]` | `[{ type: 'docs' }, { type: 'story' }]` |
+| `false`         | Never display badge                                               | `false`  | `[]`                                                                                                              | `[]`                                    |
+| `true`          | Display badge everywhere                                          | `true`   | `[{ skipInherited: false }]`                                                                                      | `[{ type: 'docs' }, { type: 'story' }]` |
+| `string`        | Display only for one type of entry, and skip inherited tag badges | `'docs'` | `[{ type: 'docs', skipInherited: true }]`                                                                         | `[{ type: 'docs' }]`                    |
 
 ---
 

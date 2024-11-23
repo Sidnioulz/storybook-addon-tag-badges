@@ -1,5 +1,6 @@
 import {
   DISPLAY_DEFAULTS,
+  DisplayOutcome,
   normaliseDisplay,
   shouldDisplay,
   type ShouldDisplayOptions,
@@ -37,7 +38,7 @@ describe('display', () => {
     it('should return an empty and a full array when sidebar is true and toolbar false', () => {
       expect(normaliseDisplay({ sidebar: true, toolbar: false })).toMatchObject(
         {
-          sidebar: ['component', 'docs', 'story', 'group'],
+          sidebar: [{ skipInherited: false }],
           toolbar: [],
         },
       )
@@ -47,15 +48,15 @@ describe('display', () => {
       expect(normaliseDisplay({ sidebar: false, toolbar: true })).toMatchObject(
         {
           sidebar: [],
-          toolbar: ['component', 'docs', 'story', 'group'],
+          toolbar: [{ skipInherited: false }],
         },
       )
     })
 
     it('should return full arrays when both elements are true', () => {
       expect(normaliseDisplay({ sidebar: true, toolbar: true })).toMatchObject({
-        sidebar: ['component', 'docs', 'story', 'group'],
-        toolbar: ['component', 'docs', 'story', 'group'],
+        sidebar: [{ skipInherited: false }],
+        toolbar: [{ skipInherited: false }],
       })
     })
 
@@ -63,8 +64,8 @@ describe('display', () => {
       expect(
         normaliseDisplay({ sidebar: 'docs', toolbar: 'story' }),
       ).toMatchObject({
-        sidebar: ['docs'],
-        toolbar: ['story'],
+        sidebar: [{ type: 'docs' }],
+        toolbar: [{ type: 'story' }],
       })
     })
 
@@ -72,7 +73,7 @@ describe('display', () => {
       expect(
         normaliseDisplay({ sidebar: ['docs'], toolbar: false }),
       ).toMatchObject({
-        sidebar: ['docs'],
+        sidebar: [{ type: 'docs' }],
         toolbar: [],
       })
     })
@@ -84,21 +85,23 @@ describe('display', () => {
           toolbar: ['docs'],
         }),
       ).toMatchObject({
-        sidebar: ['component'],
-        toolbar: ['docs'],
+        sidebar: [{ type: 'component' }],
+        toolbar: [{ type: 'docs' }],
       })
     })
   })
 
   describe('shouldDisplay', () => {
-    it('should NOT display stories in the sidebar by default', () => {
+    it('should only display non-inherited tags for stories in the sidebar by default', () => {
       expect(
         shouldDisplay({
-          config: { display: DISPLAY_DEFAULTS },
+          config: {
+            display: DISPLAY_DEFAULTS,
+          },
           type: 'story',
           context: 'sidebar',
         }),
-      ).toBeFalsy()
+      ).toBe(DisplayOutcome.SKIP_INHERITED)
     })
 
     it('should display stories in the toolbar by default', () => {
@@ -108,17 +111,17 @@ describe('display', () => {
           type: 'story',
           context: 'toolbar',
         }),
-      ).toBeTruthy()
+      ).toBe(DisplayOutcome.ALWAYS)
     })
 
-    it('should NOT display docs in the sidebar by default', () => {
+    it('should only display non-inherited tags for docs in the sidebar by default', () => {
       expect(
         shouldDisplay({
           config: { display: DISPLAY_DEFAULTS },
           type: 'docs',
           context: 'sidebar',
         }),
-      ).toBeFalsy()
+      ).toBe(DisplayOutcome.SKIP_INHERITED)
     })
 
     it('should display docs in the toolbar by default', () => {
@@ -128,7 +131,7 @@ describe('display', () => {
           type: 'docs',
           context: 'toolbar',
         }),
-      ).toBeTruthy()
+      ).toBe(DisplayOutcome.ALWAYS)
     })
 
     it('should display component in the sidebar by default', () => {
@@ -138,7 +141,7 @@ describe('display', () => {
           type: 'component',
           context: 'sidebar',
         }),
-      ).toBeTruthy()
+      ).toBe(DisplayOutcome.ALWAYS)
     })
 
     it('should NOT display component in the toolbar by default', () => {
@@ -148,7 +151,27 @@ describe('display', () => {
           type: 'component',
           context: 'toolbar',
         }),
-      ).toBeFalsy()
+      ).toBe(DisplayOutcome.NEVER)
+    })
+
+    it('should NOT display component in the toolbar by default', () => {
+      expect(
+        shouldDisplay({
+          config: { display: DISPLAY_DEFAULTS },
+          type: 'group',
+          context: 'sidebar',
+        }),
+      ).toBe(DisplayOutcome.ALWAYS)
+    })
+
+    it('should display group in the sidebar by default', () => {
+      expect(
+        shouldDisplay({
+          config: { display: DISPLAY_DEFAULTS },
+          type: 'group',
+          context: 'toolbar',
+        }),
+      ).toBe(DisplayOutcome.NEVER)
     })
 
     it('should return false on root type', () => {
@@ -158,7 +181,7 @@ describe('display', () => {
           type: 'root',
           context: 'toolbar',
         }),
-      ).toBeFalsy()
+      ).toBe(DisplayOutcome.NEVER)
     })
 
     it.each(
@@ -177,7 +200,7 @@ describe('display', () => {
             type,
             context,
           } as ShouldDisplayOptions),
-        ).toBeFalsy()
+        ).toBe(DisplayOutcome.NEVER)
       },
     )
 
@@ -189,7 +212,7 @@ describe('display', () => {
         })),
       ),
     )(
-      'should always return true when config is true (type %s context %s)',
+      'should always return ALWAYS when config is true (type %s context %s)',
       ({ type, context }) => {
         expect(
           shouldDisplay({
@@ -197,27 +220,41 @@ describe('display', () => {
             type,
             context,
           } as ShouldDisplayOptions),
-        ).toBeTruthy()
+        ).toBe(DisplayOutcome.ALWAYS)
       },
     )
 
     it.each(
-      ['sidebar', 'toolbar'].flatMap((context) =>
-        ['component', 'docs', 'story', 'group'].map((type) => ({
-          context,
-          type,
-        })),
-      ),
+      ['component', 'docs', 'story', 'group'].map((type) => ({
+        type,
+      })),
     )(
-      'should always return true when config matches the input (type %s context %s)',
-      ({ type, context }) => {
+      'should always return ALWAYS when config matches the input for the toolbar (type %s)',
+      ({ type }) => {
         expect(
           shouldDisplay({
-            config: { display: { [context]: type } },
+            config: { display: { toolbar: type } },
             type,
-            context,
+            context: 'toolbar',
           } as ShouldDisplayOptions),
-        ).toBeTruthy()
+        ).toBe(DisplayOutcome.ALWAYS)
+      },
+    )
+
+    it.each(
+      ['component', 'docs', 'story', 'group'].map((type) => ({
+        type,
+      })),
+    )(
+      'should always return SKIP_INHERITED when config matches the input for the sidebar (type %s)',
+      ({ type }) => {
+        expect(
+          shouldDisplay({
+            config: { display: { sidebar: type } },
+            type,
+            context: 'sidebar',
+          } as ShouldDisplayOptions),
+        ).toBe(DisplayOutcome.SKIP_INHERITED)
       },
     )
   })

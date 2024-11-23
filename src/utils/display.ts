@@ -1,7 +1,12 @@
 import { HashEntry } from '@storybook/manager-api'
 import type { ArrayElement } from '../types/ArrayElement'
 import type { TagBadgeParameters } from '../types/TagBadgeParameters'
-import type { Display } from '../types/DisplayOption'
+import type {
+  Display,
+  DisplayOption,
+  DisplayOptionItem,
+} from '../types/DisplayOption'
+import { API_HashEntry } from '@storybook/types'
 
 export interface ShouldDisplayOptions {
   config: Partial<ArrayElement<TagBadgeParameters>>
@@ -9,33 +14,57 @@ export interface ShouldDisplayOptions {
   type: HashEntry['type']
 }
 
+type NormalisedDisplayOption =
+  | {
+      skipInherited?: boolean
+      type: API_HashEntry['type']
+    }
+  | {
+      skipInherited: boolean
+      type?: API_HashEntry['type']
+    }
+
+type NormalisedDisplayOptions = NormalisedDisplayOption[]
+
 export const DISPLAY_DEFAULTS = {
-  sidebar: ['component'],
-  toolbar: ['docs', 'story'],
-} satisfies Display
+  sidebar: [
+    { skipInherited: true },
+    { type: 'component', skipInherited: false },
+    { type: 'group', skipInherited: false },
+  ],
+  toolbar: [{ type: 'docs' }, { type: 'story' }],
+} satisfies {
+  sidebar: NormalisedDisplayOptions
+  toolbar: NormalisedDisplayOptions
+}
 
 function normaliseDisplayProperty(
-  value: boolean | HashEntry['type'] | HashEntry['type'][] | undefined,
-  defaultValue: HashEntry['type'][],
-): HashEntry['type'][] {
+  value: DisplayOption<API_HashEntry['type']> | undefined,
+  defaultValue: NormalisedDisplayOptions,
+): NormalisedDisplayOptions {
   if (value === undefined) {
     return [...defaultValue]
   }
-  if (value === true) {
-    return ['component', 'docs', 'story', 'group']
-  }
-  if (value === false) {
-    return []
-  }
-  if (typeof value === 'string') {
-    return [value]
-  }
-  return [...value]
+
+  const toNormalise = (
+    Array.isArray(value) ? value : [value]
+  ) satisfies DisplayOptionItem<API_HashEntry['type']>[]
+
+  return toNormalise
+    .map((prop) => {
+      if (typeof prop === 'boolean') {
+        return prop ? [{ skipInherited: false }] : []
+      } else if (typeof prop === 'string') {
+        return [{ type: prop }]
+      }
+      return prop
+    })
+    .flat()
 }
 
 export function normaliseDisplay(display?: Display): {
-  sidebar: HashEntry['type'][]
-  toolbar: HashEntry['type'][]
+  sidebar: NormalisedDisplayOptions
+  toolbar: NormalisedDisplayOptions
 } {
   return {
     sidebar: normaliseDisplayProperty(
@@ -49,6 +78,12 @@ export function normaliseDisplay(display?: Display): {
   }
 }
 
+export enum DisplayOutcome {
+  NEVER = 'never',
+  SKIP_INHERITED = 'skip-inherited',
+  ALWAYS = 'always',
+}
+
 /**
  * Determines whether a badge should be displayed based on the provided config
  * and based on the display context (toolbar, sidebar).
@@ -58,12 +93,42 @@ export function normaliseDisplay(display?: Display): {
  * @param options.context The context where the badge might be displayed.
  * @param options.type The type of the current entry.
  *
- * @returns {boolean} `true` if the badge should be displayed, `false` otherwise.
+ * @returns {DisplayOutcome} `ALWAYS` if the badge should be displayed, `NEVER` if
+ * it shouldn't, and `SKIP_INHERITED` if it should only when the parent entry doesn't
+ * show a badge for the same tag already.
  */
-export function shouldDisplay({ config, context, type }: ShouldDisplayOptions) {
+export function shouldDisplay({
+  config,
+  context,
+  type,
+}: ShouldDisplayOptions): DisplayOutcome {
   if (type === 'root') {
-    return false
+    return DisplayOutcome.NEVER
   }
 
-  return normaliseDisplay(config.display)[context].includes(type)
+  const normalised = normaliseDisplay(config.display)[context]
+  let outcome = DisplayOutcome.NEVER
+
+  for (const condition of normalised) {
+    // When a type is defined, it must always match the type of the HashEntry.
+    // If it doesn't, we don't return true yet.
+    if (condition.type !== undefined && condition.type !== type) {
+      continue
+    }
+
+    // By default, we hide badges for tags that are already displayed
+    // by a parent entry in the sidebar. This option does nothing in
+    // the toolbar context.
+    if (context !== 'toolbar' && condition.skipInherited !== false) {
+      outcome = DisplayOutcome.SKIP_INHERITED
+      continue
+    }
+
+    // If we reach this, the HashEntry should be displayed unconditionally.
+    // Return early as there is no point in iterating further.
+    outcome = DisplayOutcome.ALWAYS
+    break
+  }
+
+  return outcome
 }
