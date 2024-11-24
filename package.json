@@ -4,8 +4,10 @@
   "description": "Display Storybook tags as badges in the sidebar and toolbar.",
   "keywords": [
     "storybook-addons",
+    "storybook",
     "badges",
-    "tags"
+    "tags",
+    "organize"
   ],
   "repository": {
     "type": "git",
