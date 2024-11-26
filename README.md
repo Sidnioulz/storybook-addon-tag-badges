@@ -424,7 +424,7 @@ To ensure that contributors are legally allowed to share the content they contri
 
 ### Getting Started
 
-This project uses PNPM as a package manager, and Turbo as a monorepo provider.
+This project uses PNPM as a package manager.
 
 - See the [installation instructions for PNPM](https://pnpm.io/installation)
 - Run `pnpm i`
