@@ -1,14 +1,6 @@
-# This file is generated.
-.github/dependabot.yml
-
-# We do want to lint other dotfiles.
-!.\*
-
 .gitignore
 .eslintignore
 .prettierignore
-
-/scripts
 
 pnpm-lock.yaml
 dist/
