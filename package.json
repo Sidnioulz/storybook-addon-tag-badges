@@ -48,10 +48,10 @@
     ]
   },
   "scripts": {
-    "build-storybook": "storybook build",
-    "clean": "rimraf ./dist",
     "build": "tsup",
+    "build:storybook": "storybook build",
     "build:watch": "pnpm build --watch",
+    "clean": "rimraf ./dist",
     "format": "prettier --check .",
     "format:fix": "prettier --write .",
     "lint": "eslint --cache .",
@@ -59,7 +59,7 @@
     "pack:local": "pnpm pack --out storybook-addon-tag-badges-$(date +%s).tgz",
     "prebuild": "pnpm clean",
     "prepack:local": "pnpm build",
-    "prepare": "husky install",
+    "prepare": "husky",
     "prerelease": "zx scripts/prepublish-checks.js",
     "release": "pnpm build && pnpm semantic-release",
     "start": "run-p build:watch \"storybook --quiet\"",
