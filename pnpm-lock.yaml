@@ -23,46 +23,46 @@ importers:
         specifier: ^9.15.0
         version: 9.15.0
       '@storybook/addon-essentials':
-        specifier: ^8.4.5
+        specifier: ^8.4.0
         version: 8.4.5(@types/react@18.3.12)(storybook@8.4.5(prettier@3.4.1))
       '@storybook/addon-interactions':
-        specifier: ^8.4.5
+        specifier: ^8.4.0
         version: 8.4.5(storybook@8.4.5(prettier@3.4.1))
       '@storybook/addon-links':
-        specifier: ^8.4.5
+        specifier: ^8.4.0
         version: 8.4.5(react@18.3.1)(storybook@8.4.5(prettier@3.4.1))
       '@storybook/blocks':
-        specifier: ^8.4.5
+        specifier: ^8.4.0
         version: 8.4.5(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(storybook@8.4.5(prettier@3.4.1))
       '@storybook/builder-vite':
-        specifier: ^8.4.5
+        specifier: ^8.4.0
         version: 8.4.5(storybook@8.4.5(prettier@3.4.1))(vite@6.0.1(@types/node@22.10.0)(jiti@1.21.6)(yaml@2.5.1))
       '@storybook/components':
-        specifier: ^8.4.5
+        specifier: ^8.4.0
         version: 8.4.5(storybook@8.4.5(prettier@3.4.1))
       '@storybook/manager':
-        specifier: ^8.4.5
+        specifier: ^8.4.0
         version: 8.4.5(storybook@8.4.5(prettier@3.4.1))
       '@storybook/manager-api':
-        specifier: ^8.4.5
+        specifier: ^8.4.0
         version: 8.4.5(storybook@8.4.5(prettier@3.4.1))
       '@storybook/preview-api':
-        specifier: ^8.4.5
+        specifier: ^8.4.0
         version: 8.4.5(storybook@8.4.5(prettier@3.4.1))
       '@storybook/react':
-        specifier: ^8.4.5
+        specifier: ^8.4.0
         version: 8.4.5(@storybook/test@8.4.5(storybook@8.4.5(prettier@3.4.1)))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(storybook@8.4.5(prettier@3.4.1))(typescript@5.7.2)
       '@storybook/react-vite':
-        specifier: ^8.4.5
+        specifier: ^8.4.0
         version: 8.4.5(@storybook/test@8.4.5(storybook@8.4.5(prettier@3.4.1)))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(rollup@4.27.4)(storybook@8.4.5(prettier@3.4.1))(typescript@5.7.2)(vite@6.0.1(@types/node@22.10.0)(jiti@1.21.6)(yaml@2.5.1))
       '@storybook/test':
-        specifier: ^8.4.5
+        specifier: ^8.4.0
         version: 8.4.5(storybook@8.4.5(prettier@3.4.1))
       '@storybook/theming':
-        specifier: ^8.4.5
+        specifier: ^8.4.0
         version: 8.4.5(storybook@8.4.5(prettier@3.4.1))
       '@storybook/types':
-        specifier: ^8.4.5
+        specifier: ^8.4.0
         version: 8.4.5(storybook@8.4.5(prettier@3.4.1))
       '@testing-library/jest-dom':
         specifier: ^6.6.3
@@ -143,7 +143,7 @@ importers:
         specifier: ^24.2.0
         version: 24.2.0(typescript@5.7.2)
       storybook:
-        specifier: ^8.4.5
+        specifier: ^8.4.0
         version: 8.4.5(prettier@3.4.1)
       tosource:
         specifier: 2.0.0-alpha.3
@@ -2707,9 +2707,6 @@ packages:
     resolution: {integrity: sha512-8UnnX2PeRAPZuN12svgR9j7M1uWMovg/CEnIwIG0LFkXSJJe4PdfUGiTGl8V9bsBHFUtfVINcSyYxd7q+kx9fA==}
     engines: {node: '>=12'}
 
-  magic-string@0.30.13:
-    resolution: {integrity: sha512-8rYBO+MsWkgjDSOvLomYnzhdwEG51olQ4zL5KXnNJWV5MNmrb4rTZdrtkhxjnD/QyZUqR/Z/XDsUs/4ej2nx0g==}
-
   magic-string@0.30.14:
     resolution: {integrity: sha512-5c99P1WKTed11ZC0HMJOj6CDIue6F8ySu+bJL+85q1zBEIY8IklrJ1eiKC2NDRh3Ct3FcvmJPyQHb9erXMTJNw==}
 
@@ -4979,7 +4976,7 @@ snapshots:
       '@storybook/builder-vite': 8.4.5(storybook@8.4.5(prettier@3.4.1))(vite@6.0.1(@types/node@22.10.0)(jiti@1.21.6)(yaml@2.5.1))
       '@storybook/react': 8.4.5(@storybook/test@8.4.5(storybook@8.4.5(prettier@3.4.1)))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(storybook@8.4.5(prettier@3.4.1))(typescript@5.7.2)
       find-up: 5.0.0
-      magic-string: 0.30.13
+      magic-string: 0.30.14
       react: 18.3.1
       react-docgen: 7.1.0
       react-dom: 18.3.1(react@18.3.1)
@@ -6879,10 +6876,6 @@ snapshots:
   lz-string@1.5.0: {}
 
   magic-string@0.27.0:
-    dependencies:
-      '@jridgewell/sourcemap-codec': 1.5.0
-
-  magic-string@0.30.13:
     dependencies:
       '@jridgewell/sourcemap-codec': 1.5.0
 
