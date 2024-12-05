@@ -24,6 +24,11 @@ export function useBadgesToDisplay({
   type,
 }: UseBadgesToDisplayOptions): BadgesToDisplay {
   return useMemo(() => {
+    /* Handle potentially missing data from callees. */
+    if (!tags || !type) {
+      return []
+    }
+
     return (parameters || [])
       .map((config) => ({
         ...config,
