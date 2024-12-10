@@ -8,25 +8,16 @@ export const byMarket: TagBadgeParameters = [
       const market = getTagSuffix(tag) ?? ''
 
       const shorthands: Record<string, string> = {
-        b2b: 'B2B',
-        b2c: 'B2C',
-        finance: 'FIN',
-        government: 'GOV',
-        health: 'MED',
+        b2b: 'B2B 🏢',
+        b2c: 'B2C 🛍️',
+        finance: 'FIN 💸',
+        government: 'GOV 🏛️',
+        health: 'MED ⚕️',
         all: 'ALL',
       }
 
-      const emojis: Record<string, string> = {
-        b2b: '🏢',
-        b2c: '🛍️',
-        finance: '💸',
-        government: '🏛️',
-        health: '⚕️',
-        all: '',
-      }
-
       return {
-        text: [shorthands[market], emojis[market]].filter(Boolean).join(' '),
+        text: shorthands[market],
         bgColor: '#cceeff',
         borderColor: '#330099',
         fgColor: '#110033',

@@ -1,53 +1,65 @@
 import React from 'react'
-import './button.css'
 
-interface ButtonProps {
-  /**
-   * Is this the principal call to action on the page?
-   */
-  primary?: boolean
-  /**
-   * What background color to use
-   */
-  backgroundColor?: string
-  /**
-   * How large should the button be?
-   */
+interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
+  variant?: 'primary' | 'secondary'
   size?: 'small' | 'medium' | 'large'
-  /**
-   * Button contents
-   */
-  label: string
-  /**
-   * Optional click handler
-   */
-  onClick?: () => void
+  children: React.ReactNode
 }
 
-/**
- * Primary UI component for user interaction
- */
 export const Button = ({
-  primary = false,
+  variant = 'primary',
   size = 'medium',
-  backgroundColor,
-  label,
+  children,
+  disabled,
   ...props
 }: ButtonProps) => {
-  const mode = primary
-    ? 'storybook-button--primary'
-    : 'storybook-button--secondary'
+  const baseStyles: React.CSSProperties = {
+    border: 'none',
+    borderRadius: '4px',
+    cursor: disabled ? 'not-allowed' : 'pointer',
+    fontFamily: 'sans-serif',
+    fontWeight: 500,
+    transition: 'background-color 0.2s, opacity 0.2s',
+    opacity: disabled ? 0.6 : 1,
+  }
+
+  const variantStyles: Record<string, React.CSSProperties> = {
+    primary: {
+      backgroundColor: '#007bff',
+      color: 'white',
+    },
+    secondary: {
+      backgroundColor: '#6c757d',
+      color: 'white',
+    },
+  }
+
+  const sizeStyles: Record<string, React.CSSProperties> = {
+    small: {
+      padding: '6px 12px',
+      fontSize: '14px',
+    },
+    medium: {
+      padding: '8px 16px',
+      fontSize: '16px',
+    },
+    large: {
+      padding: '12px 24px',
+      fontSize: '18px',
+    },
+  }
 
   return (
     <button
-      type="button"
-      className={['storybook-button', `storybook-button--${size}`, mode].join(
-        ' ',
-      )}
-      style={{ backgroundColor }}
+      style={{
+        ...baseStyles,
+        ...variantStyles[variant],
+        ...sizeStyles[size],
+      }}
+      disabled={disabled}
       {...props}
     >
-      {label}
+      {children}
     </button>
   )
 }
