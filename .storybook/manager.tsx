@@ -31,7 +31,7 @@ addons.setConfig({
         tooltip: 'This component can catch flies!',
       },
       display: {
-        sidebar: ['component'],
+        sidebar: ['component', 'group'],
         toolbar: false,
       },
     },

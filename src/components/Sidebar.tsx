@@ -28,6 +28,7 @@ export const Sidebar: FC<SidebarProps> = ({ children, item }) => {
 
   if (
     item.type !== 'component' &&
+    item.type !== 'group' &&
     item.type !== 'docs' &&
     item.type !== 'story'
   ) {
@@ -38,7 +39,6 @@ export const Sidebar: FC<SidebarProps> = ({ children, item }) => {
   if (item.parent) {
     const parentItem = api.resolveStory(item.parent)
     if (parentItem && parentItem.type !== 'root') {
-      // @ts-expect-error group entry tags hasn't yet been merged on SB.
       parentTags = parentItem.tags
     }
   }

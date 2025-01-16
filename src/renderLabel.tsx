@@ -6,6 +6,7 @@ import { Sidebar } from './components/Sidebar'
 export function renderLabel(item: API_HashEntry) {
   if (
     item.type !== 'story' &&
+    item.type !== 'group' &&
     item.type !== 'docs' &&
     item.type !== 'component'
   ) {
