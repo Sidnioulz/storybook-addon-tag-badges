@@ -2,7 +2,11 @@ import { useMemo } from 'react'
 
 import { DisplayOutcome, shouldDisplay } from './utils/display'
 import { matchTags } from './utils/tag'
-import { API_ComponentEntry, API_LeafEntry } from '@storybook/types'
+import {
+  API_ComponentEntry,
+  API_GroupEntry,
+  API_LeafEntry,
+} from '@storybook/types'
 import { TagBadgeParameters } from './types/TagBadgeParameters'
 import { BadgeOrBadgeFn } from './types/Badge'
 
@@ -11,7 +15,10 @@ interface UseBadgesToDisplayOptions {
   parameters: TagBadgeParameters
   parentTags?: string[]
   tags: string[]
-  type: API_ComponentEntry['type'] | API_LeafEntry['type']
+  type:
+    | API_ComponentEntry['type']
+    | API_GroupEntry['type']
+    | API_LeafEntry['type']
 }
 
 type BadgesToDisplay = { badge: BadgeOrBadgeFn; tag: string }[]
