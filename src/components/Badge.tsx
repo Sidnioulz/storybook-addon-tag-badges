@@ -40,6 +40,7 @@ const BadgeUI = styled.div<
       ? `inset 0 0 0 1px ${borderColor ?? `color-mix(in oklab, ${fgColor ?? theme.color.dark} 10%, transparent 90%)`}`
       : `inset 0 0 0 1px ${borderColor ?? 'none'}`,
   color: fgColor ?? theme.color.dark,
+  wordBreak: 'normal',
 }))
 
 const TooltipUI = styled.div(({ theme }) => ({
