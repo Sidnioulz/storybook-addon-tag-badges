@@ -17,11 +17,19 @@ const Container = styled.div<{ hasParentPadding: boolean }>(
   ({ hasParentPadding }) => `
   display: flex;
   flex: 1;
-  width: 100%;
-  justify-content: space-between;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  text-wrap-style: balance;
+  gap: 4px;
   margin-right: ${hasParentPadding ? '6px' : '12px'};
+}
 `,
 )
+
+const Spacer = styled.div`
+  flex: 1;
+}
+`
 
 export const Sidebar: FC<SidebarProps> = ({ children, item }) => {
   const { [KEY]: parameters } = addons.getConfig() as {
@@ -59,6 +67,7 @@ export const Sidebar: FC<SidebarProps> = ({ children, item }) => {
       hasParentPadding={item.type === 'component' || item.type === 'group'}
     >
       {children}
+      <Spacer />
       {badgesToDisplay.length ? (
         <WithBadge
           config={badgesToDisplay[0].badge}

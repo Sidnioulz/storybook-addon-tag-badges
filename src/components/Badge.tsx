@@ -22,8 +22,8 @@ const WithTooltipPatched = styled(WithTooltip)`
 `
 
 const BadgeUI = styled.div<
-  Pick<BadgeProps, 'context'> & { extraStyle: CSSObject }
->(({ as, context, extraStyle, theme }) => ({
+  Pick<BadgeProps, 'context'> & { extraStyle: CSSObject; hasLongText: boolean }
+>(({ as, context, extraStyle, hasLongText, theme }) => ({
   display: 'inline-block',
   fontSize: 11,
   lineHeight: '.75rem',
@@ -40,6 +40,11 @@ const BadgeUI = styled.div<
       : `inset 0 0 0 1px ${extraStyle.borderColor ?? 'none'}`,
   backgroundColor: theme.color.mediumlight,
   color: theme.color.dark,
+  wordBreak: 'normal',
+  width: hasLongText ? 'min-content' : 'fit-content',
+  flexShrink: 0,
+  textWrapStyle: 'pretty',
+  textAlign: 'center',
   ...extraStyle,
   borderColor: undefined,
 }))
@@ -120,10 +125,17 @@ export const Badge: React.FC<BadgeProps> = ({
     }
   }
 
+  const hasLongText = text.length > 15
+
   return (
     <Fragment>
       {!tooltip || context == 'sidebar' ? (
-        <BadgeUI extraStyle={extraStyle ?? {}} context={context} theme={theme}>
+        <BadgeUI
+          context={context}
+          extraStyle={extraStyle ?? {}}
+          hasLongText={hasLongText}
+          theme={theme}
+        >
           {text}
         </BadgeUI>
       ) : (
@@ -140,8 +152,9 @@ export const Badge: React.FC<BadgeProps> = ({
         >
           <BadgeUI
             as="button"
-            extraStyle={extraStyle ?? {}}
             context={context}
+            extraStyle={extraStyle ?? {}}
+            hasLongText={hasLongText}
             theme={theme}
           >
             {text}
