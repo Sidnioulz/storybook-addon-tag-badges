@@ -37,5 +37,17 @@ addons.setConfig({
         toolbar: true,
       },
     },
+    {
+      tags: 'very-tight-space',
+      badge: {
+        text: 'Multi-word Badge, badgeofmanyletters',
+        bgColor: '#1c0033',
+        fgColor: '#e00b53',
+      },
+      display: {
+        sidebar: true,
+        toolbar: false,
+      },
+    },
   ] satisfies TagBadgeParameters,
 })
