@@ -42,7 +42,14 @@ export const Medium: Story = {
     label: 'Button',
   },
 }
-Medium.tags = ['deprecated']
+
+export const MediumSizeButton: Story = {
+  args: {
+    size: 'medium',
+    label: 'Button',
+  },
+}
+MediumSizeButton.tags = ['deprecated']
 
 export const Small: Story = {
   args: {
