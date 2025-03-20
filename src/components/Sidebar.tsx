@@ -16,8 +16,15 @@ interface SidebarProps {
 const Container = styled.div`
   display: flex;
   flex: 1;
-  justify-content: space-between;
-  margin-right: 32px;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  text-wrap-style: balance;
+  gap: 4px;
+}
+`
+const Spacer = styled.div`
+  flex: 1;
+}
 `
 
 export const Sidebar: FC<SidebarProps> = ({ children, item }) => {
@@ -54,6 +61,7 @@ export const Sidebar: FC<SidebarProps> = ({ children, item }) => {
   return (
     <Container>
       {children}
+      <Spacer />
       {badgesToDisplay.length ? (
         <WithBadge
           config={badgesToDisplay[0].badge}

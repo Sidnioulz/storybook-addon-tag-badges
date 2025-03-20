@@ -23,8 +23,7 @@ const WithTooltipPatched = styled(WithTooltip)`
 
 const BadgeUI = styled.div<
   Pick<BadgeProps, 'bgColor' | 'borderColor' | 'fgColor' | 'context'>
->(({ as, bgColor, borderColor, fgColor, context, theme }) => ({
-  display: 'inline-block',
+>(({ as, bgColor, borderColor, fgColor, context, theme, hasLongText }) => ({
   fontSize: 11,
   lineHeight: '.75rem',
   alignSelf: 'center',
@@ -40,6 +39,12 @@ const BadgeUI = styled.div<
       ? `inset 0 0 0 1px ${borderColor ?? `color-mix(in oklab, ${fgColor ?? theme.color.dark} 10%, transparent 90%)`}`
       : `inset 0 0 0 1px ${borderColor ?? 'none'}`,
   color: fgColor ?? theme.color.dark,
+  wordBreak: 'normal',
+  width: hasLongText ? 'min-content' : 'fit-content',
+  flexShrink: 0,
+  display: 'inline-block',
+  textWrapStyle: 'pretty',
+  textAlign: 'center',
 }))
 
 const TooltipUI = styled.div(({ theme }) => ({
@@ -57,10 +62,17 @@ export const Badge: React.FC<BadgeProps> = ({
 }) => {
   const theme = useTheme()
 
+  const hasLongText = text.length > 15
+
   return (
     <Fragment>
       {!tooltip || context == 'sidebar' ? (
-        <BadgeUI {...restProps} context={context} theme={theme}>
+        <BadgeUI
+          {...restProps}
+          context={context}
+          theme={theme}
+          hasLongText={hasLongText}
+        >
           {text}
         </BadgeUI>
       ) : (
@@ -75,7 +87,13 @@ export const Badge: React.FC<BadgeProps> = ({
             )
           }
         >
-          <BadgeUI as="button" {...restProps} context={context} theme={theme}>
+          <BadgeUI
+            as="button"
+            {...restProps}
+            context={context}
+            theme={theme}
+            hasLongText={hasLongText}
+          >
             {text}
           </BadgeUI>
         </WithTooltipPatched>
