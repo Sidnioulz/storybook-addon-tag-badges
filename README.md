@@ -68,6 +68,9 @@ This architectural choice opens up new possibilities, but also prevents some fea
 |            Storybook >= 8.4 | ✅                          | ✅                                                                                                |
 |             Storybook < 8.3 | ❌                          | ✅                                                                                                |
 
+> [!NOTE]
+> Storybook 8.5 requires React 19. All addon authors have had to also adopt React 19 to be compatible with 8.5. THis is why newer versions of my addon no longer support Storybook 8.4. The last version to support Storybook 8.4 is v1.3.2.
+
 ## 📦 Installation
 
 ```sh
