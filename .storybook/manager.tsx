@@ -32,7 +32,7 @@ addons.setConfig({
       },
       display: {
         sidebar: ['component', 'group'],
-        toolbar: false,
+        toolbar: true,
       },
     },
   ] satisfies TagBadgeParameters,

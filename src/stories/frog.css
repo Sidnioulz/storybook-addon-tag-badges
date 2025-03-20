@@ -1,0 +1,69 @@
+.frog {
+  display: flex;
+  align-items: start;
+}
+
+.frog--size_small .frog__frog {
+  font-size: 1.5rem;
+}
+.frog--size_big .frog__frog {
+  font-size: 6rem;
+}
+
+.frog:has(.frog__diet:hover) .frog__frog {
+  animation: shake 0.82s cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
+  transform: translate3d(0, 0, 0);
+}
+
+.frog__diet {
+  anchor-name: var(--anchor-id);
+  cursor: pointer;
+  border: none;
+  background: none;
+  font-size: 1.5rem;
+  margin: 0;
+}
+
+.frog--size_big .frog__diet {
+  margin-top: 1rem;
+}
+
+.frog__diet-menu {
+  background-color: white;
+  border: 1px solid #ccc;
+  padding: 0.5em;
+  font-size: 1em;
+  border-radius: 0.5em;
+
+  margin: unset;
+  position-anchor: var(--anchor-id);
+  position-area: bottom span-right;
+}
+
+.frog__diet-menu ul {
+  margin: 0;
+  padding-inline-start: 1.5em;
+}
+
+@keyframes shake {
+  10%,
+  90% {
+    transform: translate3d(-1px, 0, 0);
+  }
+
+  20%,
+  80% {
+    transform: translate3d(2px, 0, 0);
+  }
+
+  30%,
+  50%,
+  70% {
+    transform: translate3d(-4px, 0, 0);
+  }
+
+  40%,
+  60% {
+    transform: translate3d(4px, 0, 0);
+  }
+}
