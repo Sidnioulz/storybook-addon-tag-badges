@@ -42,7 +42,7 @@ const ThemeBlock = styled.div<{ side: 'left' | 'right'; layout: string }>(
 )
 
 const AddonThemeProvider = (StoryFn, { context: { viewMode }, parameters }) => {
-  if (viewMode === 'docs') {
+  if (viewMode === 'docs' || parameters.layout === 'fullscreen') {
     return (
       <ThemeProvider theme={convert(themes.dark)}>
         <Global styles={createReset} />
