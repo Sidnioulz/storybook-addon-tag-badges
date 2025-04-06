@@ -1,7 +1,9 @@
 import type { ComponentProps } from 'react'
 import type { TooltipMessage } from '@storybook/components'
 import type { HashEntry } from 'storybook/manager-api'
-import { getTagParts, getTagPrefix, getTagSuffix } from 'src/utils/tag'
+import type { CSSObject } from 'storybook/theming'
+
+import { getTagParts, getTagPrefix, getTagSuffix } from '../utils/tag'
 
 /**
  * Properties of a badge to be displayed.
@@ -9,12 +11,20 @@ import { getTagParts, getTagPrefix, getTagSuffix } from 'src/utils/tag'
 export interface Badge {
   /** The text content of the badge. */
   text: string
-  /** The background colour of the badge (optional). */
-  bgColor?: string
-  /** The border colour of the badge (optional). */
-  borderColor?: string
-  /** The foreground (text) colour of the badge (optional). */
-  fgColor?: string
+
+  /** Either a style preset provided by the addon, or a custom emotion object. */
+  style?:
+    | 'grey'
+    | 'green'
+    | 'turquoise'
+    | 'blue'
+    | 'purple'
+    | 'pink'
+    | 'red'
+    | 'orange'
+    | 'yellow'
+    | CSSObject
+
   /** The tooltip text to display when hovering over the badge (optional). */
   tooltip?: string | ComponentProps<typeof TooltipMessage>
 }
