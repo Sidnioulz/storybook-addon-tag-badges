@@ -70,9 +70,7 @@ const meta: Meta<typeof Badge> = {
   tags: ['autodocs'],
   argTypes: {
     text: disabledArgType,
-    bgColor: disabledArgType,
-    borderColor: disabledArgType,
-    fgColor: disabledArgType,
+    style: disabledArgType,
     tooltip: disabledArgType,
   },
 }

@@ -86,9 +86,11 @@ describe('Badge', () => {
         <Badge
           context="sidebar"
           text="Custom Colors"
-          bgColor="#ff0000"
-          borderColor="#00ff00"
-          fgColor="#0000ff"
+          style={{
+            background: '#ff0000',
+            borderColor: '#00ff00',
+            color: '#0000ff',
+          }}
         />,
       )
       const badge = screen.getByText('Custom Colors')
