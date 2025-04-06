@@ -1,5 +1,5 @@
 import React from 'react'
-import type { Meta, StoryObj } from '@storybook/react'
+import type { Meta, StoryObj } from '@storybook/react-vite'
 import { Title, Stories } from '@storybook/blocks'
 
 import { Badge, getBadgeProps } from '../components/Badge'
