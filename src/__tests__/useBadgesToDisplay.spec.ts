@@ -1,5 +1,6 @@
-import { useBadgesToDisplay } from '../useBadgesToDisplay'
 import { renderHook } from '@testing-library/react'
+
+import { useBadgesToDisplay } from '../useBadgesToDisplay'
 import { TagBadgeParameters } from '../types/TagBadgeParameters'
 import { BadgeOrBadgeFn } from '../types/Badge'
 import { defaultConfig } from '../defaultConfig'
