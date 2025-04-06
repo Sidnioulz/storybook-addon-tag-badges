@@ -5,15 +5,13 @@ const config: StorybookConfig = {
 
   addons: [
     './local-preset.js',
+    '@storybook/addon-docs',
     '@storybook/addon-essentials',
-    '@storybook/experimental-addon-test',
+    '@storybook/addon-vitest',
   ],
   framework: {
     name: '@storybook/react-vite',
     options: {},
-  },
-  docs: {
-    autodocs: 'tag',
   },
 }
 

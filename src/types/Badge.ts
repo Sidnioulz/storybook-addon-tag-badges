@@ -1,6 +1,6 @@
 import type { ComponentProps } from 'react'
 import type { TooltipMessage } from '@storybook/components'
-import type { HashEntry } from '@storybook/manager-api'
+import type { HashEntry } from 'storybook/manager-api'
 import { getTagParts, getTagPrefix, getTagSuffix } from 'src/utils/tag'
 
 /**

@@ -1,11 +1,11 @@
 import React, { type FC } from 'react'
-import { addons, type API } from '@storybook/manager-api'
+import { addons, type API } from 'storybook/manager-api'
+import { styled } from 'storybook/theming'
 
 import { KEY, TOOL_ID } from '../constants'
 import { type TagBadgeParameters } from '../types/TagBadgeParameters'
 import { WithBadge } from './Badge'
-import { styled } from '@storybook/theming'
-import { useBadgesToDisplay } from 'src/useBadgesToDisplay'
+import { useBadgesToDisplay } from '../useBadgesToDisplay'
 interface ToolProps {
   api: API
 }
