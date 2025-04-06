@@ -6,20 +6,21 @@ const meta: Meta<typeof Badge> = {
   title: 'Addon/Badge',
   component: Badge,
   argTypes: {
-    bgColor: {
-      control: 'color',
-      description: 'Background colour, defaults to greyscale',
-      type: 'string',
-    },
-    borderColor: {
-      control: 'color',
-      description: 'Background colour, optional',
-      type: 'string',
-    },
-    fgColor: {
-      control: 'color',
-      description: 'Text colour, defaults to greyscale',
-      type: 'string',
+    style: {
+      control: 'select',
+      options: [
+        'grey',
+        'green',
+        'turquoise',
+        'blue',
+        'purple',
+        'pink',
+        'red',
+        'orange',
+        'yellow',
+      ],
+      description:
+        'Color preset (a CSS object can also be passed for more customisation)',
     },
     context: {
       control: 'select',
@@ -51,8 +52,10 @@ export const Colors: Story = {
   args: {
     context: 'toolbar',
     text: 'Text',
-    bgColor: 'hsl(110, 100%, 64%)',
-    fgColor: 'hsl(110, 100%, 8%)',
+    style: {
+      backgroundColor: 'hsl(110, 100%, 64%)',
+      color: 'hsl(110, 100%, 8%)',
+    },
   },
 }
 
@@ -60,9 +63,11 @@ export const ColorAndBorders: Story = {
   args: {
     context: 'toolbar',
     text: 'Text',
-    bgColor: 'hsl(110, 100%, 64%)',
-    borderColor: 'hsl(110, 100%, 24%)',
-    fgColor: 'hsl(110, 100%, 8%)',
+    style: {
+      backgroundColor: 'hsl(110, 100%, 64%)',
+      borderColor: 'hsl(110, 100%, 24%)',
+      color: 'hsl(110, 100%, 8%)',
+    },
   },
 }
 
