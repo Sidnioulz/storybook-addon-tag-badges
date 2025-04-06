@@ -26,8 +26,10 @@ addons.setConfig({
       tags: 'frog',
       badge: {
         text: 'Frog 🐸',
-        bgColor: '#001c13',
-        fgColor: '#e0eb0b',
+        style: {
+          backgroundColor: '#001c13',
+          color: '#e0eb0b',
+        },
         tooltip: 'This component can catch flies!',
       },
       display: {

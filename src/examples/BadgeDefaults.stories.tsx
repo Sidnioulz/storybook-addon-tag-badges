@@ -46,3 +46,6 @@ export const PresetCodeOnly: Story = {
 export const PresetVersion: Story = {
   args: getBadgeProps(defaultConfig[6].badge, mockEntry, 'version:1.0.0'),
 }
+export const PresetExperimentalVersion: Story = {
+  args: getBadgeProps(defaultConfig[6].badge, mockEntry, 'version:0.2.1'),
+}
