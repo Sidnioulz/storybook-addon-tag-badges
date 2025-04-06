@@ -13,12 +13,15 @@ interface SidebarProps {
   item: API_HashEntry
 }
 
-const Container = styled.div`
+const Container = styled.div<{ hasParentPadding: boolean }>(
+  ({ hasParentPadding }) => `
   display: flex;
   flex: 1;
+  width: 100%;
   justify-content: space-between;
-  margin-right: 32px;
-`
+  margin-right: ${hasParentPadding ? '6px' : '12px'};
+`,
+)
 
 export const Sidebar: FC<SidebarProps> = ({ children, item }) => {
   const { [KEY]: parameters } = addons.getConfig() as {
@@ -52,7 +55,9 @@ export const Sidebar: FC<SidebarProps> = ({ children, item }) => {
   })
 
   return (
-    <Container>
+    <Container
+      hasParentPadding={item.type === 'component' || item.type === 'group'}
+    >
       {children}
       {badgesToDisplay.length ? (
         <WithBadge
