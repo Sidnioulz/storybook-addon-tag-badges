@@ -190,8 +190,10 @@ addons.setConfig({
       tags: 'frog',
       badge: {
         text: 'Frog 🐸',
-        bgColor: '#001c13',
-        fgColor: '#e0eb0b',
+        style: {
+          backgroundColor: '#001c13',
+          color: '#e0eb0b',
+        },
         tooltip: 'This component can catch flies!',
       },
       display: {
@@ -265,14 +267,70 @@ The `badge` property defines the appearance and content of the badge to display.
 
 The object has the following properties:
 
-| Name            | Type                             | Description                                    | Example                                                                                           |
-| --------------- | -------------------------------- | ---------------------------------------------- | ------------------------------------------------------------------------------------------------- |
-| **text**        | `string`                         | The text displayed in the badge (required).    | 'New'                                                                                             |
-| **bgColor**     | `string?`                        | The CSS property passed to `background-color`. | '#aea'                                                                                            |
-| **fgColor**     | `string?`                        | The CSS property passed to `color`.            | '#2f2'                                                                                            |
-| **borderColor** | `string?`                        | A border colour, rendered as a CSS box-shadow. | '#2f2'                                                                                            |
-| **tooltip**     | `string \| TooltipMessageProps?` | A tooltip shown on click in the toolbar only.  | `'This component is new!'` or `{ title: 'New Component', desc: 'Recently added to the library' }` |
+| Name        | Type                             | Description                                   | Example                                                             |
+| ----------- | -------------------------------- | --------------------------------------------- | ------------------------------------------------------------------- |
+| **text**    | `string`                         | The text displayed in the badge (required).   | 'New'                                                               |
+| **style**   | `string                          | object`                                       | Preset color, or CSS properties object.                             | 'turquoise' |
+| **tooltip** | `string \| TooltipMessageProps?` | A tooltip shown on click in the toolbar only. | `{ title: 'New Component', desc: 'Recently added to the library' }` |
 
+#### Style presets
+
+The following preset colors are defined:
+* grey
+* green
+* turquoise
+* blue
+* purple
+* pink
+* red
+* orange
+* yellow
+
+#### Custom Style
+
+To customise the look of your badges, you may pass an object of CSS properties to the `style` prop. The object is consumed by [`@storybook/theming`](https://storybook.js.org/docs/configure/user-interface/theming#using-the-theme-for-addon-authors) and ultimately by [emotion](https://emotion.sh/docs/introduction).
+
+> [!NOTE]
+> The `borderColor` property, if set, will be passed to an inner box-shadow and then deleted.
+
+> [!NOTE]
+> The margin on the side of the badge cannot be removed. It is reserved for the Vitest addon and other future Storybook UI features.
+
+Example of a custom style:
+
+```ts
+// .storybook/manager.ts
+import { addons } from '@storybook/manager-api'
+import {
+  defaultConfig,
+  type TagBadgeParameters,
+} from 'storybook-addon-tag-badges'
+
+addons.setConfig({
+  tagBadges: [
+    {
+      tags: 'stylish',
+      badge: {
+        text: 'Stylish!',
+        style: {
+          background:
+            'linear-gradient(to right in lch, rgb(255, 41, 91) 0%, rgb(177, 75, 255) 100%)',
+          borderColor: 'transparent',
+          borderRadius: 0,
+          color: '#111',
+          fontWeight: 'bold',
+          fontFamily: 'monospace',
+          letterSpacing: '0.05em',
+          fontVariant: 'small-caps',
+          padding: '0.5em',
+        },
+        tooltip: `This component can help create strong brand moments.`,
+      },
+    },
+    ...defaultConfig,
+  ] satisfies TagBadgeParameters,
+})
+```
 
 #### Dynamic Badge Functions
 
@@ -301,7 +359,7 @@ addons.setConfig({
         const isUnstable = version.startsWith('0')
         return {
           text: `v${version}`,
-          bgColor: version.startsWith('0') ? '#f0ccff' : '#cce0ff',
+          style: version.startsWith('0') ? 'pink' : 'blue',
           tooltip: `Version ${version}${isUnstable ? ' (unstable)' : ''}`,
         }
       },

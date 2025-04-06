@@ -1,7 +1,7 @@
 import React, { Fragment } from 'react'
 import type { HashEntry } from 'storybook/manager-api'
 import { WithTooltip, TooltipMessage } from '@storybook/components'
-import { styled, useTheme } from 'storybook/theming'
+import { CSSObject, styled, useTheme } from 'storybook/theming'
 
 import type { Badge as BadgeConfigType, BadgeOrBadgeFn } from '../types/Badge'
 import { getTagParts, getTagPrefix, getTagSuffix } from '../utils/tag'
@@ -22,8 +22,8 @@ const WithTooltipPatched = styled(WithTooltip)`
 `
 
 const BadgeUI = styled.div<
-  Pick<BadgeProps, 'bgColor' | 'borderColor' | 'fgColor' | 'context'>
->(({ as, bgColor, borderColor, fgColor, context, theme }) => ({
+  Pick<BadgeProps, 'context'> & { extraStyle: CSSObject }
+>(({ as, context, extraStyle, theme }) => ({
   display: 'inline-block',
   fontSize: 11,
   lineHeight: '.75rem',
@@ -34,12 +34,14 @@ const BadgeUI = styled.div<
     as === 'button' ? 'help' : context === 'sidebar' ? 'cursor' : 'initial',
   borderRadius: '3em',
   fontWeight: theme.typography.weight.bold,
-  background: bgColor ?? theme.color.mediumlight,
   boxShadow:
     theme.base === 'light'
-      ? `inset 0 0 0 1px ${borderColor ?? `color-mix(in oklab, ${fgColor ?? theme.color.dark} 10%, transparent 90%)`}`
-      : `inset 0 0 0 1px ${borderColor ?? 'none'}`,
-  color: fgColor ?? theme.color.dark,
+      ? `inset 0 0 0 1px ${extraStyle.borderColor ?? `color-mix(in oklab, ${extraStyle.color ?? theme.color.dark} 10%, transparent 90%)`}`
+      : `inset 0 0 0 1px ${extraStyle.borderColor ?? 'none'}`,
+  backgroundColor: theme.color.mediumlight,
+  color: theme.color.dark,
+  ...extraStyle,
+  borderColor: undefined,
 }))
 
 const TooltipUI = styled.div(({ theme }) => ({
@@ -51,16 +53,77 @@ const TooltipUI = styled.div(({ theme }) => ({
 
 export const Badge: React.FC<BadgeProps> = ({
   context,
+  style,
   text,
   tooltip,
-  ...restProps
 }) => {
   const theme = useTheme()
+
+  let extraStyle
+  if (style === 'green') {
+    extraStyle = {
+      backgroundColor: 'hsl(130, 100%, 74%)',
+      borderColor: 'hsl(130, 100%, 34%)',
+      color: 'hsl(130, 100%, 6%)',
+    }
+  } else if (style === 'purple') {
+    extraStyle = {
+      backgroundColor: 'hsl(257, 100%, 84%)',
+      borderColor: 'hsl(257, 100%, 64%)',
+      color: 'hsl(257, 100%, 12%)',
+    }
+  } else if (style === 'blue') {
+    extraStyle = {
+      backgroundColor: 'hsl(194, 100%, 74%)',
+      borderColor: 'hsl(194, 100%, 34%)',
+      color: 'hsl(194, 100%, 12%)',
+    }
+  } else if (style === 'grey') {
+    extraStyle = {
+      backgroundColor: 'hsl(0, 0%, 84%)',
+      borderColor: 'hsl(0, 0%, 34%)',
+      color: 'hsl(0, 0%, 12%)',
+    }
+  } else if (style === 'orange') {
+    extraStyle = {
+      backgroundColor: 'hsl(16, 100%, 74%)',
+      borderColor: 'hsl(16, 100%, 34%)',
+      color: 'hsl(16, 100%, 12%)',
+    }
+  } else if (style === 'red') {
+    extraStyle = {
+      backgroundColor: 'hsl(0, 100%, 44%)',
+      borderColor: 'hsl(0, 100%, 64%)',
+      color: 'hsl(0, 100%, 94%)',
+    }
+  } else if (style === 'yellow') {
+    extraStyle = {
+      backgroundColor: 'hsl(36, 100%, 74%)',
+      borderColor: 'hsl(36, 100%, 34%)',
+      color: 'hsl(36, 100%, 12%)',
+    }
+  } else if (style === 'pink') {
+    extraStyle = {
+      backgroundColor: 'hsl(330, 100%, 74%)',
+      borderColor: 'hsl(330, 100%, 34%)',
+      color: 'hsl(330, 100%, 12%)',
+    }
+  } else if (style === 'turquoise') {
+    extraStyle = {
+      backgroundColor: 'hsl(157, 100%, 74%)',
+      borderColor: 'hsl(157, 100%, 34%)',
+      color: 'hsl(157, 100%, 12%)',
+    }
+  } else if (typeof style === 'object') {
+    extraStyle = {
+      ...style,
+    }
+  }
 
   return (
     <Fragment>
       {!tooltip || context == 'sidebar' ? (
-        <BadgeUI {...restProps} context={context} theme={theme}>
+        <BadgeUI extraStyle={extraStyle ?? {}} context={context} theme={theme}>
           {text}
         </BadgeUI>
       ) : (
@@ -75,7 +138,12 @@ export const Badge: React.FC<BadgeProps> = ({
             )
           }
         >
-          <BadgeUI as="button" {...restProps} context={context} theme={theme}>
+          <BadgeUI
+            as="button"
+            extraStyle={extraStyle ?? {}}
+            context={context}
+            theme={theme}
+          >
             {text}
           </BadgeUI>
         </WithTooltipPatched>
