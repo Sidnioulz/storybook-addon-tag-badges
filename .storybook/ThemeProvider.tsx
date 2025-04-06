@@ -6,7 +6,7 @@ import {
   styled,
   ThemeProvider,
   themes,
-} from '@storybook/theming'
+} from 'storybook/theming'
 
 const ThemeBlock = styled.div<{ side: 'left' | 'right'; layout: string }>(
   {

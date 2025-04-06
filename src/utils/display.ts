@@ -1,4 +1,4 @@
-import { HashEntry } from '@storybook/manager-api'
+import { HashEntry } from 'storybook/manager-api'
 import type { ArrayElement } from '../types/ArrayElement'
 import type { TagBadgeParameters } from '../types/TagBadgeParameters'
 import type {

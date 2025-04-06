@@ -1,5 +1,5 @@
-import type { Preview } from '@storybook/react'
-import { themes } from '@storybook/theming'
+import type { Preview } from '@storybook/react-vite'
+import { themes } from 'storybook/theming'
 
 import ThemeProvider from './ThemeProvider'
 
@@ -14,6 +14,9 @@ const preview: Preview = {
       },
     },
     docs: {
+      source: {
+        codePanel: true,
+      },
       theme: themes.dark,
       toc: true,
     },
