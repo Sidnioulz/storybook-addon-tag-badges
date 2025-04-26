@@ -11,17 +11,21 @@ import { WithBadge } from './Badge'
 interface SidebarProps {
   children: ReactNode
   item: API_HashEntry
+  hasStatusWithUI: boolean
 }
 
-const Container = styled.div<{ hasParentPadding: boolean }>(
-  ({ hasParentPadding }) => `
+const Container = styled.div<{
+  hasParentPadding: boolean
+  hasStatusWithUI: boolean
+}>(
+  ({ hasParentPadding, hasStatusWithUI }) => `
   display: flex;
   flex: 1;
   justify-content: flex-end;
   flex-wrap: wrap;
   text-wrap-style: balance;
   gap: 4px;
-  margin-right: ${hasParentPadding ? '6px' : '12px'};
+  margin-right: ${hasStatusWithUI ? '6px' : hasParentPadding ? '28px' : '34px'};
 }
 `,
 )
@@ -31,7 +35,11 @@ const Spacer = styled.div`
 }
 `
 
-export const Sidebar: FC<SidebarProps> = ({ children, item }) => {
+export const Sidebar: FC<SidebarProps> = ({
+  children,
+  item,
+  hasStatusWithUI,
+}) => {
   const { [KEY]: parameters } = addons.getConfig() as {
     [KEY]: TagBadgeParameters
   }
@@ -65,6 +73,7 @@ export const Sidebar: FC<SidebarProps> = ({ children, item }) => {
   return (
     <Container
       hasParentPadding={item.type === 'component' || item.type === 'group'}
+      hasStatusWithUI={hasStatusWithUI}
     >
       {children}
       <Spacer />
