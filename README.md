@@ -43,13 +43,13 @@
 - [Installation](#-installation)
 - [Default Config](#-default-config)
 - [Usage](#-usage)
-- [Customise Badge Config](#️-customise-badge-config)
-- [Sidebar Config](#️-sidebar-config)
+- [Customise Badge Config](#-customise-badge-config)
+- [Sidebar Config](#-sidebar-config)
 - [Workflow Examples](#-workflow-examples)
 - [Limitations](#-limitations)
 - [Contributing](#-contributing)
 - [Support](#-support)
-- [Contact](#️-contact)
+- [Contact](#-contact)
 - [Acknowledgments](#-acknowledgments)
 
 ## 🤔 Which badge addon should I use?
