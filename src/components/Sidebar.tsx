@@ -11,7 +11,7 @@ import { WithBadge } from './Badge'
 interface SidebarProps {
   children: ReactNode
   item: API_HashEntry
-  hasStatusWithUI: boolean
+  hasStatusWithUI?: boolean
 }
 
 const Container = styled.div<{
@@ -73,7 +73,7 @@ export const Sidebar: FC<SidebarProps> = ({
   return (
     <Container
       hasParentPadding={item.type === 'component' || item.type === 'group'}
-      hasStatusWithUI={hasStatusWithUI}
+      hasStatusWithUI={hasStatusWithUI ?? false}
     >
       {children}
       <Spacer />
