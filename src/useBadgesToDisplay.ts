@@ -11,7 +11,7 @@ import { TagBadgeParameters } from './types/TagBadgeParameters'
 import { BadgeOrBadgeFn } from './types/Badge'
 
 interface UseBadgesToDisplayOptions {
-  context: 'sidebar' | 'toolbar'
+  context: 'mdx' | 'sidebar' | 'toolbar'
   parameters: TagBadgeParameters
   parentTags?: string[]
   tags: string[]
@@ -60,5 +60,5 @@ export function useBadgesToDisplay({
         }
         return acc
       }, [])
-  }, [parameters, parentTags, tags, type])
+  }, [context, parameters, parentTags, tags, type])
 }

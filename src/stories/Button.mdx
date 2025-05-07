@@ -1,0 +1,22 @@
+import { Canvas, Heading, Meta, Title } from '@storybook/blocks'
+
+import ButtonStoriesMeta, * as BS from './Button.stories'
+import { CustomBadge } from '../components/CustomBadge'
+import { MDXBadges } from '../components/MDXBadges'
+
+<Meta of={ButtonStoriesMeta} />
+
+<Title of={ButtonStoriesMeta} /> <MDXBadges of={ButtonStoriesMeta} />
+
+This is a custom MDX page about buttons.
+
+<section>
+  <h2>Custom Section</h2>
+  This custom section contains custom badges. <CustomBadge text="Custom" style="turquoise" /> The custom badges contain arbitrary content. <CustomBadge text="Indeed" style="green" />
+
+</section>
+
+{BS.__namedExportsOrder.map((storyName) => <section key={storyName}>
+  <Heading>{storyName} <MDXBadges of={BS[storyName]} /></Heading>
+  <Canvas of={BS[storyName]} />
+</section>)}

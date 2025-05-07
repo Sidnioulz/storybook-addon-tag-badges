@@ -10,7 +10,7 @@ const meta: Meta<typeof Button> = {
     backgroundColor: { control: 'color' },
     onClick: fn(),
   },
-  tags: ['autodocs', 'frog', 'version:1.0.0'],
+  tags: ['frog', 'version:1.0.0'],
 }
 
 export default meta

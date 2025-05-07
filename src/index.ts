@@ -2,6 +2,8 @@ export * from './utils/tag'
 export { defaultConfig } from './defaultConfig'
 export { renderLabel } from './renderLabel'
 export { Sidebar } from './components/Sidebar'
+export { CustomBadge } from './components/CustomBadge'
+export { MDXBadges } from './components/MDXBadges'
 
 export type { Badge, BadgeOrBadgeFn } from './types/Badge'
 export type { Display } from './types/DisplayOption'
