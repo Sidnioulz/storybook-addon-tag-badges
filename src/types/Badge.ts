@@ -1,4 +1,3 @@
-import type { ComponentProps } from 'react'
 import type { TooltipMessage } from '@storybook/components'
 import type { HashEntry } from 'storybook/manager-api'
 import type { CSSObject } from 'storybook/theming'
@@ -26,7 +25,7 @@ export interface Badge {
     | CSSObject
 
   /** The tooltip text to display when hovering over the badge (optional). */
-  tooltip?: string | ComponentProps<typeof TooltipMessage>
+  tooltip?: string | React.ComponentProps<typeof TooltipMessage>
 }
 
 /**
@@ -37,7 +36,8 @@ export interface Badge {
  */
 export type BadgeOrBadgeFn =
   | ((params: {
-      entry: HashEntry
+      context: 'mdx' | 'sidebar' | 'toolbar'
+      entry: HashEntry | undefined
       getTagParts: typeof getTagParts
       getTagPrefix: typeof getTagPrefix
       getTagSuffix: typeof getTagSuffix

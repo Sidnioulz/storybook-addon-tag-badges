@@ -2,8 +2,8 @@ import React from 'react'
 import { addons } from 'storybook/manager-api'
 import { API_HashEntry } from '@storybook/types'
 
-import { defaultConfig, renderLabel, Sidebar } from '../src/index'
-import type { TagBadgeParameters } from '../src/types/TagBadgeParameters'
+import tagBadges from './tagBadges'
+import { renderLabel, Sidebar } from '../src/index'
 
 addons.setConfig({
   sidebar: {
@@ -20,34 +20,5 @@ addons.setConfig({
       },
     },
   },
-  tagBadges: [
-    ...defaultConfig,
-    {
-      tags: 'frog',
-      badge: {
-        text: 'Frog 🐸',
-        style: {
-          backgroundColor: '#001c13',
-          color: '#e0eb0b',
-        },
-        tooltip: 'This component can catch flies!',
-      },
-      display: {
-        sidebar: ['component', 'group'],
-        toolbar: true,
-      },
-    },
-    {
-      tags: 'very-tight-space',
-      badge: {
-        text: 'Multi-word Badge, badgeofmanyletters',
-        bgColor: '#1c0033',
-        fgColor: '#e00b53',
-      },
-      display: {
-        sidebar: true,
-        toolbar: false,
-      },
-    },
-  ] satisfies TagBadgeParameters,
+  tagBadges,
 })

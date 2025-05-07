@@ -7,14 +7,14 @@ import type { Badge as BadgeConfigType, BadgeOrBadgeFn } from '../types/Badge'
 import { getTagParts, getTagPrefix, getTagSuffix } from '../utils/tag'
 
 interface BadgeProps extends BadgeConfigType {
-  context: 'sidebar' | 'toolbar'
+  context: 'mdx' | 'sidebar' | 'toolbar'
 }
 
 interface WithBadgeProps {
   config: BadgeOrBadgeFn
-  entry: HashEntry
+  entry: HashEntry | undefined
   tag: string
-  context: 'sidebar' | 'toolbar'
+  context: 'mdx' | 'sidebar' | 'toolbar'
 }
 
 const WithTooltipPatched = styled(WithTooltip)`
@@ -125,6 +125,12 @@ export const Badge: React.FC<BadgeProps> = ({
     }
   }
 
+  if (typeof text !== 'string') {
+    throw new Error(
+      'Badge: the text prop must be defined and must be a string.',
+    )
+  }
+
   const hasLongText = text.length > 15
 
   return (
@@ -167,24 +173,26 @@ export const Badge: React.FC<BadgeProps> = ({
 
 export function getBadgeProps(
   config: BadgeOrBadgeFn,
-  entry: HashEntry,
+  entry: HashEntry | undefined,
   tag: string,
+  context: 'mdx' | 'sidebar' | 'toolbar',
 ): Omit<BadgeProps, 'context'> {
   const props =
     typeof config === 'function'
-      ? config({ entry, getTagParts, getTagPrefix, getTagSuffix, tag })
+      ? config({ context, entry, getTagParts, getTagPrefix, getTagSuffix, tag })
       : config
 
   return props
 }
 
 export const WithBadge: React.FC<WithBadgeProps> = ({
+  context,
   config,
   entry,
   tag,
   ...restProps
 }) => {
-  const cfg = getBadgeProps(config, entry, tag)
+  const cfg = getBadgeProps(config, entry, tag, context)
 
-  return <Badge {...cfg} {...restProps} />
+  return <Badge {...cfg} context={context} {...restProps} />
 }
