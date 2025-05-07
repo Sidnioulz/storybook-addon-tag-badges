@@ -39,7 +39,6 @@
 
 <!-- no toc -->
 - [Table of Contents](#-table-of-contents)
-- [Which badge addon should I use?](#-which-badge-addon-should-i-use)
 - [Installation](#-installation)
 - [Default Config](#-default-config)
 - [Usage](#-usage)
@@ -51,25 +50,6 @@
 - [Support](#-support)
 - [Contact](#-contact)
 - [Acknowledgments](#-acknowledgments)
-
-## 🤔 Which badge addon should I use?
-
-A few other projects have been written to display badges in Storybook. This addon is a rewrite of [storybook-addon-badges](https://storybook.js.org/addons/@geometricpanda/storybook-addon-badges) from [Jim Drury](https://github.com/geometricpanda), focused on exploiting Storybook [tags](https://storybook.js.org/docs/writing-stories/tags). We use tags as a data source to display badges, rather than dedicated [story parameters](https://storybook.js.org/docs/writing-stories/parameters), as tags are becoming more prevalent in Storybook and have a strong role overlap with badges.
-
-This architectural choice opens up new possibilities, but also prevents some features from the original addon from working. The table below summarises the differences between both addons.
-
-|                             | storybook-addon-tag-badges | [storybook-addon-badges](https://storybook.js.org/addons/@geometricpanda/storybook-addon-badges) |
-| --------------------------: | -------------------------- | ------------------------------------------------------------------------------------------------ |
-|      Show badges in toolbar | ✅                          | ✅                                                                                                |
-|      Show badges in sidebar | ✅                          | ⚠️ _only for current story_                                                                       |
-| Define badges based on tags | ✅                          | ❌                                                                                                |
-|     Per-story customisation | ❌                          | ✅                                                                                                |
-|             Tooltip support | ⚠️ _only in toolbar_        | ✅                                                                                                |
-|            Storybook >= 8.4 | ✅                          | ✅                                                                                                |
-|             Storybook < 8.3 | ❌                          | ✅                                                                                                |
-
-> [!NOTE]
-> Storybook 8.5 requires React 19. All addon authors have had to also adopt React 19 to be compatible with 8.5. THis is why newer versions of my addon no longer support Storybook 8.4. The last version to support Storybook 8.4 is v1.3.2.
 
 ## 📦 Installation
 
@@ -108,7 +88,7 @@ This addon comes with a default config, allowing you to get started immediately 
 |   ![](./static/badge-outdated.png) | `outdated`                            | Components with design changes that weren't yet implemented, which can incur extra development costs to your users |
 |     ![](./static/badge-danger.png) | `danger`                              | Components that require particular attention when configuring them (e.g. for with security concerns)               |
 |  ![](./static/badge-code-only.png) | `code-only`                           | Components that only exist in code, and not in design                                                              |
-|    ![](./static/badge-version.png) | `version:*`                           | Per-component versioning                                                                                           |
+|    ![](./static/badge-version.png) | `version:*`, `v:*`                    | Per-component versioning                                                                                           |
 
 ### Display Logic
 
@@ -199,6 +179,7 @@ addons.setConfig({
       display: {
         sidebar: ['component'],
         toolbar: false,
+        mdx: true,
       },
     },
     // Place the default config after your custom matchers.
@@ -226,7 +207,7 @@ A tag pattern can be:
 
 ### Display
 
-The `display` property controls where and for what type of content the badges are rendered. It has two sub-properties: `sidebar` and `toolbar`. In the sidebar, tags may be displayed for component, group, docs or story entries. In the toolbar, they may be set for docs or story entries (as other entry types aren't displayable outside the sidebar).
+The `display` property controls where and for what type of content the badges are rendered. It has three sub-properties: `sidebar`, `toolbar` and `mdx`. In the sidebar, tags may be displayed for component, group, docs or story entries. In the toolbar, they may be set for docs or story entries (as other entry types aren't displayable outside the sidebar). The `mdx` property controls the badges displayed by `MDXBadges` in a MDX file; in MDX, tags may be displayed for component or story entries (when importing CSF stories and using the `of` prop).
 
 The following entry types are rendered by Storybook:
 
@@ -237,7 +218,7 @@ The following entry types are rendered by Storybook:
 | ![](./static/entry-component.svg) | component | The grouping of a component's stories and autodocs page.                   |
 | ![](./static/entry-group.svg)     | group     | A generic group containing unattached MDX docs, stories and/or components. |
 
-To control where badges are shown, you pass conditions to the `sidebar` and `toolbar` keys. You can either specify a single condition, or an array of conditions (in which case matching any condition causes the badge to display).
+To control where badges are shown, you pass conditions to the `sidebar`, `toolbar` and `mdx` keys. You can either specify a single condition, or an array of conditions (in which case matching any condition causes the badge to display).
 
 Conditions can either specify the type of entry you want to display badges for, or, whether to allow badges for any tag that isn't already displayed by a parent entry (e.g. in the top-level component in the sidebar). Tags inherited from parents are skipped in the default configuration; otherwise, every single story would have a tag when you add tags to a CSF meta export, which would be verbose.
 
@@ -336,7 +317,8 @@ addons.setConfig({
 
 Dynamic badge functions allow you to customize the badge based on the current entry and matched tag. They must return a valid badge object as documented above. They receive an object parameter with the following properties:
 
-- `entry`: The current HashEntry (component, story, etc.), with an `id` and/or `name`, a `type`, and `tags`
+- `context`: Whether the badge is being rendered in `mdx` or in the Storybook `sidebar` or `toolbar`
+- `entry`: The current HashEntry (component, story, etc.), with an `id` and/or `name`, a `type`, and `tags` (except if using badges in `mdx` with MdxBadges, as the `entry` is not loadable in that context)
 - `getTagParts`, `getTagPrefix`, `getTagSuffix`: Utility functions to extract parts of the tag
 - `tag`: The matched tag string
 
@@ -429,6 +411,93 @@ addons.setConfig({
 })
 ```
 
+## Using Badges in MDX
+
+This addon provides two ways for you to include badges in your MDX files. A `MDXBadges` component takes a CSF meta or CSF story as a parameter and renders badges based on this parameter's tags. A `CustomBadge` component lets you create your own badge independently from tags.
+
+### Prerequisites
+
+Before you can use badges in MDX, it's necessary to adjust how you handle your `tagBadges` configuration object.
+
+Because we cannot load addon config in the `preview` part of Storybook (where MDX is rendered), we have to separate the `tagBadges` config in its own file, and load that file both in `.storybook/manager.ts` and `.storybook/preview.ts`.
+
+First, create the `.storybook/tagBadges.ts` file to centralise your customisations to the default config:
+
+```ts
+// .storybook/tagBadges.ts
+import { defaultConfig, type TagBadgeParameters } from 'storybook-addon-tag-badges'
+
+export default [
+  ...defaultConfig,
+  {
+    tags: 'frog',
+    badge: {
+      text: 'Frog 🐸',
+      style: {
+        backgroundColor: '#001c13',
+        color: '#e0eb0b',
+      },
+      tooltip: 'This component can catch flies!',
+    },
+  },
+] satisfies TagBadgeParameters
+```
+
+Next, adjust the manager to load config from that file:
+
+```ts
+// .storybook/manager.ts
+import { addons } from 'storybook/manager-api'
+import tagBadges from './tagBadges'
+
+addons.setConfig({ tagBadges })
+```
+
+Finally, inject the `tagBadges` config into the `window` of the preview context. Note that parameters and globals cannot be used because their content is not loadable from MDX files:
+
+```ts
+// .storybook/preview.ts
+import tagBadges from './tagBadges'
+
+declare global {
+  interface Window {
+    tagBadges: typeof tagBadges
+  }
+}
+
+window.tagBadges = tagBadges
+```
+
+### MDXBadges
+
+This component works like `@storybook/blocks` components `Title`, `Subtitle`, etc. It takes an `of` prop, which may receive either a CSF meta (the default export of a CSF file) or an individual story. Say you have a Button component implemented, the below example shows how to create your custom MDX page with automatic badges:
+
+```mdx
+import { Canvas, Heading, Meta, Title } from '@storybook/blocks'
+import { MDXBadges } from 'storybook-addon-tag-badges'
+
+import ButtonStoriesMeta, * as CSF from './Button.stories'
+
+<Meta of={ButtonStoriesMeta} />
+<Title of={ButtonStoriesMeta} /> <MDXBadges of={ButtonStoriesMeta} />
+
+{CSF.__namedExportsOrder.map((storyName) => <section key={storyName}>
+  <Heading>{storyName} <MDXBadges of={CSF[storyName]} /></Heading>
+  <Canvas of={CSF[storyName]} />
+</section>)}
+```
+
+You can control which tags generate a badge in `MDXBadges` with the `mdx` sub-property of the `display` property in your addon configuration.
+
+### CustomBadge
+
+If you want to create your own custom badges on the fly, you may import and use the `CustomBadge` component.
+
+```tsx
+import { CustomBadge } from 'storybook-addon-tag-badges'
+
+<CustomBadge text="My text" style="turquoise" />
+```
 
 ## 📝 Workflow Examples
 

@@ -23,6 +23,10 @@ export type DisplayOption<T> = DisplayOptionItem<T> | DisplayOptionItem<T>[]
  */
 export interface Display {
   /**
+   * Controls the display of badges in MDX pages with associated components.
+   */
+  mdx?: DisplayOption<Exclude<API_HashEntry['type'], 'root' | 'group' | 'docs'>>
+  /**
    * Controls the display of badges in the sidebar.
    */
   sidebar?: DisplayOption<Exclude<API_HashEntry['type'], 'root'>>

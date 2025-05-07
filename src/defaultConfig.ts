@@ -49,9 +49,14 @@ export const defaultConfig: TagBadgeParameters = [
     },
   },
   {
-    tags: {
-      prefix: 'version',
-    },
+    tags: [
+      {
+        prefix: 'v',
+      },
+      {
+        prefix: 'version',
+      },
+    ],
     badge: ({ getTagSuffix, tag }) => {
       const version = getTagSuffix(tag)
       const isExperimental = version?.startsWith('0')
