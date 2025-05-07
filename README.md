@@ -254,7 +254,7 @@ The object has the following properties:
 | Name        | Type                             | Description                                   | Example                                                             |
 | ----------- | -------------------------------- | --------------------------------------------- | ------------------------------------------------------------------- |
 | **text**    | `string`                         | The text displayed in the badge (required).   | 'New'                                                               |
-| **style**   | `string                          | object`                                       | Preset color, or CSS properties object.                             | 'turquoise' |
+| **style**   | `string \| object`               | Preset color, or a CSS properties object.     | `'turquoise'` \| `{ color: 'red', fontSize: '1rem' }`               |
 | **tooltip** | `string \| TooltipMessageProps?` | A tooltip shown on click in the toolbar only. | `{ title: 'New Component', desc: 'Recently added to the library' }` |
 
 #### Style presets
