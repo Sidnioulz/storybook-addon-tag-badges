@@ -10,7 +10,7 @@ import { API_HashEntry } from '@storybook/types'
 
 export interface ShouldDisplayOptions {
   config: Partial<ArrayElement<TagBadgeParameters>>
-  context: 'sidebar' | 'toolbar'
+  context: 'mdx' | 'sidebar' | 'toolbar'
   type: HashEntry['type']
 }
 
@@ -27,6 +27,7 @@ type NormalisedDisplayOption =
 type NormalisedDisplayOptions = NormalisedDisplayOption[]
 
 export const DISPLAY_DEFAULTS = {
+  mdx: [{ type: 'story' }, { type: 'component' }],
   sidebar: [
     { skipInherited: true },
     { type: 'component', skipInherited: false },
@@ -34,6 +35,7 @@ export const DISPLAY_DEFAULTS = {
   ],
   toolbar: [{ type: 'docs' }, { type: 'story' }],
 } satisfies {
+  mdx: NormalisedDisplayOptions
   sidebar: NormalisedDisplayOptions
   toolbar: NormalisedDisplayOptions
 }
@@ -63,10 +65,12 @@ function normaliseDisplayProperty(
 }
 
 export function normaliseDisplay(display?: Display): {
+  mdx: NormalisedDisplayOptions
   sidebar: NormalisedDisplayOptions
   toolbar: NormalisedDisplayOptions
 } {
   return {
+    mdx: normaliseDisplayProperty(display?.mdx, DISPLAY_DEFAULTS.mdx),
     sidebar: normaliseDisplayProperty(
       display?.sidebar,
       DISPLAY_DEFAULTS.sidebar,
@@ -119,7 +123,7 @@ export function shouldDisplay({
     // By default, we hide badges for tags that are already displayed
     // by a parent entry in the sidebar. This option does nothing in
     // the toolbar context.
-    if (context !== 'toolbar' && condition.skipInherited !== false) {
+    if (context === 'sidebar' && condition.skipInherited !== false) {
       outcome = DisplayOutcome.SKIP_INHERITED
       continue
     }
