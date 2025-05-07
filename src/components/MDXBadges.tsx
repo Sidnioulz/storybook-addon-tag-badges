@@ -42,7 +42,7 @@ export const MDXBadges: FC<MDXBadgesProps> = (props) => {
       : fetchedOf.story.tags
 
   const badgesToDisplay = useBadgesToDisplay({
-    context: 'sidebar',
+    context: 'mdx',
     parameters: window[KEY],
     tags: tags || [],
     type: fetchedOf.type === 'meta' ? 'component' : 'story',
