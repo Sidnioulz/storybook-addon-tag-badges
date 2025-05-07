@@ -116,6 +116,9 @@ By default, all tags are always displayed on the toolbar, but they're only displ
 
 Besides, the addon is limited to one badge per entry in the sidebar. Badges placed first in the configuration will be displayed in priority. For example, the `new` badge will be displayed before the `code-only` badge.
 
+> [!WARNING]
+> This means that when you customise this addon's configuration, you should include your customisations **before** spreading the default config object, so that they have a higher priority.
+
 ## 👀 Usage
 
 To display preconfigured badges, add the relevant tags to your components, stories, or docs entries.
