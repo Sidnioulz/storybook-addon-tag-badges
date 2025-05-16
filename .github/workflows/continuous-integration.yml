@@ -45,7 +45,7 @@ jobs:
       - name: Install dependencies
         run: pnpm install
       - name: Install Playwright browsers
-        run: npx playwright install
+        run: pnpm exec playwright install
       - name: Run tests
         run: pnpm test:coverage
       - name: Upload coverage reports to Codecov
