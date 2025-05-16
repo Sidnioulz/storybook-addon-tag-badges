@@ -6,7 +6,7 @@ import { TagPatterns } from './TagPattern'
  * Configuration that maps a tag or tag matching pattern to the config
  * that can render a badge, and to display conditions.
  */
-interface TagBadgeParameter {
+export interface TagBadgeParameter {
   /**
    * Controls where badges are rendered and for what type of content.
    */
