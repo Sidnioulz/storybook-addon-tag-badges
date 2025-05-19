@@ -14,79 +14,37 @@ describe('display', () => {
 
     it('should return the default sidebar when sidebar is omitted', () => {
       expect(normaliseDisplay({ toolbar: false })).toMatchObject({
+        mdx: DISPLAY_DEFAULTS.mdx,
         sidebar: DISPLAY_DEFAULTS.sidebar,
-        toolbar: [],
+        toolbar: [false],
       })
     })
 
     it('should return the default toolbar when toolbar is omitted', () => {
       expect(normaliseDisplay({ sidebar: false })).toMatchObject({
-        sidebar: [],
+        mdx: DISPLAY_DEFAULTS.mdx,
+        sidebar: [false],
         toolbar: DISPLAY_DEFAULTS.toolbar,
       })
     })
 
-    it('should return empty arrays when both elements are false', () => {
+    it('should return arrays when elements are not arrays', () => {
       expect(
         normaliseDisplay({ sidebar: false, toolbar: false }),
       ).toMatchObject({
-        sidebar: [],
-        toolbar: [],
+        mdx: DISPLAY_DEFAULTS.mdx,
+        sidebar: [false],
+        toolbar: [false],
       })
     })
 
-    it('should return an empty and a full array when sidebar is true and toolbar false', () => {
-      expect(normaliseDisplay({ sidebar: true, toolbar: false })).toMatchObject(
-        {
-          sidebar: [{ skipInherited: false }],
-          toolbar: [],
-        },
-      )
-    })
-
-    it('should return an empty and a full array when sidebar is false and toolbar true', () => {
-      expect(normaliseDisplay({ sidebar: false, toolbar: true })).toMatchObject(
-        {
-          sidebar: [],
-          toolbar: [{ skipInherited: false }],
-        },
-      )
-    })
-
-    it('should return full arrays when both elements are true', () => {
-      expect(normaliseDisplay({ sidebar: true, toolbar: true })).toMatchObject({
-        sidebar: [{ skipInherited: false }],
-        toolbar: [{ skipInherited: false }],
-      })
-    })
-
-    it('returns only the one matching element when a string is passed', () => {
+    it('should return elements when they already are arrays', () => {
       expect(
-        normaliseDisplay({ sidebar: 'docs', toolbar: 'story' }),
+        normaliseDisplay({ sidebar: [false, true], toolbar: ['story'] }),
       ).toMatchObject({
-        sidebar: [{ type: 'docs' }],
-        toolbar: [{ type: 'story' }],
-      })
-    })
-
-    it('returns an array when passed one to sidebar', () => {
-      expect(
-        normaliseDisplay({ sidebar: ['docs'], toolbar: false }),
-      ).toMatchObject({
-        sidebar: [{ type: 'docs' }],
-        toolbar: [],
-      })
-    })
-
-    it('returns an array when passed one to toolbar', () => {
-      expect(
-        normaliseDisplay({
-          sidebar: ['component'],
-          toolbar: ['docs'],
-        }),
-      ).toMatchObject({
-        sidebar: [{ type: 'component' }],
-        toolbar: [{ type: 'docs' }],
+        mdx: DISPLAY_DEFAULTS.mdx,
+        sidebar: [false, true],
+        toolbar: ['story'],
       })
     })
   })
@@ -246,15 +204,32 @@ describe('display', () => {
         type,
       })),
     )(
-      'should always return SKIP_INHERITED when config matches the input for the sidebar (type %s)',
+      'should always return SKIP_INHERITED when config matches the input for the sidebar and skipInherited is true (type %s)',
       ({ type }) => {
         expect(
           shouldDisplay({
-            config: { display: { sidebar: type } },
+            config: { display: { sidebar: { type, skipInherited: true } } },
             type,
             context: 'sidebar',
           } as ShouldDisplayOptions),
         ).toBe(DisplayOutcome.SKIP_INHERITED)
+      },
+    )
+
+    it.each(
+      ['component', 'docs', 'story', 'group'].map((type) => ({
+        type,
+      })),
+    )(
+      'should always return ALWAYS when config matches the input for the sidebar and skipInherited is false (type %s)',
+      ({ type }) => {
+        expect(
+          shouldDisplay({
+            config: { display: { sidebar: { type, skipInherited: false } } },
+            type,
+            context: 'sidebar',
+          } as ShouldDisplayOptions),
+        ).toBe(DisplayOutcome.ALWAYS)
       },
     )
   })

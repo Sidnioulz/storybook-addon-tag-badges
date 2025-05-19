@@ -1,5 +1,5 @@
 import { BadgeOrBadgeFn } from './Badge'
-import { Display } from './DisplayOption'
+import { Display } from './DisplayOptions'
 import { TagPatterns } from './TagPattern'
 
 /**

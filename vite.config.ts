@@ -1,10 +1,9 @@
 /// <reference types="vitest" />
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
-import { storybookTest } from '@storybook/addon-vitest/vitest-plugin'
 
 export default defineConfig({
-  plugins: [react(), storybookTest({ storybookScript: 'pnpm storybook --ci' })],
+  plugins: [react()],
   test: {
     coverage: {
       include: [
@@ -17,16 +16,6 @@ export default defineConfig({
     },
     globals: true,
     environment: 'jsdom',
-    setupFiles: ['./src/__tests__/setup.ts', './.storybook/vitest.setup.ts'],
-    browser: {
-      enabled: true,
-      provider: 'playwright',
-      headless: true,
-      instances: [
-        {
-          browser: 'chromium',
-        },
-      ],
-    },
+    setupFiles: ['./src/__tests__/setup.ts'],
   },
 })

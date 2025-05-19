@@ -3,10 +3,11 @@ import type { ArrayElement } from '../types/ArrayElement'
 import type { TagBadgeParameters } from '../types/TagBadgeParameters'
 import type {
   Display,
-  DisplayOption,
-  DisplayOptionItem,
-} from '../types/DisplayOption'
-import { API_HashEntry } from '@storybook/types'
+  NormalisedDisplay,
+  MDXDisplayOptionItem,
+  SidebarDisplayOptionItem,
+  ToolbarDisplayOptionItem,
+} from '../types/DisplayOptions'
 
 export interface ShouldDisplayOptions {
   config: Partial<ArrayElement<TagBadgeParameters>>
@@ -14,71 +15,30 @@ export interface ShouldDisplayOptions {
   type: HashEntry['type']
 }
 
-type NormalisedDisplayOption =
-  | {
-      skipInherited?: boolean
-      type: API_HashEntry['type']
-    }
-  | {
-      skipInherited: boolean
-      type?: API_HashEntry['type']
-    }
-
-type NormalisedDisplayOptions = NormalisedDisplayOption[]
-
 export const DISPLAY_DEFAULTS = {
-  mdx: [{ type: 'story' }, { type: 'component' }],
+  mdx: ['story', 'component'],
   sidebar: [
-    { skipInherited: true },
+    { type: 'story', skipInherited: true },
+    { type: 'docs', skipInherited: true },
     { type: 'component', skipInherited: false },
     { type: 'group', skipInherited: false },
   ],
-  toolbar: [{ type: 'docs' }, { type: 'story' }],
-} satisfies {
-  mdx: NormalisedDisplayOptions
-  sidebar: NormalisedDisplayOptions
-  toolbar: NormalisedDisplayOptions
-}
+  toolbar: ['docs', 'story'],
+} satisfies NormalisedDisplay
 
-function normaliseDisplayProperty(
-  value: DisplayOption<API_HashEntry['type']> | undefined,
-  defaultValue: NormalisedDisplayOptions,
-): NormalisedDisplayOptions {
-  if (value === undefined) {
-    return [...defaultValue]
-  }
-
-  const toNormalise = (
-    Array.isArray(value) ? value : [value]
-  ) satisfies DisplayOptionItem<API_HashEntry['type']>[]
-
-  return toNormalise
-    .map((prop) => {
-      if (typeof prop === 'boolean') {
-        return prop ? [{ skipInherited: false }] : []
-      } else if (typeof prop === 'string') {
-        return [{ type: prop }]
-      }
-      return prop
-    })
-    .flat()
+function toArray<T>(value: T | T[]): T[] {
+  return Array.isArray(value) ? value : [value]
 }
 
 export function normaliseDisplay(display?: Display): {
-  mdx: NormalisedDisplayOptions
-  sidebar: NormalisedDisplayOptions
-  toolbar: NormalisedDisplayOptions
+  mdx: MDXDisplayOptionItem[]
+  sidebar: SidebarDisplayOptionItem[]
+  toolbar: ToolbarDisplayOptionItem[]
 } {
   return {
-    mdx: normaliseDisplayProperty(display?.mdx, DISPLAY_DEFAULTS.mdx),
-    sidebar: normaliseDisplayProperty(
-      display?.sidebar,
-      DISPLAY_DEFAULTS.sidebar,
-    ),
-    toolbar: normaliseDisplayProperty(
-      display?.toolbar,
-      DISPLAY_DEFAULTS.toolbar,
-    ),
+    mdx: toArray(display?.mdx ?? DISPLAY_DEFAULTS.mdx),
+    sidebar: toArray(display?.sidebar ?? DISPLAY_DEFAULTS.sidebar),
+    toolbar: toArray(display?.toolbar ?? DISPLAY_DEFAULTS.toolbar),
   }
 }
 
@@ -110,29 +70,37 @@ export function shouldDisplay({
     return DisplayOutcome.NEVER
   }
 
-  const normalised = normaliseDisplay(config.display)[context]
-  let outcome = DisplayOutcome.NEVER
-
-  for (const condition of normalised) {
-    // When a type is defined, it must always match the type of the HashEntry.
-    // If it doesn't, we don't return true yet.
-    if (condition.type !== undefined && condition.type !== type) {
-      continue
+  for (const condition of normaliseDisplay(config.display)[context]) {
+    // If options contain the value `true`, we must show badges for all types.
+    if (condition === true) {
+      return DisplayOutcome.ALWAYS
     }
 
-    // By default, we hide badges for tags that are already displayed
-    // by a parent entry in the sidebar. This option does nothing in
-    // the toolbar context.
-    if (context === 'sidebar' && condition.skipInherited !== false) {
-      outcome = DisplayOutcome.SKIP_INHERITED
-      continue
+    // Inversely, if `false` is found, we must never display badges.
+    if (condition === false) {
+      return DisplayOutcome.NEVER
     }
 
-    // If we reach this, the HashEntry should be displayed unconditionally.
-    // Return early as there is no point in iterating further.
-    outcome = DisplayOutcome.ALWAYS
-    break
+    // For MDX and toolbar badges, we may have strings that match a content type.
+    // If a condition matches the type in parameters, we know we can show the badge.
+    // NOTE: we don't actually check for context here to account for users who don't
+    // use TypeScript and mistakenly pass strings to the 'sidebar' context options.
+    if (condition === type) {
+      // If the type is found, we must show badges for this type.
+      return DisplayOutcome.ALWAYS
+    }
+
+    // For sidebar badges, we must account for the `skipInherited` property.
+    if (context === 'sidebar' && typeof condition === 'object') {
+      // When a type is defined, it must always match the type of the HashEntry.
+      // If it doesn't, we don't return true yet.
+      if (condition.type === type) {
+        return condition.skipInherited
+          ? DisplayOutcome.SKIP_INHERITED
+          : DisplayOutcome.ALWAYS
+      }
+    }
   }
 
-  return outcome
+  return DisplayOutcome.NEVER
 }

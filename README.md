@@ -210,6 +210,8 @@ A tag pattern can be:
 
 ### Display
 
+TODO
+
 The `display` property controls where and for what type of content the badges are rendered. It has three sub-properties: `sidebar`, `toolbar` and `mdx`. In the sidebar, tags may be displayed for component, group, docs or story entries. In the toolbar, they may be set for docs or story entries (as other entry types aren't displayable outside the sidebar). The `mdx` property controls the badges displayed by `MDXBadges` in a MDX file; in MDX, tags may be displayed for component or story entries (when importing CSF stories and using the `of` prop).
 
 The following entry types are rendered by Storybook:
