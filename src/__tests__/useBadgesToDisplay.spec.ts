@@ -303,7 +303,7 @@ describe('useBadgesToDisplay', () => {
     })
   })
 
-  describe.only('skipInherited', () => {
+  describe('skipInherited', () => {
     const parameters: TagBadgeParameters = [
       {
         tags: ['test1'],
