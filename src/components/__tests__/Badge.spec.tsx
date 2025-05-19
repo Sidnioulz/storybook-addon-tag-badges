@@ -106,7 +106,9 @@ describe('Badge', () => {
     it('renders with a basic config object', () => {
       const config = {
         text: 'Config Badge',
-        bgColor: '#cccccc',
+        style: {
+          background: '#cccccc',
+        },
       }
       renderWithTheme(
         <WithBadge
@@ -126,7 +128,9 @@ describe('Badge', () => {
       configFn.mockImplementation(
         ({ entry, tag }: { entry: HashEntry; tag: string }) => ({
           text: `${entry.type}-${tag}`,
-          bgColor: '#eeeeee',
+          style: {
+            background: '#eeeeee',
+          },
         }),
       )
       renderWithTheme(
