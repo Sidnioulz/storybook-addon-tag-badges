@@ -129,6 +129,12 @@
   "peerDependencies": {
     "storybook": "^9.0.0"
   },
+  "resolutions": {
+    "@octokit/core": "^7",
+    "@octokit/request-error": "^7",
+    "@octokit/request": "^10",
+    "@octokit/plugin-paginate-rest": "^13"
+  },
   "publishConfig": {
     "access": "public",
     "provenance": true,
