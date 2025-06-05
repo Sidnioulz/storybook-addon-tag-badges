@@ -11,11 +11,11 @@
   </picture>
 
   <h1>Storybook Addon - Tag Badges</h1>
-  
+
   <p>
     This addon displays badges in the <a href="https://storybook.js.org/docs/configure/user-interface/sidebar-and-urls">sidebar</a> and <a href="https://storybook.js.org/docs/essentials/toolbars-and-globals">toolbar</a> of the Storybook UI, next to <code>component</code>, <code>docs</code> or <code>story</code> entries, based on the <a href="https://storybook.js.org/docs/writing-stories/tags">tags</a> defined in your content. Badges can be customised to support your team's workflows.
   </p>
-  
+
   <p>
     <img src="https://img.shields.io/badge/status-stable-4cc71e" alt="Status: Stable" />
     <a href="https://github.com/Sidnioulz/storybook-addon-tag-badges/commits"><img src="https://img.shields.io/github/commit-activity/m/Sidnioulz/storybook-addon-tag-badges" alt="commit activity" /></a>
@@ -180,7 +180,10 @@ addons.setConfig({
         tooltip: 'This component can catch flies!',
       },
       display: {
-        sidebar: ['component'],
+        sidebar: [{
+            type: 'component',
+            skipInherited: true,
+        }],
         toolbar: false,
         mdx: true,
       },
@@ -244,7 +247,7 @@ A condition for the sidebar takes two properties:
 | Property        | Description                                                                                          | Type     | Example value |
 | --------------- | ---------------------------------------------------------------------------------------------------- | -------- | ------------- |
 | `type`          | The type of entry to match                                                                           | `string` | `'docs'`      |
-| `skipInherited` | Whether to skip showing the badge if a parent entry in the UI already shows a badge for the same tag | `string` | `true`        |
+| `skipInherited` | Whether to skip showing the badge if a parent entry in the UI already shows a badge for the same tag | `boolean` | `true`        |
 
 Using the default config for `display` is heavily recommended. It is defined as follows:
 ```ts
