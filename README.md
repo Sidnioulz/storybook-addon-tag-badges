@@ -211,6 +211,31 @@ A tag pattern can be:
 
 ---
 
+When `prefix` or `suffix` are used, the tag is split in two on the first `:` separator character. The left-hand side of the tag is compared to `prefix` and the right-hand side (including any additional `:`) to the `suffix`. If you've used a string as `prefix` or `suffix`, the addon will search for an exact match. If you used a `RegExp`, you must add `^` and `$` regular expression delimiters yourself to avoid accidentally matching other tags.
+
+```ts
+// As an example, consider the following tags on a story:
+const tags = ['v:1.0.0', 'private']
+
+// ✅ The string prefix will only match 'v:1.0.0'
+{
+  tags: { prefix: 'v' },
+  badge: { /* ... */ },
+}
+
+// ❌ The RegExp prefix without delimiters will also match 'private'
+{
+  tags: { prefix: /v/i },
+  badge: { /* ... */ },
+}
+
+// ✅ The RegExp prefix with delimiters will only match 'v:1.0.0'
+{
+  tags: { prefix: /^v$/i },
+  badge: { /* ... */ },
+}
+```
+
 ### Display (advanced usage)
 
 The `display` property controls where and for what type of content the badges are rendered. It has three sub-properties: `sidebar`, `toolbar` and `mdx`. In the sidebar, tags may be displayed for component, group, docs or story entries. In the toolbar, they may be set for docs or story entries (as other entry types aren't displayable outside the sidebar). The `mdx` property controls the badges displayed by `MDXBadges` in a MDX file; in MDX, tags may be displayed for component or story entries (when importing CSF stories and using the `of` prop).

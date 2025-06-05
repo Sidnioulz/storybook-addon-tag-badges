@@ -36,6 +36,28 @@ export function getTagSuffix(tag: string): string | null {
   return getTagParts(tag).suffix
 }
 
+function normalisePattern(
+  pattern: string | RegExp | undefined,
+): string | RegExp {
+  if (pattern === undefined) {
+    return /.*/
+  }
+
+  if (typeof pattern === 'string') {
+    let patternWithBoundaries = pattern
+    if (!patternWithBoundaries.startsWith('^')) {
+      patternWithBoundaries = `^${patternWithBoundaries}`
+    }
+    if (!patternWithBoundaries.endsWith('$')) {
+      patternWithBoundaries += '$'
+    }
+
+    return new RegExp(patternWithBoundaries)
+  }
+
+  return pattern
+}
+
 /**
  * Checks if a given tag matches any of the provided patterns.
  * Patterns can be regular expressions, strings, or objects with prefix and suffix patterns.
@@ -56,14 +78,13 @@ export function matchTag(tag: string, patterns: TagPatterns): boolean {
       }
     } else {
       const { prefix, suffix } = getTagParts(tag)
-      const prefixPattern = pattern.prefix ?? '[^:]+'
-      const suffixPattern = pattern.suffix ?? '.+'
+      const prefixPattern = normalisePattern(pattern.prefix)
+      const suffixPattern = normalisePattern(pattern.suffix)
 
-      if (
-        prefix.match(prefixPattern) &&
-        ((suffix && suffixPattern) || (!suffix && !suffixPattern)) &&
-        suffix?.match(suffixPattern)
-      ) {
+      const matchesPrefix = prefix.match(prefixPattern)
+      const matchesSuffix = suffix && suffix.match(suffixPattern)
+
+      if (matchesPrefix && matchesSuffix) {
         return true
       }
     }
