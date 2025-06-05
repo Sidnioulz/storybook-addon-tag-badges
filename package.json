@@ -61,6 +61,7 @@
     "prepare": "husky",
     "prerelease": "zx scripts/prepublish-checks.js",
     "release": "pnpm build && pnpm semantic-release",
+    "release:canary": "pnpm build && auto canary",
     "start": "run-p build:watch \"storybook --quiet\"",
     "storybook": "storybook dev -p 6006",
     "test": "vitest",
@@ -96,6 +97,7 @@
     "@vitejs/plugin-react": "^4.5.0",
     "@vitest/browser": "3.2.0",
     "@vitest/coverage-istanbul": "3.2.0",
+    "auto": "^11.3.0",
     "boxen": "^8.0.1",
     "commitlint": "^19.8.1",
     "dedent": "^1.6.0",
@@ -126,6 +128,12 @@
   },
   "peerDependencies": {
     "storybook": "^9.0.0"
+  },
+  "resolutions": {
+    "@octokit/core": "^7",
+    "@octokit/request-error": "^7",
+    "@octokit/request": "^10",
+    "@octokit/plugin-paginate-rest": "^13"
   },
   "publishConfig": {
     "access": "public",
