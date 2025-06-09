@@ -90,12 +90,12 @@
     "@storybook/types": "next",
     "@testing-library/jest-dom": "^6.6.3",
     "@testing-library/react": "^16.3.0",
-    "@types/node": "^22.15.29",
+    "@types/node": "^22.15.30",
     "@types/react": "^19.1.6",
-    "@types/react-dom": "^19.1.5",
-    "@vitejs/plugin-react": "^4.5.0",
-    "@vitest/browser": "3.2.0",
-    "@vitest/coverage-istanbul": "3.2.0",
+    "@types/react-dom": "^19.1.6",
+    "@vitejs/plugin-react": "^4.5.1",
+    "@vitest/browser": "3.2.3",
+    "@vitest/coverage-istanbul": "3.2.3",
     "boxen": "^8.0.1",
     "commitlint": "^19.8.1",
     "dedent": "^1.6.0",
@@ -119,10 +119,10 @@
     "tosource": "2.0.0-alpha.3",
     "tsup": "^8.5.0",
     "typescript": "^5.8.3",
-    "typescript-eslint": "^8.33.0",
+    "typescript-eslint": "^8.33.1",
     "vite": "^6.3.5",
-    "vitest": "^3.2.0",
-    "zx": "^8.5.4"
+    "vitest": "^3.2.3",
+    "zx": "^8.5.5"
   },
   "peerDependencies": {
     "storybook": "^9.0.0"
