@@ -6,7 +6,6 @@ const config: StorybookConfig = {
   addons: [
     './local-preset.js',
     '@storybook/addon-docs',
-    '@storybook/addon-essentials',
     '@storybook/addon-vitest',
   ],
   framework: {
