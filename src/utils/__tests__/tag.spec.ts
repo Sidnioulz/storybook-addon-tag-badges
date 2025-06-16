@@ -196,6 +196,56 @@ describe('tag', () => {
         false,
       )
     })
+
+    it('object - string prefix requires exact match', () => {
+      expect(matchTag('foobar:test', { prefix: 'foo' })).toBe(false)
+      expect(matchTag('foo:test', { prefix: 'foo' })).toBe(true)
+      expect(matchTag('xfoo:test', { prefix: 'foo' })).toBe(false)
+      expect(matchTag('foox:test', { prefix: 'foo' })).toBe(false)
+    })
+
+    it('object - string suffix requires exact match', () => {
+      expect(matchTag('test:foobar', { suffix: 'foo' })).toBe(false)
+      expect(matchTag('test:foo', { suffix: 'foo' })).toBe(true)
+      expect(matchTag('test:xfoo', { suffix: 'foo' })).toBe(false)
+      expect(matchTag('test:foox', { suffix: 'foo' })).toBe(false)
+    })
+
+    it('object - RegExp prefix allows partial matches', () => {
+      expect(matchTag('foobar:test', { prefix: /foo/ })).toBe(true)
+      expect(matchTag('xfoo:test', { prefix: /foo/ })).toBe(true)
+      expect(matchTag('foox:test', { prefix: /foo/ })).toBe(true)
+      expect(matchTag('bar:test', { prefix: /foo/ })).toBe(false)
+    })
+
+    it('object - RegExp suffix allows partial matches', () => {
+      expect(matchTag('test:foobar', { suffix: /foo/ })).toBe(true)
+      expect(matchTag('test:xfoo', { suffix: /foo/ })).toBe(true)
+      expect(matchTag('test:foox', { suffix: /foo/ })).toBe(true)
+      expect(matchTag('test:bar', { suffix: /foo/ })).toBe(false)
+    })
+
+    it('object - prefix is case sensitive', () => {
+      expect(matchTag('FOO:test', { prefix: 'foo' })).toBe(false)
+      expect(matchTag('FOO:test', { prefix: /foo/ })).toBe(false)
+    })
+
+    it('object - RegExp prefix with case insensitive flag', () => {
+      expect(matchTag('FOO:test', { prefix: /foo/i })).toBe(true)
+      expect(matchTag('FoO:test', { prefix: /foo/i })).toBe(true)
+      expect(matchTag('foo:test', { prefix: /foo/i })).toBe(true)
+    })
+
+    it('object - suffix is case sensitive', () => {
+      expect(matchTag('test:FOO', { suffix: 'foo' })).toBe(false)
+      expect(matchTag('test:FOO', { suffix: /foo/ })).toBe(false)
+    })
+
+    it('object - RegExp suffix with case insensitive flag', () => {
+      expect(matchTag('test:FOO', { suffix: /foo/i })).toBe(true)
+      expect(matchTag('test:FoO', { suffix: /foo/i })).toBe(true)
+      expect(matchTag('test:foo', { suffix: /foo/i })).toBe(true)
+    })
   })
 
   describe('matchTags', () => {
