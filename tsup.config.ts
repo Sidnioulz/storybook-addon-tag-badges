@@ -59,7 +59,7 @@ export default defineConfig(async (options) => {
       },
       format: ['esm', 'cjs'],
       target: [...BROWSER_TARGET, ...NODE_TARGET],
-      platform: 'neutral',
+      platform: 'browser',
       external: [...globalManagerPackages, ...globalPreviewPackages],
     })
   }
