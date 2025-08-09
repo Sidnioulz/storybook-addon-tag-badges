@@ -26,13 +26,11 @@ const Container = styled.div<{
   text-wrap-style: balance;
   gap: 4px;
   margin-right: ${hasStatusWithUI ? '6px' : hasParentPadding ? '28px' : '34px'};
-}
 `,
 )
 
 const Spacer = styled.div`
   flex: 1;
-}
 `
 
 export const Sidebar: FC<SidebarProps> = ({
