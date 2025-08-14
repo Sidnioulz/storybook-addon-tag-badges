@@ -15,9 +15,7 @@ const preview: Preview = {
       },
     },
     docs: {
-      source: {
-        codePanel: true,
-      },
+      codePanel: true,
       theme: themes.dark,
       toc: true,
     },
