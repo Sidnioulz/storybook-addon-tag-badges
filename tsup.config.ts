@@ -4,8 +4,7 @@ import { defineConfig, type Options } from 'tsup'
 import { globalPackages as globalManagerPackages } from 'storybook/internal/manager/globals'
 import { globalPackages as globalPreviewPackages } from 'storybook/internal/preview/globals'
 
-// The current browsers supported by Storybook v7
-const BROWSER_TARGET: Options['target'] = [
+const BROWSER_TARGETS: Options['target'] = [
   'chrome131',
   'edge134',
   'firefox136',
@@ -58,8 +57,8 @@ export default defineConfig(async (options) => {
         resolve: true,
       },
       format: ['esm', 'cjs'],
-      target: [...BROWSER_TARGET, ...NODE_TARGET],
-      platform: 'browser',
+      platform: 'neutral',
+      target: NODE_TARGET,
       external: [...globalManagerPackages, ...globalPreviewPackages],
     })
   }
@@ -72,8 +71,8 @@ export default defineConfig(async (options) => {
       ...commonConfig,
       entry: managerEntries,
       format: ['esm'],
-      target: BROWSER_TARGET,
       platform: 'browser',
+      target: BROWSER_TARGETS,
       external: globalManagerPackages,
     })
   }
@@ -89,9 +88,10 @@ export default defineConfig(async (options) => {
         resolve: true,
       },
       format: ['esm', 'cjs'],
-      target: BROWSER_TARGET,
       platform: 'browser',
+      target: BROWSER_TARGETS,
       external: globalPreviewPackages,
+      // FIXME/TODO: react, react-dom, and react/jsx-runtime?
     })
   }
 
@@ -103,8 +103,8 @@ export default defineConfig(async (options) => {
       ...commonConfig,
       entry: nodeEntries,
       format: ['cjs'],
-      target: NODE_TARGET,
       platform: 'node',
+      target: NODE_TARGET,
     })
   }
 
