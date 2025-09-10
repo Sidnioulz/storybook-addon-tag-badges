@@ -465,16 +465,18 @@ This addon provides two ways for you to include badges in your MDX files. A `MDX
 
 ### MDXBadges
 
-This component works like `@storybook/blocks` components `Title`, `Subtitle`, etc. It takes an `of` prop, which may receive either a CSF meta (the default export of a CSF file) or an individual story. Say you have a Button component implemented, the below example shows how to create your custom MDX page with automatic badges:
+This component works like `@storybook/addon-docs/blocks` components `Title`, `Subtitle`, etc. It takes an `of` prop, which may receive either a CSF meta (the default export of a CSF file) or an individual story. Say you have a Button component implemented, the below example shows how to create your custom MDX page with automatic badges:
 
 ```mdx
-import { Canvas, Heading, Meta, Title } from '@storybook/blocks'
+import { Canvas, Heading, Meta, Title } from '@storybook/addon-docs/blocks'
 import { MDXBadges } from 'storybook-addon-tag-badges'
 
 import ButtonStoriesMeta, * as CSF from './Button.stories'
 
 <Meta of={ButtonStoriesMeta} />
-<Title of={ButtonStoriesMeta} /> <MDXBadges of={ButtonStoriesMeta} />
+
+<MDXBadges of={ButtonStoriesMeta} />
+<Title of={ButtonStoriesMeta} />
 
 {CSF.__namedExportsOrder.map((storyName) => <section key={storyName}>
   <Heading>{storyName} <MDXBadges of={CSF[storyName]} /></Heading>
