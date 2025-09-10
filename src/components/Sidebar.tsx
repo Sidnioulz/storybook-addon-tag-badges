@@ -8,7 +8,7 @@ import { TagBadgeParameters } from '../types/TagBadgeParameters'
 import { useBadgesToDisplay } from '../useBadgesToDisplay'
 import { WithBadge } from './Badge'
 
-interface SidebarProps {
+export interface SidebarProps {
   children: ReactNode
   item: API_HashEntry
   hasStatusWithUI?: boolean

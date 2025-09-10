@@ -1,7 +1,6 @@
 import type { Preview } from '@storybook/react-vite'
 import { themes } from 'storybook/theming'
 
-import tagBadges from './tagBadges'
 import ThemeProvider from './ThemeProvider'
 
 export const decorators = [ThemeProvider]
@@ -24,13 +23,5 @@ const preview: Preview = {
     background: { value: 'dark' },
   },
 }
-
-declare global {
-  interface Window {
-    tagBadges: typeof tagBadges
-  }
-}
-
-window.tagBadges = tagBadges
 
 export default preview

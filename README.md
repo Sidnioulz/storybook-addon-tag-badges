@@ -463,59 +463,6 @@ addons.setConfig({
 
 This addon provides two ways for you to include badges in your MDX files. A `MDXBadges` component takes a CSF meta or CSF story as a parameter and renders badges based on this parameter's tags. A `CustomBadge` component lets you create your own badge independently from tags.
 
-### Prerequisites
-
-Before you can use badges in MDX, it's necessary to adjust how you handle your `tagBadges` configuration object.
-
-Because we cannot load addon config in the `preview` part of Storybook (where MDX is rendered), we have to separate the `tagBadges` config in its own file, and load that file both in `.storybook/manager.ts` and `.storybook/preview.ts`.
-
-First, create the `.storybook/tagBadges.ts` file to centralise your customisations to the default config:
-
-```ts
-// .storybook/tagBadges.ts
-import { defaultConfig, type TagBadgeParameters } from 'storybook-addon-tag-badges'
-
-export default [
-  ...defaultConfig,
-  {
-    tags: 'frog',
-    badge: {
-      text: 'Frog 🐸',
-      style: {
-        backgroundColor: '#001c13',
-        color: '#e0eb0b',
-      },
-      tooltip: 'This component can catch flies!',
-    },
-  },
-] satisfies TagBadgeParameters
-```
-
-Next, adjust the manager to load config from that file:
-
-```ts
-// .storybook/manager.ts
-import { addons } from 'storybook/manager-api'
-import tagBadges from './tagBadges'
-
-addons.setConfig({ tagBadges })
-```
-
-Finally, inject the `tagBadges` config into the `window` of the preview context. Note that parameters and globals cannot be used because their content is not loadable from MDX files:
-
-```ts
-// .storybook/preview.ts
-import tagBadges from './tagBadges'
-
-declare global {
-  interface Window {
-    tagBadges: typeof tagBadges
-  }
-}
-
-window.tagBadges = tagBadges
-```
-
 ### MDXBadges
 
 This component works like `@storybook/blocks` components `Title`, `Subtitle`, etc. It takes an `of` prop, which may receive either a CSF meta (the default export of a CSF file) or an individual story. Say you have a Button component implemented, the below example shows how to create your custom MDX page with automatic badges:
