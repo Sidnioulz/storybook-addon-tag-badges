@@ -13,7 +13,7 @@ declare global {
   }
 }
 
-interface MDXBadgesProps {
+export interface MDXBadgesProps {
   /**
    * Specify where to get the Badge tags from. Must be a CSF file's default export or a CSF story.
    * If not specified, the tags will be extracted from the meta of the attached CSF file.
