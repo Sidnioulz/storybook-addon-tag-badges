@@ -70,6 +70,9 @@ export default defineConfig(async (options) => {
     configs.push({
       ...commonConfig,
       entry: managerEntries,
+      dts: {
+        resolve: true,
+      },
       format: ['esm'],
       platform: 'browser',
       target: BROWSER_TARGETS,
