@@ -37,11 +37,10 @@
     "preview.js"
   ],
   "bundler": {
-    "exportEntries": [
-      "src/index.ts"
-    ],
+    "exportEntries": [],
     "managerEntries": [
-      "src/manager.tsx"
+      "src/manager.tsx",
+      "src/index.ts"
     ],
     "previewEntries": [
       "src/preview.ts"
