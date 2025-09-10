@@ -8,6 +8,12 @@ import { renderLabel } from './renderLabel'
 import { SET_CONFIG } from 'storybook/internal/core-events'
 import { TagBadgeParameters } from './types/TagBadgeParameters'
 
+declare global {
+  interface Window {
+    tagBadges: TagBadgeParameters
+  }
+}
+
 function readConfig(config = addons.getConfig()): TagBadgeParameters {
   return config?.tagBadges
 }
