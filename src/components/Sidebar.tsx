@@ -1,6 +1,6 @@
 import React, { type FC, type ReactNode } from 'react'
 import { addons } from 'storybook/manager-api'
-import type { API_HashEntry } from '@storybook/types'
+import type { API_HashEntry } from 'storybook/internal/types'
 import { styled } from 'storybook/theming'
 
 import { KEY } from '../constants'

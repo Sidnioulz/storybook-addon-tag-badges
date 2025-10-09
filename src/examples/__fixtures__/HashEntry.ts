@@ -1,4 +1,4 @@
-import { API_ComponentEntry } from '@storybook/types'
+import { API_ComponentEntry } from 'storybook/internal/types'
 
 export const mockEntry: API_ComponentEntry = {
   type: 'component',

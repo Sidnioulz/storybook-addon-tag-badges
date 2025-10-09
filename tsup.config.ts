@@ -41,7 +41,7 @@ export default defineConfig(async (options) => {
     minify: !options.watch,
     treeshake: true,
     sourcemap: true,
-    clean: options.watch ? false : true,
+    clean: false,
   }
 
   const configs: Options[] = []
@@ -70,9 +70,6 @@ export default defineConfig(async (options) => {
     configs.push({
       ...commonConfig,
       entry: managerEntries,
-      dts: {
-        resolve: true,
-      },
       format: ['esm'],
       platform: 'browser',
       target: BROWSER_TARGETS,

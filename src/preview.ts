@@ -1,4 +1,4 @@
-import type { ProjectAnnotations, Renderer } from '@storybook/types'
+import type { ProjectAnnotations, Renderer } from 'storybook/internal/types'
 import { addons } from 'storybook/internal/preview-api'
 import { EVENTS } from './constants'
 import { TagBadgeParameters } from './types/TagBadgeParameters'

@@ -1,6 +1,6 @@
 import React, { type FC } from 'react'
-import { useOf, type Of } from '@storybook/blocks'
-import { styled } from '@storybook/theming'
+import { useOf, type Of } from '@storybook/addon-docs/blocks'
+import { styled } from 'storybook/theming'
 
 import { KEY } from '../constants'
 import { WithBadge } from './Badge'
