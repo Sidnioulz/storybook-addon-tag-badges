@@ -164,7 +164,7 @@ import { addons } from '@storybook/manager-api'
 import {
   defaultConfig,
   type TagBadgeParameters,
-} from 'storybook-addon-tag-badges'
+} from 'storybook-addon-tag-badges/manager-helpers'
 
 addons.setConfig({
   tagBadges: [
@@ -333,7 +333,7 @@ import { addons } from '@storybook/manager-api'
 import {
   defaultConfig,
   type TagBadgeParameters,
-} from 'storybook-addon-tag-badges'
+} from 'storybook-addon-tag-badges/manager-helpers'
 
 addons.setConfig({
   tagBadges: [
@@ -378,7 +378,7 @@ import { addons } from '@storybook/manager-api'
 import {
   defaultConfig,
   type TagBadgeParameters,
-} from 'storybook-addon-tag-badges'
+} from 'storybook-addon-tag-badges/manager-helpers'
 
 addons.setConfig({
   tagBadges: [
@@ -422,7 +422,7 @@ To show badges for items that aren't customised by your own `renderLabel` logic,
 // .storybook/manager.ts
 import { addons } from '@storybook/manager-api'
 import type { API_HashEntry } from '@storybook/types'
-import { renderLabel, Sidebar } from 'storybook-addon-tag-badges'
+import { renderLabel, Sidebar } from 'storybook-addon-tag-badges/manager-helpers'
 
 addons.setConfig({
   sidebar: {
@@ -449,7 +449,7 @@ Likewise, if you define configuration for the `sidebar` option without including
 ```tsx
 // .storybook/manager.ts
 import { addons } from '@storybook/manager-api'
-import { renderLabel } from 'storybook-addon-tag-badges'
+import { renderLabel } from 'storybook-addon-tag-badges/manager-helpers'
 
 addons.setConfig({
   sidebar: {
@@ -469,7 +469,7 @@ This component works like `@storybook/addon-docs/blocks` components `Title`, `Su
 
 ```mdx
 import { Canvas, Heading, Meta, Title } from '@storybook/addon-docs/blocks'
-import { MDXBadges } from 'storybook-addon-tag-badges'
+import { MDXBadges } from 'storybook-addon-tag-badges/manager-helpers'
 
 import ButtonStoriesMeta, * as CSF from './Button.stories'
 
@@ -491,7 +491,7 @@ You can control which tags generate a badge in `MDXBadges` with the `mdx` sub-pr
 If you want to create your own custom badges on the fly, you may import and use the `CustomBadge` component.
 
 ```tsx
-import { CustomBadge } from 'storybook-addon-tag-badges'
+import { CustomBadge } from 'storybook-addon-tag-badges/manager-helpers'
 
 <CustomBadge text="My text" style="turquoise" />
 ```

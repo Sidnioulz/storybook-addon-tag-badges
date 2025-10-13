@@ -1,4 +1,4 @@
-import { defaultConfig, type TagBadgeParameters } from '../src/index'
+import { defaultConfig, type TagBadgeParameters } from '../src/manager-helpers'
 
 export default [
   ...defaultConfig,
@@ -13,7 +13,10 @@ export default [
       tooltip: 'This component can catch flies!',
     },
     display: {
-      sidebar: ['component', 'group'],
+      sidebar: [
+        { skipInherited: true, type: 'component' },
+        { skipInherited: true, type: 'group' },
+      ],
       toolbar: true,
     },
   },

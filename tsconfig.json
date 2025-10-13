@@ -7,9 +7,9 @@
     "incremental": false,
     "isolatedModules": true,
     "jsx": "react",
-    "lib": ["es2020", "dom"],
+    "lib": ["esnext", "dom", "dom.iterable"],
     "moduleResolution": "bundler",
-    "module": "Preserve",
+    "module": "esnext",
     "noImplicitAny": true,
     "rootDir": "./src",
     "skipLibCheck": true,
@@ -17,5 +17,5 @@
     "target": "ES2022",
     "types": ["vitest/globals"]
   },
-  "include": ["src/**/*"]
+  "include": ["src/**/*", "tsup.config.ts"]
 }

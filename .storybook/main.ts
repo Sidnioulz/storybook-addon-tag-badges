@@ -4,7 +4,7 @@ const config: StorybookConfig = {
   stories: ['../src/**/*.mdx', '../src/**/*.stories.@(js|jsx|ts|tsx)'],
 
   addons: [
-    './local-preset.js',
+    import.meta.resolve('./local-preset.ts'),
     '@storybook/addon-docs',
     '@storybook/addon-vitest',
   ],

@@ -13,10 +13,6 @@ overrides:
 importers:
 
   .:
-    dependencies:
-      '@storybook/icons':
-        specifier: ^1.4.0
-        version: 1.4.0(react-dom@19.1.1(react@19.1.1))(react@19.1.1)
     devDependencies:
       '@commitlint/config-conventional':
         specifier: ^20.0.0
@@ -30,6 +26,9 @@ importers:
       '@storybook/addon-vitest':
         specifier: next
         version: 10.0.0-beta.7(@vitest/browser@3.2.4)(@vitest/runner@3.2.4)(react-dom@19.1.1(react@19.1.1))(react@19.1.1)(storybook@10.0.0-beta.7(@testing-library/dom@10.4.0)(msw@2.8.2(@types/node@24.5.2)(typescript@5.9.2))(prettier@3.6.2)(react-dom@19.1.1(react@19.1.1))(react@19.1.1)(vite@7.1.7(@types/node@24.5.2)(jiti@2.6.0)(yaml@2.8.1)))(vitest@3.2.4)
+      '@storybook/icons':
+        specifier: ^1.4.0
+        version: 1.4.0(react-dom@19.1.1(react@19.1.1))(react@19.1.1)
       '@storybook/react-vite':
         specifier: next
         version: 10.0.0-beta.7(esbuild@0.25.5)(react-dom@19.1.1(react@19.1.1))(react@19.1.1)(rollup@4.52.0)(storybook@10.0.0-beta.7(@testing-library/dom@10.4.0)(msw@2.8.2(@types/node@24.5.2)(typescript@5.9.2))(prettier@3.6.2)(react-dom@19.1.1(react@19.1.1))(react@19.1.1)(vite@7.1.7(@types/node@24.5.2)(jiti@2.6.0)(yaml@2.8.1)))(typescript@5.9.2)(vite@7.1.7(@types/node@24.5.2)(jiti@2.6.0)(yaml@2.8.1))
