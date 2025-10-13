@@ -3,7 +3,7 @@
   "version": "0.0.0-semantically-released",
   "description": "Display Storybook tags as badges in the sidebar and toolbar.",
   "keywords": [
-    "storybook-addons",
+    "storybook-addon",
     "storybook",
     "badges",
     "tags",
@@ -19,14 +19,13 @@
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
-      "import": "./dist/index.js",
-      "require": "./dist/index.cjs"
+      "default": "./dist/index.js"
     },
+    "./manager-helpers": "./dist/manager-helpers.js",
     "./manager": "./dist/manager.js",
     "./preview": {
       "types": "./dist/index.d.ts",
-      "import": "./dist/preview.js",
-      "require": "./dist/preview.cjs"
+      "default": "./dist/preview.js"
     },
     "./package.json": "./package.json"
   },
@@ -37,13 +36,14 @@
     "preview.js"
   ],
   "bundler": {
-    "exportEntries": [],
     "managerEntries": [
       "src/manager.tsx",
-      "src/index.ts"
+      "src/manager-helpers.ts"
     ],
+    "nodeEntries": [],
     "previewEntries": [
-      "src/preview.ts"
+      "src/preview.ts",
+      "src/index.ts"
     ]
   },
   "scripts": {
@@ -66,14 +66,12 @@
     "test": "vitest",
     "test:coverage": "vitest --coverage"
   },
-  "dependencies": {
-    "@storybook/icons": "^1.4.0"
-  },
   "devDependencies": {
     "@commitlint/config-conventional": "^20.0.0",
     "@eslint/js": "^9.36.0",
     "@storybook/addon-docs": "next",
     "@storybook/addon-vitest": "next",
+    "@storybook/icons": "^1.4.0",
     "@storybook/react-vite": "next",
     "@testing-library/jest-dom": "^6.8.0",
     "@testing-library/react": "^16.3.0",
@@ -113,7 +111,7 @@
     "zx": "^8.8.4"
   },
   "peerDependencies": {
-    "storybook": "^9.0.0"
+    "storybook": "^10.0.0"
   },
   "resolutions": {
     "@octokit/core": "^7",
