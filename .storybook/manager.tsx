@@ -1,9 +1,9 @@
 import React from 'react'
 import { addons } from 'storybook/manager-api'
-import { API_HashEntry } from '@storybook/types'
+import { API_HashEntry } from 'storybook/internal/types'
 
 import tagBadges from './tagBadges'
-import { renderLabel, Sidebar } from '../src/index'
+import { renderLabel, Sidebar } from '../src/manager-helpers'
 
 addons.setConfig({
   sidebar: {
