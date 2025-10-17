@@ -61,6 +61,6 @@ export const MDXBadges: FC<MDXBadgesProps> = (props) => {
       ))}
     </BadgeContainer>
   ) : (
-    'ø'
+    ''
   )
 }
