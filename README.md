@@ -269,9 +269,9 @@ For instance, of a component entry has a `new` badge, you must decide if you als
 
 A condition for the sidebar takes two properties:
 
-| Property        | Description                                                                                          | Type     | Example value |
-| --------------- | ---------------------------------------------------------------------------------------------------- | -------- | ------------- |
-| `type`          | The type of entry to match                                                                           | `string` | `'docs'`      |
+| Property        | Description                                                                                          | Type      | Example value |
+| --------------- | ---------------------------------------------------------------------------------------------------- | --------- | ------------- |
+| `type`          | The type of entry to match                                                                           | `string`  | `'docs'`      |
 | `skipInherited` | Whether to skip showing the badge if a parent entry in the UI already shows a badge for the same tag | `boolean` | `true`        |
 
 Using the default config for `display` is heavily recommended. It is defined as follows:
@@ -611,7 +611,7 @@ This project uses PNPM as a package manager.
 
 - `pnpm start` starts the local Storybook
 - `pnpm build` builds and packages the addon code
-- `pnpm pack:local` makes a local tarball to be used as a NPM dependency elsewhere
+- `pnpm pack` makes a local tarball to be used as a NPM dependency elsewhere
 - `pnpm test` runs unit tests
 
 ### Migrating to a later Storybook version
