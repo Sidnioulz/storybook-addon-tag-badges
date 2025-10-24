@@ -1,6 +1,6 @@
 import React, { type FC } from 'react'
-import { useOf, type Of } from '@storybook/blocks'
-import { styled } from '@storybook/theming'
+import { useOf, type Of } from '@storybook/addon-docs/blocks'
+import { styled } from 'storybook/theming'
 
 import { KEY } from '../constants'
 import { WithBadge } from './Badge'
@@ -13,7 +13,7 @@ declare global {
   }
 }
 
-interface MDXBadgesProps {
+export interface MDXBadgesProps {
   /**
    * Specify where to get the Badge tags from. Must be a CSF file's default export or a CSF story.
    * If not specified, the tags will be extracted from the meta of the attached CSF file.

@@ -1,6 +1,6 @@
 import React from 'react'
 import type { Meta, StoryObj } from '@storybook/react-vite'
-import { Title, Stories } from '@storybook/blocks'
+import { Title, Stories } from '@storybook/addon-docs/blocks'
 
 import { Badge, getBadgeProps } from '../components/Badge'
 import {
@@ -13,7 +13,7 @@ import {
 } from './sampleWorkflows'
 import { mockEntry } from './__fixtures__/HashEntry'
 import { TagBadgeParameters } from 'src/types/TagBadgeParameters'
-import { styled } from '@storybook/theming'
+import { styled } from 'storybook/theming'
 import toSource from 'tosource'
 
 const disabledArgType = {

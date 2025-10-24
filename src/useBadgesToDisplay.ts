@@ -8,7 +8,7 @@ import type {
   API_GroupEntry,
   API_HashEntry,
   API_LeafEntry,
-} from '@storybook/types'
+} from 'storybook/internal/types'
 import { TagBadgeParameters } from './types/TagBadgeParameters'
 import { BadgeOrBadgeFn } from './types/Badge'
 

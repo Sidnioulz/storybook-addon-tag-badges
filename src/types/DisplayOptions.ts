@@ -1,4 +1,4 @@
-import { API_HashEntry } from '@storybook/types'
+import { API_HashEntry } from 'storybook/internal/types'
 
 /**
  * Display options for badges in MDX pages. Only applicable to components

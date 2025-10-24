@@ -1,4 +1,4 @@
-import type { TooltipMessage } from '@storybook/components'
+import type { TooltipMessage } from 'storybook/internal/components'
 import type { HashEntry } from 'storybook/manager-api'
 import type { CSSObject } from 'storybook/theming'
 
