@@ -150,5 +150,10 @@
       "supported-frameworks"
     ],
     "icon": "https://raw.githubusercontent.com/Sidnioulz/storybook-addon-tag-badges/main/static/icon.png"
+  },
+  "pnpm": {
+    "overrides": {
+      "vite@>=7.1.0 <=7.1.10": ">=7.1.11"
+    }
   }
 }
