@@ -142,7 +142,7 @@
   },
   "packageManager": "pnpm@10.7.0",
   "engines": {
-    "node": ">=22"
+    "node": ">=20"
   },
   "storybook": {
     "displayName": "Tag Badges",
