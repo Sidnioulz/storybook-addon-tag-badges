@@ -1,8 +1,8 @@
+import storybook from 'eslint-plugin-storybook'
 import js from '@eslint/js'
 import prettierRecommended from 'eslint-plugin-prettier/recommended'
 import reactPlugin from 'eslint-plugin-react'
 import tseslint from 'typescript-eslint'
-import globals from 'globals'
 
 export default [
   {
@@ -32,15 +32,6 @@ export default [
     },
   },
   ...tseslint.configs.recommended,
-  {
-    files: ['preset.js', '.storybook/local-preset.js'],
-    languageOptions: {
-      sourceType: 'commonjs',
-      globals: globals.node,
-    },
-    rules: {
-      '@typescript-eslint/no-require-imports': 'off',
-    },
-  },
+  ...storybook.configs['flat/recommended'],
   prettierRecommended,
 ]

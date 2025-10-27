@@ -1,12 +1,8 @@
-import { API_HashEntry } from 'storybook/internal/types'
-
 /**
  * Display options for badges in MDX pages. Only applicable to components
  * and stories referenced in MDX files.
  */
-export type MDXDisplayOptionItem =
-  | boolean
-  | Exclude<API_HashEntry['type'], 'root' | 'group' | 'docs'>
+export type MDXDisplayOptionItem = boolean | 'component' | 'story'
 export type MDXDisplayOptions = MDXDisplayOptionItem | MDXDisplayOptionItem[]
 
 /**
@@ -17,7 +13,7 @@ export type SidebarDisplayOptionItem =
   | boolean
   | {
       skipInherited: boolean
-      type: Exclude<API_HashEntry['type'], 'root'>
+      type: 'test' | 'story' | 'docs' | 'component' | 'group'
     }
 export type SidebarDisplayOptions =
   | SidebarDisplayOptionItem
@@ -27,9 +23,7 @@ export type SidebarDisplayOptions =
  * Display options for badges in MDX pages. Only applicable to docs and stories
  * which are the two types that have a preview canvas, and thus, a toolbar.
  */
-export type ToolbarDisplayOptionItem =
-  | boolean
-  | Exclude<API_HashEntry['type'], 'root' | 'component' | 'group'>
+export type ToolbarDisplayOptionItem = boolean | 'test' | 'docs' | 'story'
 export type ToolbarDisplayOptions =
   | ToolbarDisplayOptionItem
   | ToolbarDisplayOptionItem[]

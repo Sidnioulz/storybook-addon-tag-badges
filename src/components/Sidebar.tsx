@@ -7,6 +7,12 @@ import { KEY } from '../constants'
 import { TagBadgeParameters } from '../types/TagBadgeParameters'
 import { useBadgesToDisplay } from '../useBadgesToDisplay'
 import { WithBadge } from './Badge'
+import {
+  getItemType,
+  itemIsComponent,
+  itemIsGroup,
+  itemIsRoot,
+} from '#src/itemTypes.js'
 
 export interface SidebarProps {
   children: ReactNode
@@ -42,12 +48,7 @@ export const Sidebar: FC<SidebarProps> = ({
     [KEY]: TagBadgeParameters
   }
 
-  if (
-    item.type !== 'component' &&
-    item.type !== 'group' &&
-    item.type !== 'docs' &&
-    item.type !== 'story'
-  ) {
+  if (itemIsRoot(item)) {
     return children
   }
 
@@ -56,12 +57,12 @@ export const Sidebar: FC<SidebarProps> = ({
     parameters,
     parent: item.parent,
     tags: item.tags,
-    type: item.type,
+    type: getItemType(item),
   })
 
   return (
     <Container
-      hasParentPadding={item.type === 'component' || item.type === 'group'}
+      hasParentPadding={itemIsComponent(item) || itemIsGroup(item)}
       hasStatusWithUI={hasStatusWithUI ?? false}
     >
       {children}

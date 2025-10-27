@@ -3,6 +3,7 @@ import { API_HashEntry, type StatusByTypeId } from 'storybook/internal/types'
 import { experimental_useStatusStore } from 'storybook/manager-api'
 
 import { Sidebar } from './components/Sidebar'
+import { itemIsRoot } from './itemTypes'
 
 function hasStatusWithUI(itemStatuses: StatusByTypeId): boolean {
   if (!itemStatuses) {
@@ -19,12 +20,7 @@ function hasStatusWithUI(itemStatuses: StatusByTypeId): boolean {
 }
 
 export function renderLabel(item: API_HashEntry) {
-  if (
-    item.type !== 'story' &&
-    item.type !== 'group' &&
-    item.type !== 'docs' &&
-    item.type !== 'component'
-  ) {
+  if (itemIsRoot(item)) {
     return
   }
 

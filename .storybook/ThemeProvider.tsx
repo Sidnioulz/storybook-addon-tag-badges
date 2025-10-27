@@ -1,4 +1,5 @@
 import React, { Fragment } from 'react'
+import { DecoratorFunction } from 'storybook/internal/csf'
 import {
   convert,
   createReset,
@@ -41,7 +42,10 @@ const ThemeBlock = styled.div<{ side: 'left' | 'right'; layout: string }>(
         },
 )
 
-const AddonThemeProvider = (StoryFn, { context: { viewMode }, parameters }) => {
+const AddonThemeProvider: DecoratorFunction = (
+  StoryFn,
+  { context: { viewMode }, parameters },
+) => {
   if (viewMode === 'docs') {
     return (
       <ThemeProvider theme={convert(themes.dark)}>

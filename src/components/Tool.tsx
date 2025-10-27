@@ -6,6 +6,9 @@ import { KEY, TOOL_ID } from '../constants'
 import { type TagBadgeParameters } from '../types/TagBadgeParameters'
 import { WithBadge } from './Badge'
 import { useBadgesToDisplay } from '../useBadgesToDisplay'
+
+// import icon from '../../static/icon.png?inline'
+
 interface ToolProps {
   api: API
 }
@@ -30,10 +33,13 @@ const Root = styled.div`
   }
 `
 
+console.log('yaa')
 export const Tool: FC<ToolProps> = function Tool({ api }) {
   const { [KEY]: parameters } = addons.getConfig() as {
     [KEY]: TagBadgeParameters
   }
+
+  console.log('yo')
   const storyData = api.getCurrentStoryData()
   const { tags, type } = storyData ?? {}
 
@@ -46,6 +52,7 @@ export const Tool: FC<ToolProps> = function Tool({ api }) {
 
   return badgesToDisplay.length ? (
     <Root key={TOOL_ID}>
+      {/* <img src={icon} alt="demo" width={14} height={14} /> */}
       {badgesToDisplay.map(({ badge, tag }) => (
         <WithBadge
           config={badge}

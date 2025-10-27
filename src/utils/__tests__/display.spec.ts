@@ -50,6 +50,122 @@ describe('display', () => {
   })
 
   describe('shouldDisplay', () => {
+    describe('test type', () => {
+      it('should only display non-inherited tags for test in the sidebar by default', () => {
+        expect(
+          shouldDisplay({
+            config: { display: DISPLAY_DEFAULTS },
+            type: 'test',
+            context: 'sidebar',
+          }),
+        ).toBe(DisplayOutcome.SKIP_INHERITED)
+      })
+
+      it('should display test in the toolbar by default', () => {
+        expect(
+          shouldDisplay({
+            config: { display: DISPLAY_DEFAULTS },
+            type: 'test',
+            context: 'toolbar',
+          }),
+        ).toBe(DisplayOutcome.ALWAYS)
+      })
+
+      it('should NOT display test in MDX by default', () => {
+        expect(
+          shouldDisplay({
+            config: { display: DISPLAY_DEFAULTS },
+            type: 'test',
+            context: 'mdx',
+          }),
+        ).toBe(DisplayOutcome.NEVER)
+      })
+
+      it('should display test when toolbar is set to true', () => {
+        expect(
+          shouldDisplay({
+            config: { display: { toolbar: true } },
+            type: 'test',
+            context: 'toolbar',
+          }),
+        ).toBe(DisplayOutcome.ALWAYS)
+      })
+
+      it('should display test when explicitly enabled in toolbar', () => {
+        expect(
+          shouldDisplay({
+            config: { display: { toolbar: 'test' } },
+            type: 'test',
+            context: 'toolbar',
+          }),
+        ).toBe(DisplayOutcome.ALWAYS)
+      })
+
+      it('should display test when sidebar is set to true', () => {
+        expect(
+          shouldDisplay({
+            config: { display: { sidebar: true } },
+            type: 'test',
+            context: 'sidebar',
+          }),
+        ).toBe(DisplayOutcome.ALWAYS)
+      })
+
+      it('should skip inherited when sidebar config has skipInherited: true', () => {
+        expect(
+          shouldDisplay({
+            config: {
+              display: { sidebar: { type: 'test', skipInherited: true } },
+            },
+            type: 'test',
+            context: 'sidebar',
+          }),
+        ).toBe(DisplayOutcome.SKIP_INHERITED)
+      })
+
+      it('should always display when sidebar config has skipInherited: false', () => {
+        expect(
+          shouldDisplay({
+            config: {
+              display: { sidebar: { type: 'test', skipInherited: false } },
+            },
+            type: 'test',
+            context: 'sidebar',
+          }),
+        ).toBe(DisplayOutcome.ALWAYS)
+      })
+
+      it('should NOT display test when toolbar is explicitly disabled', () => {
+        expect(
+          shouldDisplay({
+            config: { display: { toolbar: false } },
+            type: 'test',
+            context: 'toolbar',
+          }),
+        ).toBe(DisplayOutcome.NEVER)
+      })
+
+      it('should NOT display test when sidebar is explicitly disabled', () => {
+        expect(
+          shouldDisplay({
+            config: { display: { sidebar: false } },
+            type: 'test',
+            context: 'sidebar',
+          }),
+        ).toBe(DisplayOutcome.NEVER)
+      })
+
+      it('should NOT display test in toolbar when only other types are enabled', () => {
+        expect(
+          shouldDisplay({
+            config: { display: { toolbar: ['story', 'docs'] } },
+            type: 'test',
+            context: 'toolbar',
+          }),
+        ).toBe(DisplayOutcome.NEVER)
+      })
+    })
+
     it('should only display non-inherited tags for stories in the sidebar by default', () => {
       expect(
         shouldDisplay({
@@ -144,7 +260,7 @@ describe('display', () => {
 
     it.each(
       ['sidebar', 'toolbar'].flatMap((context) =>
-        ['component', 'docs', 'story', 'group'].map((type) => ({
+        ['test', 'component', 'docs', 'story', 'group'].map((type) => ({
           context,
           type,
         })),
@@ -164,7 +280,7 @@ describe('display', () => {
 
     it.each(
       ['sidebar', 'toolbar'].flatMap((context) =>
-        ['component', 'docs', 'story', 'group'].map((type) => ({
+        ['test', 'component', 'docs', 'story', 'group'].map((type) => ({
           context,
           type,
         })),
@@ -183,7 +299,7 @@ describe('display', () => {
     )
 
     it.each(
-      ['component', 'docs', 'story', 'group'].map((type) => ({
+      ['test', 'component', 'docs', 'story', 'group'].map((type) => ({
         type,
       })),
     )(
@@ -200,7 +316,7 @@ describe('display', () => {
     )
 
     it.each(
-      ['component', 'docs', 'story', 'group'].map((type) => ({
+      ['test', 'component', 'docs', 'story', 'group'].map((type) => ({
         type,
       })),
     )(
@@ -217,7 +333,7 @@ describe('display', () => {
     )
 
     it.each(
-      ['component', 'docs', 'story', 'group'].map((type) => ({
+      ['test', 'component', 'docs', 'story', 'group'].map((type) => ({
         type,
       })),
     )(

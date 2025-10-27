@@ -1,8 +1,9 @@
-import type { Meta, StoryObj } from '@storybook/react-vite'
+import preview from '#.storybook/preview'
+import { expect } from 'storybook/test'
 
 import { Badge } from '../components/Badge'
 
-const meta: Meta<typeof Badge> = {
+const meta = preview.meta({
   title: 'Addon/Badge',
   component: Badge,
   argTypes: {
@@ -36,19 +37,16 @@ const meta: Meta<typeof Badge> = {
   parameters: {
     layout: 'centered',
   },
-}
+})
 
-export default meta
-type Story = StoryObj<typeof Badge>
-
-export const Default: Story = {
+export const Default = meta.story({
   args: {
     context: 'toolbar',
     text: 'Text',
   },
-}
+})
 
-export const Colors: Story = {
+export const Colors = meta.story({
   args: {
     context: 'toolbar',
     text: 'Text',
@@ -57,9 +55,36 @@ export const Colors: Story = {
       color: 'hsl(110, 100%, 8%)',
     },
   },
-}
+})
 
-export const ColorAndBorders: Story = {
+Colors.test('looks green', () => {
+  expect(document.querySelector('div')).toHaveStyle({
+    backgroundColor: 'hsl(110, 100%, 64%)',
+    color: 'hsl(110, 100%, 8%)',
+  })
+})
+
+Colors.test('looks stunning', () => {
+  expect(document.querySelector('div')).toHaveStyle({
+    backgroundColor: 'hsl(110, 100%, 64%)',
+    color: 'hsl(110, 100%, 8%)',
+  })
+})
+
+Colors.test(
+  'looks clean',
+  {
+    tags: ['flaky'],
+  },
+  () => {
+    expect(document.querySelector('div')).toHaveStyle({
+      backgroundColor: 'hsl(110, 100%, 64%)',
+      color: 'hsl(110, 100%, 8%)',
+    })
+  },
+)
+
+export const ColorAndBorders = meta.story({
   args: {
     context: 'toolbar',
     text: 'Text',
@@ -69,17 +94,17 @@ export const ColorAndBorders: Story = {
       color: 'hsl(110, 100%, 8%)',
     },
   },
-}
+})
 
-export const SimpleTooltip: Story = {
+export const SimpleTooltip = meta.story({
   args: {
     context: 'toolbar',
     text: 'Text',
     tooltip: 'This badge has a simple string tooltip!',
   },
-}
+})
 
-export const RichTooltip: Story = {
+export const RichTooltip = meta.story({
   args: {
     context: 'toolbar',
     text: 'Text',
@@ -88,9 +113,9 @@ export const RichTooltip: Story = {
       desc: 'This badge uses a TooltipMessage component with title and description',
     },
   },
-}
+})
 
-export const RichTooltipWithLink: Story = {
+export const RichTooltipWithLink = meta.story({
   args: {
     context: 'toolbar',
     text: 'Text',
@@ -105,12 +130,12 @@ export const RichTooltipWithLink: Story = {
       ],
     },
   },
-}
+})
 
-export const SidebarBadge: Story = {
+export const SidebarBadge = meta.story({
   args: {
     context: 'sidebar',
     text: 'Text',
     tooltip: 'Tooltips are disabled in the sidebar',
   },
-}
+})

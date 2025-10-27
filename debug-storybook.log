@@ -1,0 +1,70 @@
+[17:26:59.435] [INFO] Storybook Upgrade - v0.0.0-pr-32391-sha-f5e829d5
+[17:26:59.444] [INFO] detect-projects-spinner-start: Detecting projects...
+[17:26:59.445] [DEBUG] Finding Storybook projects...
+[17:26:59.568] [DEBUG] Found 1 Storybook projects
+[17:26:59.569] [INFO] detect-projects-spinner: Detecting projects: 1 projects
+[17:26:59.569] [DEBUG] Getting Storybook data...
+[17:26:59.569] [DEBUG] Getting Storybook info...
+[17:26:59.569] [DEBUG] Loading main config...
+[17:26:59.612] [INFO] detect-projects-spinner: {"column":4,"file":"/home/steve/Development/storybook-addon-tag-badges/.storybook/main.ts","length":11,"line":7,"lineText":"    import.meta.resolve('./local-preset.ts'),","namespace":"","suggestion":""}
+[17:26:59.612] [INFO] detect-projects-spinner: "import.meta" is not available with the "cjs" output format and will be empty
+[17:26:59.614] [DEBUG] Error: Unable to find or evaluate /home/steve/Development/storybook-addon-tag-badges/.storybook/main.ts: SB_CORE-SERVER_0007 (MainFileEvaluationError): Storybook couldn't evaluate your .storybook/main.ts file.
+
+Original error:
+TypeError: import_meta.resolve is not a function
+    at Object.<anonymous> (/.storybook/main.ts:7:17)
+    at Module._compile (node:internal/modules/cjs/loader:1692:14)
+    at Module._compile (/home/steve/.npm/_npx/f5b6eb25e2925b23/node_modules/esbuild-register/dist/node.js:2258:26)
+    at node:internal/modules/cjs/loader:1824:10
+    at Object.newLoader [as .ts] (/home/steve/.npm/_npx/f5b6eb25e2925b23/node_modules/esbuild-register/dist/node.js:2262:9)
+    at Module.load (node:internal/modules/cjs/loader:1427:32)
+    at Module._load (node:internal/modules/cjs/loader:1250:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:235:24)
+    at Module.require (node:internal/modules/cjs/loader:1449:12)
+[17:26:59.614] [INFO] detect-projects-spinner-stop: 1 project detected
+[17:26:59.614] [DEBUG] Found 0 valid projects and 1 error projects
+[17:26:59.615] [ERROR] Failed to get projects
+[17:26:59.624] [ERROR] Error: ❌ Storybook found errors while collecting data for the following projects:
+/.storybook:
+Error: Unable to find or evaluate ./.storybook/main.ts: SB_CORE-SERVER_0007 (MainFileEvaluationError): Storybook couldn't evaluate your .storybook/main.ts file.
+
+Original error:
+TypeError: import_meta.resolve is not a function
+    at Object.<anonymous> (/.storybook/main.ts:7:17)
+    at Module._compile (node:internal/modules/cjs/loader:1692:14)
+    at Module._compile (/home/steve/.npm/_npx/f5b6eb25e2925b23/node_modules/esbuild-register/dist/node.js:2258:26)
+    at node:internal/modules/cjs/loader:1824:10
+    at Object.newLoader [as .ts] (/home/steve/.npm/_npx/f5b6eb25e2925b23/node_modules/esbuild-register/dist/node.js:2262:9)
+    at Module.load (node:internal/modules/cjs/loader:1427:32)
+    at Module._load (node:internal/modules/cjs/loader:1250:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:235:24)
+    at Module.require (node:internal/modules/cjs/loader:1449:12)
+    at getStorybookData (/home/steve/.npm/_npx/f5b6eb25e2925b23/node_modules/@storybook/cli/dist/bin/index.cjs:78:2455)
+    at async processProject (/home/steve/.npm/_npx/f5b6eb25e2925b23/node_modules/@storybook/cli/dist/bin/index.cjs:71:5434)
+Please fix the errors and run the upgrade command again.
+    at getProjects (/home/steve/.npm/_npx/f5b6eb25e2925b23/node_modules/@storybook/cli/dist/bin/index.cjs:76:10)
+    at async /home/steve/.npm/_npx/f5b6eb25e2925b23/node_modules/@storybook/cli/dist/bin/index.cjs:285:1637
+    at async withTelemetry (/home/steve/.npm/_npx/f5b6eb25e2925b23/node_modules/storybook/dist/core-server/index.cjs:42292:12)
+    at async upgrade (/home/steve/.npm/_npx/f5b6eb25e2925b23/node_modules/@storybook/cli/dist/bin/index.cjs:285:1361)
+    at async Command.<anonymous> (/home/steve/.npm/_npx/f5b6eb25e2925b23/node_modules/@storybook/cli/dist/bin/index.cjs:291:3312)
+[17:27:00.207] [ERROR] Error: ❌ Storybook found errors while collecting data for the following projects:
+/.storybook:
+Error: Unable to find or evaluate ./.storybook/main.ts: SB_CORE-SERVER_0007 (MainFileEvaluationError): Storybook couldn't evaluate your .storybook/main.ts file.
+
+Original error:
+TypeError: import_meta.resolve is not a function
+    at Object.<anonymous> (/.storybook/main.ts:7:17)
+    at Module._compile (node:internal/modules/cjs/loader:1692:14)
+    at Module._compile (/home/steve/.npm/_npx/f5b6eb25e2925b23/node_modules/esbuild-register/dist/node.js:2258:26)
+    at node:internal/modules/cjs/loader:1824:10
+    at Object.newLoader [as .ts] (/home/steve/.npm/_npx/f5b6eb25e2925b23/node_modules/esbuild-register/dist/node.js:2262:9)
+    at Module.load (node:internal/modules/cjs/loader:1427:32)
+    at Module._load (node:internal/modules/cjs/loader:1250:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:235:24)
+    at Module.require (node:internal/modules/cjs/loader:1449:12)
+    at getStorybookData (/home/steve/.npm/_npx/f5b6eb25e2925b23/node_modules/@storybook/cli/dist/bin/index.cjs:78:2455)
+    at async processProject (/home/steve/.npm/_npx/f5b6eb25e2925b23/node_modules/@storybook/cli/dist/bin/index.cjs:71:5434)
+Please fix the errors and run the upgrade command again.

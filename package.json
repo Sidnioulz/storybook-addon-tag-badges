@@ -16,6 +16,13 @@
   "type": "module",
   "author": "Steve Dodier-Lazaro <sidnioulz@gmail.com>",
   "license": "MIT",
+  "imports": {
+    "#*": [
+      "./*",
+      "./*.ts",
+      "./*.tsx"
+    ]
+  },
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
@@ -69,10 +76,10 @@
   "devDependencies": {
     "@commitlint/config-conventional": "^20.0.0",
     "@eslint/js": "^9.36.0",
-    "@storybook/addon-docs": "next",
-    "@storybook/addon-vitest": "next",
+    "@storybook/addon-docs": "0.0.0-pr-32391-sha-f5e829d5",
+    "@storybook/addon-vitest": "0.0.0-pr-32391-sha-f5e829d5",
     "@storybook/icons": "^1.4.0",
-    "@storybook/react-vite": "next",
+    "@storybook/react-vite": "0.0.0-pr-32391-sha-f5e829d5",
     "@testing-library/jest-dom": "^6.8.0",
     "@testing-library/react": "^16.3.0",
     "@types/node": "^24.5.2",
@@ -89,6 +96,7 @@
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-prettier": "^5.5.4",
     "eslint-plugin-react": "^7.37.5",
+    "eslint-plugin-storybook": "0.0.0-pr-32391-sha-f5e829d5",
     "globals": "^16.4.0",
     "husky": "^9.1.7",
     "jsdom": "^27.0.0",
@@ -101,7 +109,7 @@
     "react-dom": "^19.1.1",
     "rimraf": "^6.0.1",
     "semantic-release": "^24.2.9",
-    "storybook": "next",
+    "storybook": "0.0.0-pr-32391-sha-f5e829d5",
     "tosource": "2.0.0-alpha.3",
     "tsup": "^8.5.0",
     "typescript": "^5.9.2",

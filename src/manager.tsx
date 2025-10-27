@@ -41,10 +41,11 @@ addons.register(ADDON_ID, (api) => {
     sidebar: { renderLabel },
   })
 
+  console.log('yiyi')
   // Register tools.
   addons.add(TOOL_ID, {
     type: types.TOOL,
     title: 'Tag Badges',
-    render: () => <Tool api={api} />,
+    render: () => console.log('yu') || <Tool api={api} />,
   })
 })

@@ -1,4 +1,3 @@
-import { HashEntry } from 'storybook/manager-api'
 import type { ArrayElement } from '../types/ArrayElement'
 import type { TagBadgeParameters } from '../types/TagBadgeParameters'
 import type {
@@ -12,18 +11,19 @@ import type {
 export interface ShouldDisplayOptions {
   config: Partial<ArrayElement<TagBadgeParameters>>
   context: 'mdx' | 'sidebar' | 'toolbar'
-  type: HashEntry['type']
+  type: 'test' | 'story' | 'docs' | 'component' | 'group' | 'root'
 }
 
 export const DISPLAY_DEFAULTS = {
   mdx: ['story', 'component'],
   sidebar: [
+    { type: 'test', skipInherited: true },
     { type: 'story', skipInherited: true },
     { type: 'docs', skipInherited: true },
     { type: 'component', skipInherited: false },
     { type: 'group', skipInherited: false },
   ],
-  toolbar: ['docs', 'story'],
+  toolbar: ['test', 'docs', 'story'],
 } satisfies NormalisedDisplay
 
 function toArray<T>(value: T | T[]): T[] {

@@ -48,6 +48,17 @@ export const dangerBadge: TagBadgeParameter = {
   },
 }
 
+export const flakyBadge: TagBadgeParameter = {
+  tags: ['flaky'],
+  badge: {
+    text: 'Flaky',
+    style: 'orange',
+  },
+  display: {
+    sidebar: [{ skipInherited: true, type: 'test' }],
+  },
+}
+
 export const codeOnlyBadge: TagBadgeParameter = {
   tags: ['code-only'],
   badge: {
@@ -84,4 +95,5 @@ export const defaultConfig: TagBadgeParameters = [
   dangerBadge,
   codeOnlyBadge,
   versionBadge,
+  flakyBadge,
 ]
