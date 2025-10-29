@@ -26,13 +26,13 @@ export default defineConfig(async () => {
 
   // manager entries are entries meant to be loaded into the manager UI
   // they'll have manager-specific packages externalized and they won't be usable in node
-  // they won't have types generated for them as they're usually loaded automatically by Storybook
   if (managerEntries.length) {
     configs.push({
       ...commonConfig,
       entry: managerEntries,
       platform: 'browser',
       target: 'esnext',
+      dts: true,
     })
   }
 
