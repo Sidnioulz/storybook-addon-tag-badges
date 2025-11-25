@@ -84,6 +84,7 @@
     "@vitest/coverage-istanbul": "3.2.4",
     "auto": "^11.3.0",
     "boxen": "^8.0.1",
+    "chromatic": "^13.3.4",
     "commitlint": "^20.0.0",
     "dedent": "^1.7.0",
     "eslint": "^9.36.0",

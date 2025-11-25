@@ -9,3 +9,6 @@ build-storybook.log
 .vscode
 .eslintcache
 coverage
+chromatic.log
+chromatic-build-*.xml
+chromatic-diagnostics.json
