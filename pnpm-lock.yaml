@@ -67,6 +67,9 @@ importers:
       boxen:
         specifier: ^8.0.1
         version: 8.0.1
+      chromatic:
+        specifier: ^13.3.4
+        version: 13.3.4
       commitlint:
         specifier: ^20.2.0
         version: 20.2.0(@types/node@24.10.1)(typescript@5.9.3)
