@@ -7,6 +7,7 @@ const config: StorybookConfig = {
     import.meta.resolve('./local-preset.ts'),
     '@storybook/addon-docs',
     '@storybook/addon-vitest',
+    '@chromatic-com/storybook',
   ],
   framework: {
     name: '@storybook/react-vite',
