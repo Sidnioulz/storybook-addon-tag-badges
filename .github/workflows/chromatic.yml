@@ -23,6 +23,8 @@ jobs:
           cache: 'pnpm'
       - name: Install dependencies
         run: pnpm install
+      - name: Build addon
+        run: pnpm build
       - name: Run Chromatic
         uses: chromaui/action@latest
         with:
