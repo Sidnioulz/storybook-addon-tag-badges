@@ -13,6 +13,12 @@ const config: StorybookConfig = {
     name: '@storybook/react-vite',
     options: {},
   },
+  managerHead: async (head) => {
+    return `
+      ${head}
+      <meta name="google-site-verification" content="pEN4G_61OdhIR3Yl59I_M9QgF7FJsGNqWX1w-WcetC4" />
+    `
+  },
 }
 
 export default config
