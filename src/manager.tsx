@@ -36,9 +36,22 @@ addons.register(ADDON_ID, (api) => {
   const userConfig = readConfig()
   window.tagBadges = userConfig ?? defaultConfig
 
+  // In Storybook 10+, manager.ts runs before addon registration,
+  // so we can safely read existing config to preserve user customizations
+  const existingConfig = addons.getConfig()
+  const customRenderLabel = existingConfig.sidebar?.renderLabel
+
+  // Use user's renderLabel if provided, otherwise use our own
+  // Users who want badges can import our renderLabel in their custom function
+  const finalRenderLabel = customRenderLabel ?? renderLabel
+
   addons.setConfig({
+    ...existingConfig,
     [KEY]: userConfig ?? defaultConfig,
-    sidebar: { renderLabel },
+    sidebar: {
+      ...existingConfig.sidebar,
+      renderLabel: finalRenderLabel,
+    },
   })
 
   // Register tools.
