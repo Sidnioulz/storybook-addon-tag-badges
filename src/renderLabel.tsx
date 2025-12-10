@@ -18,6 +18,16 @@ function hasStatusWithUI(itemStatuses: StatusByTypeId): boolean {
   return false
 }
 
+function RenderLabelContent({ item }: { item: API_HashEntry }) {
+  const itemStatuses = experimental_useStatusStore((all) => all[item.id])
+
+  return (
+    <Sidebar item={item} hasStatusWithUI={hasStatusWithUI(itemStatuses)}>
+      {item.name}
+    </Sidebar>
+  )
+}
+
 export function renderLabel(item: API_HashEntry) {
   if (
     item.type !== 'story' &&
@@ -28,11 +38,5 @@ export function renderLabel(item: API_HashEntry) {
     return
   }
 
-  const itemStatuses = experimental_useStatusStore((all) => all[item.id])
-
-  return (
-    <Sidebar item={item} hasStatusWithUI={hasStatusWithUI(itemStatuses)}>
-      {item.name}
-    </Sidebar>
-  )
+  return <RenderLabelContent item={item} />
 }
