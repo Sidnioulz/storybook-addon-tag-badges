@@ -21,6 +21,21 @@ export default [
     },
   },
   {
+    tags: 'big-if-true',
+    badge: {
+      text: 'Big Frog!',
+      style: {
+        backgroundColor: '#33001c',
+        color: '#0be0b5',
+      },
+      tooltip: 'This is one big frog!',
+    },
+    display: {
+      sidebar: true,
+      toolbar: true,
+    },
+  },
+  {
     tags: 'very-tight-space',
     badge: {
       text: 'Multi-word Badge, badgeofmanyletters',

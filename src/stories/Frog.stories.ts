@@ -19,6 +19,7 @@ export const Big: Story = {
   args: {
     size: 'big',
   },
+  tags: ['big-if-true', 'frog'],
 }
 
 export const Small: Story = {

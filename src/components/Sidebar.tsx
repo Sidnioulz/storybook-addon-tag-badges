@@ -21,13 +21,19 @@ const Container = styled.div<{
   ({ hasParentPadding, hasStatusWithUI }) => `
   display: flex;
   flex: 1;
-  justify-content: flex-end;
+  align-items: flex-start;
   flex-wrap: wrap;
   text-wrap-style: balance;
   gap: 4px;
   margin-right: ${hasStatusWithUI ? '6px' : hasParentPadding ? '28px' : '34px'};
 `,
 )
+
+const FirstLineAlignedLabel = styled.div`
+  display: flex;
+  align-items: center;
+  min-height: 19px;
+`
 
 const Spacer = styled.div`
   flex: 1;
@@ -64,7 +70,7 @@ export const Sidebar: FC<SidebarProps> = ({
       hasParentPadding={item.type === 'component' || item.type === 'group'}
       hasStatusWithUI={hasStatusWithUI ?? false}
     >
-      {children}
+      <FirstLineAlignedLabel>{children}</FirstLineAlignedLabel>
       <Spacer />
       {badgesToDisplay.length ? (
         <WithBadge
