@@ -7,6 +7,7 @@ import { defaultConfig } from './defaultConfig'
 import { renderLabel } from './renderLabel'
 import { SET_CONFIG } from 'storybook/internal/core-events'
 import { TagBadgeParameters } from './types/TagBadgeParameters'
+import { API_SidebarOptions } from 'storybook/internal/types'
 
 declare global {
   interface Window {
@@ -16,6 +17,12 @@ declare global {
 
 function readConfig(config = addons.getConfig()): TagBadgeParameters {
   return config?.tagBadges
+}
+
+function readSidebarConfig(
+  config = addons.getConfig(),
+): API_SidebarOptions['renderLabel'] | undefined {
+  return config?.sidebar?.renderLabel
 }
 
 addons.register(ADDON_ID, (api) => {
@@ -38,7 +45,7 @@ addons.register(ADDON_ID, (api) => {
 
   addons.setConfig({
     [KEY]: userConfig ?? defaultConfig,
-    sidebar: { renderLabel },
+    sidebar: { renderLabel: readSidebarConfig() ?? renderLabel },
   })
 
   // Register tools.
