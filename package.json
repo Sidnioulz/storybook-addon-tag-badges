@@ -93,7 +93,7 @@
     "eslint-plugin-react": "^7.37.5",
     "globals": "^16.5.0",
     "husky": "^9.1.7",
-    "jsdom": "^27.3.0",
+    "jsdom": "^27.4.0",
     "lint-staged": "^16.2.7",
     "npm-run-all": "^4.1.5",
     "playwright": "^1.57.0",
@@ -107,7 +107,7 @@
     "tosource": "2.0.0-alpha.3",
     "tsup": "^8.5.1",
     "typescript": "^5.9.3",
-    "typescript-eslint": "^8.50.0",
+    "typescript-eslint": "^8.50.1",
     "vite": "^7.3.0",
     "vitest": "^4.0.16",
     "zx": "^8.8.5"
