@@ -113,7 +113,13 @@
     "zx": "^8.8.5"
   },
   "peerDependencies": {
+    "@storybook/addon-docs": "^10.1.10",
     "storybook": "^10.1.10"
+  },
+  "peerDependenciesMeta": {
+    "@storybook/addon-docs": {
+      "optional": true
+    }
   },
   "resolutions": {
     "@octokit/core": "^7",
