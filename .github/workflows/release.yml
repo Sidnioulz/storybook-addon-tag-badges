@@ -54,4 +54,4 @@ jobs:
         if: github.event_name == 'pull_request'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: pnpm release:canary
+        run: pnpm npm -v && pnpm release:canary
