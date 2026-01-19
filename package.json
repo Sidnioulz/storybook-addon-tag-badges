@@ -120,7 +120,7 @@
   "publishConfig": {
     "access": "public",
     "provenance": true,
-    "registry": "https://registry.npmjs.org/"
+    "registry": "https://registry.npmjs.org"
   },
   "packageManager": "pnpm@10.7.0",
   "engines": {
