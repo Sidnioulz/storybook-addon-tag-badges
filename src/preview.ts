@@ -12,11 +12,15 @@ declare global {
 const preview: ProjectAnnotations<Renderer> = {}
 
 const channel = addons.getChannel()
-window.tagBadges = window.parent.tagBadges
 
+// Initialize with empty array to avoid undefined errors
+window.tagBadges = []
+
+// Request config from manager (which will set window.tagBadges)
 channel.emit(EVENTS.REQUEST_CONFIG)
 channel.on(EVENTS.CONFIG_READY, () => {
-  window.tagBadges = window.parent.tagBadges
+  // Config is now available in window.tagBadges (set by manager)
+  // This is kept for backward compatibility with non-MDX components
 })
 
 export default preview

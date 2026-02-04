@@ -8,6 +8,9 @@ import { renderLabel } from './renderLabel'
 import { SET_CONFIG } from 'storybook/internal/core-events'
 import { TagBadgeParameters } from './types/TagBadgeParameters'
 import { API_SidebarOptions } from 'storybook/internal/types'
+import { getBadgeProps } from './components/Badge'
+import type { Badge } from './types/Badge'
+import { matchTags } from './utils/tag'
 
 declare global {
   interface Window {
@@ -36,6 +39,35 @@ addons.register(ADDON_ID, (api) => {
   api.on(SET_CONFIG, (config) => {
     window.tagBadges = readConfig(config) ?? []
     api.emit(EVENTS.CONFIG_READY)
+  })
+
+  // Handle MDX badge render requests from preview
+  api.on(EVENTS.REQUEST_MDX_BADGE_RENDER, (data: {
+    tags: string[]
+    context: 'mdx' | 'sidebar' | 'toolbar'
+    type: 'component' | 'story'
+    requestId: string
+  }) => {
+    const { tags, context, type, requestId } = data
+    const parameters = readConfig() ?? defaultConfig
+    
+    // Compute serializable badge data
+    const badgeData = (parameters || [])
+      .flatMap((config) => {
+        // Use the matchTags utility to find matching tags
+        const matchedTags = matchTags(tags, config.tags)
+        
+        return matchedTags.map((tag) => {
+          // Resolve badge config to serializable Badge object
+          const badge = getBadgeProps(config.badge, undefined, tag, context)
+          return { tag, badge }
+        })
+      })
+    
+    api.emit(EVENTS.MDX_BADGE_RENDER_RESPONSE, {
+      requestId,
+      badges: badgeData,
+    })
   })
 
   // We now initialise the manager, both through window for preview and
