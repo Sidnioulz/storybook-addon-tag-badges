@@ -1,4 +1,4 @@
-import React, { type FC, useState, useEffect } from 'react'
+import React, { type FC, useState, useEffect, useRef } from 'react'
 import { useOf, type Of } from '@storybook/addon-docs/blocks'
 import { styled } from 'storybook/theming'
 import { addons } from 'storybook/internal/preview-api'
@@ -21,6 +21,9 @@ const BadgeContainer = styled.span`
   gap: 0.25em;
 `
 
+// Counter to ensure unique request IDs across component instances
+let requestCounter = 0
+
 export const MDXBadges: FC<MDXBadgesProps> = (props) => {
   const { of } = props
   if ('of' in props && of === undefined) {
@@ -39,9 +42,12 @@ export const MDXBadges: FC<MDXBadgesProps> = (props) => {
     Array<{ tag: string; badge: Badge }>
   >([])
 
+  // Use ref to track component instance for unique request IDs
+  const instanceIdRef = useRef(++requestCounter)
+
   useEffect(() => {
     const channel = addons.getChannel()
-    const requestId = `mdx-${Date.now()}-${Math.random()}`
+    const requestId = `mdx-${instanceIdRef.current}-${Date.now()}-${Math.random()}`
 
     const handleResponse = (response: {
       requestId: string
@@ -64,7 +70,7 @@ export const MDXBadges: FC<MDXBadgesProps> = (props) => {
     return () => {
       channel.off(EVENTS.MDX_BADGE_RENDER_RESPONSE, handleResponse)
     }
-  }, [tags, fetchedOf.type])
+  }, [tags])
 
   return badgesToDisplay.length ? (
     <BadgeContainer>
