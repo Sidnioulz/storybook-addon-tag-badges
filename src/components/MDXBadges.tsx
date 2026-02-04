@@ -3,7 +3,7 @@ import { useOf, type Of } from '@storybook/addon-docs/blocks'
 import { styled } from 'storybook/theming'
 import { addons } from 'storybook/internal/preview-api'
 
-import { EVENTS, KEY } from '../constants'
+import { EVENTS } from '../constants'
 import { WithBadge } from './Badge'
 import { type Badge } from '../types/Badge'
 
@@ -42,7 +42,7 @@ export const MDXBadges: FC<MDXBadgesProps> = (props) => {
   useEffect(() => {
     const channel = addons.getChannel()
     const requestId = `mdx-${Date.now()}-${Math.random()}`
-    
+
     const handleResponse = (response: {
       requestId: string
       badges: Array<{ tag: string; badge: Badge }>
@@ -58,7 +58,6 @@ export const MDXBadges: FC<MDXBadgesProps> = (props) => {
     channel.emit(EVENTS.REQUEST_MDX_BADGE_RENDER, {
       tags: tags || [],
       context: 'mdx',
-      type: fetchedOf.type === 'meta' ? 'component' : 'story',
       requestId,
     })
 
