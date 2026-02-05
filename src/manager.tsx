@@ -1,24 +1,18 @@
 import React from 'react'
 import { addons, types } from 'storybook/manager-api'
+import memoizerific from 'memoizerific'
 
 import { Tool } from './components/Tool'
 import { ADDON_ID, EVENTS, KEY, TOOL_ID } from './constants'
 import { defaultConfig } from './defaultConfig'
 import { renderLabel } from './renderLabel'
-import { SET_CONFIG } from 'storybook/internal/core-events'
 import { TagBadgeParameters } from './types/TagBadgeParameters'
 import { API_SidebarOptions } from 'storybook/internal/types'
 import { getBadgeProps } from './components/Badge'
 import { matchTags } from './utils/tag'
 
-declare global {
-  interface Window {
-    tagBadges: TagBadgeParameters
-  }
-}
-
 function readConfig(config = addons.getConfig()): TagBadgeParameters {
-  return config?.tagBadges
+  return config?.tagBadges ?? defaultConfig
 }
 
 function readSidebarConfig(
@@ -27,20 +21,23 @@ function readSidebarConfig(
   return config?.sidebar?.renderLabel
 }
 
+// Memoise badge computation based on tags, context, and config.
+const computeBadgeData = memoizerific(100)((
+  tags: string[],
+  context: 'mdx' | 'sidebar' | 'toolbar',
+  config: TagBadgeParameters,
+) => {
+  return config.flatMap((config) => {
+    const matchedTags = matchTags(tags, config.tags)
+    return matchedTags.map((tag) => {
+      const badge = getBadgeProps(config.badge, undefined, tag, context)
+      return { tag, badge }
+    })
+  })
+})
+
 addons.register(ADDON_ID, (api) => {
-  // Config has functions and would get serialised if we sent it directly,
-  // so instead we pass it to our child frame via window.
-  api.on(EVENTS.REQUEST_CONFIG, () => {
-    window.tagBadges = readConfig() ?? []
-    api.emit(EVENTS.CONFIG_READY)
-  })
-
-  api.on(SET_CONFIG, (config) => {
-    window.tagBadges = readConfig(config) ?? []
-    api.emit(EVENTS.CONFIG_READY)
-  })
-
-  // Handle MDX badge render requests from preview
+  // Handle MDX badge render requests from preview.
   api.on(
     EVENTS.REQUEST_MDX_BADGE_RENDER,
     (data: {
@@ -49,19 +46,10 @@ addons.register(ADDON_ID, (api) => {
       requestId: string
     }) => {
       const { tags, context, requestId } = data
-      const parameters = readConfig() ?? defaultConfig
+      const config = readConfig()
 
-      // Compute serializable badge data
-      const badgeData = (parameters || []).flatMap((config) => {
-        // Use the matchTags utility to find matching tags
-        const matchedTags = matchTags(tags, config.tags)
-
-        return matchedTags.map((tag) => {
-          // Resolve badge config to serializable Badge object
-          const badge = getBadgeProps(config.badge, undefined, tag, context)
-          return { tag, badge }
-        })
-      })
+      // Compute serialisable badge data using memoised function.
+      const badgeData = computeBadgeData(tags, context, config)
 
       api.emit(EVENTS.MDX_BADGE_RENDER_RESPONSE, {
         requestId,
@@ -70,13 +58,9 @@ addons.register(ADDON_ID, (api) => {
     },
   )
 
-  // We now initialise the manager, both through window for preview and
-  // through the addons singleton for manager.
-  const userConfig = readConfig()
-  window.tagBadges = userConfig ?? defaultConfig
-
+  // Initialise manager whilst preserving user config.
   addons.setConfig({
-    [KEY]: userConfig ?? defaultConfig,
+    [KEY]: readConfig(),
     sidebar: { renderLabel: readSidebarConfig() ?? renderLabel },
   })
 
