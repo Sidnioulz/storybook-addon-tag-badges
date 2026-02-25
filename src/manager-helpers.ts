@@ -1,5 +1,5 @@
 export * from './utils/tag'
-export { defaultConfig } from './defaultConfig'
+export * from './defaultConfig'
 export { DISPLAY_DEFAULTS as defaultDisplay } from './utils/display'
 export { renderLabel } from './renderLabel'
 export { Sidebar } from './components/Sidebar'
