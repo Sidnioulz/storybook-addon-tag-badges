@@ -7,18 +7,11 @@ import { ADDON_ID, EVENTS, KEY, TOOL_ID } from './constants'
 import { defaultConfig } from './defaultConfig'
 import { renderLabel } from './renderLabel'
 import { TagBadgeParameters } from './types/TagBadgeParameters'
-import { API_SidebarOptions } from 'storybook/internal/types'
 import { getBadgeProps } from './components/Badge'
 import { matchTags } from './utils/tag'
 
 function readConfig(config = addons.getConfig()): TagBadgeParameters {
   return config?.tagBadges ?? defaultConfig
-}
-
-function readSidebarConfig(
-  config = addons.getConfig(),
-): API_SidebarOptions['renderLabel'] | undefined {
-  return config?.sidebar?.renderLabel
 }
 
 // Memoise badge computation based on tags, context, and config.
@@ -61,7 +54,7 @@ addons.register(ADDON_ID, (api) => {
   // Initialise manager whilst preserving user config.
   addons.setConfig({
     [KEY]: readConfig(),
-    sidebar: { renderLabel: readSidebarConfig() ?? renderLabel },
+    sidebar: { renderLabel, ...addons.getConfig()?.sidebar },
   })
 
   // Register tools.
