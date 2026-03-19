@@ -249,6 +249,70 @@ describe('useBadgesToDisplay', () => {
       })
     })
 
+    describe('display.mdx: false with docs type', () => {
+      const parameters: TagBadgeParameters = [
+        {
+          tags: ['test1'],
+          badge: { text: 'Test1' },
+          display: { mdx: false },
+        },
+      ]
+
+      it('should not show badges for docs type in toolbar when display.mdx is false', () => {
+        const { result } = renderHook(() =>
+          useBadgesToDisplay({
+            context: 'toolbar',
+            parameters,
+            tags: ['test1'],
+            type: 'docs',
+          }),
+        )
+
+        expect(result.current).toHaveLength(0)
+      })
+
+      it('should not show badges for docs type in sidebar when display.mdx is false', () => {
+        const { result } = renderHook(() =>
+          useBadgesToDisplay({
+            context: 'sidebar',
+            parameters,
+            tags: ['test1'],
+            type: 'docs',
+          }),
+        )
+
+        expect(result.current).toHaveLength(0)
+      })
+
+      it('should still show badges for story type in toolbar when display.mdx is false', () => {
+        const { result } = renderHook(() =>
+          useBadgesToDisplay({
+            context: 'toolbar',
+            parameters,
+            tags: ['test1'],
+            type: 'story',
+          }),
+        )
+
+        expect(result.current).toHaveLength(1)
+        expect(result.current[0].badge).toEqual({ text: 'Test1' })
+      })
+
+      it('should still show badges for story type in sidebar when display.mdx is false', () => {
+        const { result } = renderHook(() =>
+          useBadgesToDisplay({
+            context: 'sidebar',
+            parameters,
+            tags: ['test1'],
+            type: 'story',
+          }),
+        )
+
+        expect(result.current).toHaveLength(1)
+        expect(result.current[0].badge).toEqual({ text: 'Test1' })
+      })
+    })
+
     describe('output correctness', () => {
       it('handles function form of badge parameter', () => {
         const badgeFunction: BadgeOrBadgeFn = () => ({ text: 'Test Badge' })

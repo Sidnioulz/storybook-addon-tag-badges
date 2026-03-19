@@ -142,6 +142,76 @@ describe('display', () => {
       ).toBe(DisplayOutcome.NEVER)
     })
 
+    it('should return NEVER for docs in the toolbar when display.mdx is false', () => {
+      expect(
+        shouldDisplay({
+          config: { display: { mdx: false } },
+          type: 'docs',
+          context: 'toolbar',
+        }),
+      ).toBe(DisplayOutcome.NEVER)
+    })
+
+    it('should return NEVER for docs in the sidebar when display.mdx is false', () => {
+      expect(
+        shouldDisplay({
+          config: { display: { mdx: false } },
+          type: 'docs',
+          context: 'sidebar',
+        }),
+      ).toBe(DisplayOutcome.NEVER)
+    })
+
+    it('should still display stories in the toolbar when display.mdx is false', () => {
+      expect(
+        shouldDisplay({
+          config: { display: { mdx: false } },
+          type: 'story',
+          context: 'toolbar',
+        }),
+      ).toBe(DisplayOutcome.ALWAYS)
+    })
+
+    it('should still display stories in the sidebar when display.mdx is false', () => {
+      expect(
+        shouldDisplay({
+          config: { display: { mdx: false } },
+          type: 'story',
+          context: 'sidebar',
+        }),
+      ).toBe(DisplayOutcome.SKIP_INHERITED)
+    })
+
+    it('should still display docs in the toolbar when display.mdx is not false', () => {
+      expect(
+        shouldDisplay({
+          config: { display: { mdx: ['story', 'component'] } },
+          type: 'docs',
+          context: 'toolbar',
+        }),
+      ).toBe(DisplayOutcome.ALWAYS)
+    })
+
+    it('should still display docs in the sidebar when display.mdx is not set', () => {
+      expect(
+        shouldDisplay({
+          config: { display: {} },
+          type: 'docs',
+          context: 'sidebar',
+        }),
+      ).toBe(DisplayOutcome.SKIP_INHERITED)
+    })
+
+    it('should return NEVER for docs in the toolbar when display.mdx is [false]', () => {
+      expect(
+        shouldDisplay({
+          config: { display: { mdx: [false] } },
+          type: 'docs',
+          context: 'toolbar',
+        }),
+      ).toBe(DisplayOutcome.NEVER)
+    })
+
     it.each(
       ['sidebar', 'toolbar'].flatMap((context) =>
         ['component', 'docs', 'story', 'group'].map((type) => ({

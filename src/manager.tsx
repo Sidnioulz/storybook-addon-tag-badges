@@ -9,24 +9,31 @@ import { renderLabel } from './renderLabel'
 import { TagBadgeParameters } from './types/TagBadgeParameters'
 import { getBadgeProps } from './components/Badge'
 import { matchTags } from './utils/tag'
+import { shouldDisplay, DisplayOutcome } from './utils/display'
 
 function readConfig(config = addons.getConfig()): TagBadgeParameters {
   return config?.tagBadges ?? defaultConfig
 }
 
-// Memoise badge computation based on tags, context, and config.
+// Memoise badge computation based on tags, context, type, and config.
 const computeBadgeData = memoizerific(100)((
   tags: string[],
   context: 'mdx' | 'sidebar' | 'toolbar',
+  type: string,
   config: TagBadgeParameters,
 ) => {
-  return config.flatMap((config) => {
-    const matchedTags = matchTags(tags, config.tags)
-    return matchedTags.map((tag) => {
-      const badge = getBadgeProps(config.badge, undefined, tag, context)
-      return { tag, badge }
+  return config
+    .filter(
+      (config) =>
+        shouldDisplay({ config, context, type }) !== DisplayOutcome.NEVER,
+    )
+    .flatMap((config) => {
+      const matchedTags = matchTags(tags, config.tags)
+      return matchedTags.map((tag) => {
+        const badge = getBadgeProps(config.badge, undefined, tag, context)
+        return { tag, badge }
+      })
     })
-  })
 })
 
 addons.register(ADDON_ID, (api) => {
@@ -36,13 +43,14 @@ addons.register(ADDON_ID, (api) => {
     (data: {
       tags: string[]
       context: 'mdx' | 'sidebar' | 'toolbar'
+      type: string
       requestId: string
     }) => {
-      const { tags, context, requestId } = data
+      const { tags, context, type, requestId } = data
       const config = readConfig()
 
       // Compute serialisable badge data using memoised function.
-      const badgeData = computeBadgeData(tags, context, config)
+      const badgeData = computeBadgeData(tags, context, type, config)
 
       api.emit(EVENTS.MDX_BADGE_RENDER_RESPONSE, {
         requestId,

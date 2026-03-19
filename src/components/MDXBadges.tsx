@@ -37,6 +37,7 @@ export const MDXBadges: FC<MDXBadgesProps> = (props) => {
     fetchedOf.type === 'meta'
       ? fetchedOf.preparedMeta.tags
       : fetchedOf.story.tags
+  const entryType = fetchedOf.type === 'meta' ? 'component' : 'story'
 
   const [badgesToDisplay, setBadgesToDisplay] = useState<
     Array<{ tag: string; badge: Badge }>
@@ -64,13 +65,14 @@ export const MDXBadges: FC<MDXBadgesProps> = (props) => {
     channel.emit(EVENTS.REQUEST_MDX_BADGE_RENDER, {
       tags: tags || [],
       context: 'mdx',
+      type: entryType,
       requestId,
     })
 
     return () => {
       channel.off(EVENTS.MDX_BADGE_RENDER_RESPONSE, handleResponse)
     }
-  }, [tags])
+  }, [tags, entryType])
 
   return badgesToDisplay.length ? (
     <BadgeContainer>
