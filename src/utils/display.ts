@@ -70,17 +70,18 @@ export function shouldDisplay({
     return DisplayOutcome.NEVER
   }
 
+  const normalised = normaliseDisplay(config.display)
+
   // When viewing a docs page in the toolbar or sidebar, also respect
   // the mdx display config. If mdx is explicitly disabled (false),
   // the badge should not show on docs pages (including autodocs).
   if (type === 'docs' && (context === 'toolbar' || context === 'sidebar')) {
-    const normalisedMdx = normaliseDisplay(config.display).mdx
-    if (normalisedMdx.includes(false)) {
+    if (normalised.mdx.includes(false)) {
       return DisplayOutcome.NEVER
     }
   }
 
-  for (const condition of normaliseDisplay(config.display)[context]) {
+  for (const condition of normalised[context]) {
     // If options contain the value `true`, we must show badges for all types.
     if (condition === true) {
       return DisplayOutcome.ALWAYS
