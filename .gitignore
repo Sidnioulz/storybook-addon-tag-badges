@@ -12,3 +12,7 @@ coverage
 chromatic.log
 chromatic-build-*.xml
 chromatic-diagnostics.json
+
+# stryker temp files
+.stryker-tmp
+reports
