@@ -61,6 +61,7 @@ export const Sidebar: FC<SidebarProps> = ({
     context: 'sidebar',
     parameters,
     parent: item.parent,
+    refId: item.refId,
     tags: item.tags,
     type: item.type,
   })
