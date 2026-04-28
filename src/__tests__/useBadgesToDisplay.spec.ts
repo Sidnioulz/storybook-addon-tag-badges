@@ -7,9 +7,12 @@ import { defaultConfig } from '../defaultConfig'
 
 vi.mock('storybook/manager-api', () => ({
   useStorybookApi: vi.fn(() => ({
-    resolveStory: vi.fn().mockImplementation((id) => {
+    resolveStory: vi.fn().mockImplementation((id, refId) => {
       if (id === 'mock-component') {
         return { type: 'component', tags: ['test1', 'test2', 'test3'] }
+      }
+      if (id === 'mock-composed-component' && refId === 'child-ref') {
+        return { type: 'component', tags: ['test2'] }
       }
       return { type: 'component', tags: [] }
     }),
@@ -360,6 +363,21 @@ describe('useBadgesToDisplay', () => {
           context: 'sidebar',
           parameters,
           parent: 'mock-component',
+          tags: ['test2'],
+          type: 'story',
+        }),
+      )
+
+      expect(result.current).toHaveLength(0)
+    })
+
+    it('uses refId when resolving composed parents', () => {
+      const { result } = renderHook(() =>
+        useBadgesToDisplay({
+          context: 'sidebar',
+          parameters,
+          parent: 'mock-composed-component',
+          refId: 'child-ref',
           tags: ['test2'],
           type: 'story',
         }),

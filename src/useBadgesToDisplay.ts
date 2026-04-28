@@ -16,6 +16,7 @@ interface UseBadgesToDisplayOptions {
   context: 'mdx' | 'sidebar' | 'toolbar'
   parameters: TagBadgeParameters
   parent?: string
+  refId?: string
   tags: string[]
   type:
     | API_ComponentEntry['type']
@@ -30,6 +31,7 @@ function _useBadgesToDisplay({
   context,
   parameters,
   parent,
+  refId,
   tags,
   type,
 }: UseBadgesToDisplayOptions & {
@@ -43,7 +45,7 @@ function _useBadgesToDisplay({
   let parentTags: string[] | undefined
   let resolvedParent: API_HashEntry | undefined
   if (api && parent) {
-    resolvedParent = api.resolveStory(parent)
+    resolvedParent = api.resolveStory(parent, refId)
     if (resolvedParent && resolvedParent.type !== 'root') {
       parentTags = resolvedParent.tags
     }
@@ -74,6 +76,7 @@ function _useBadgesToDisplay({
           context,
           parameters,
           parent: resolvedParent.parent,
+          refId,
           tags: parentTags,
           type: resolvedParent.type,
         })
@@ -94,6 +97,7 @@ export function useBadgesToDisplay({
   context,
   parameters,
   parent,
+  refId,
   tags,
   type,
 }: UseBadgesToDisplayOptions): BadgesToDisplay {
@@ -106,9 +110,10 @@ export function useBadgesToDisplay({
         context,
         parameters,
         parent,
+        refId,
         tags,
         type,
       }),
-    [context, parameters, parent, tags, type],
+    [context, parameters, parent, refId, tags, type],
   )
 }
