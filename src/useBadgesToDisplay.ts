@@ -45,6 +45,9 @@ function _useBadgesToDisplay({
   let parentTags: string[] | undefined
   let resolvedParent: API_HashEntry | undefined
   if (api && parent) {
+    // Composed Storybooks need refId so the manager API resolves the parent from
+    // the correct child ref. Standalone instances do not set refId, and leaving
+    // it undefined preserves the existing local resolution behavior.
     resolvedParent = api.resolveStory(parent, refId)
     if (resolvedParent && resolvedParent.type !== 'root') {
       parentTags = resolvedParent.tags
