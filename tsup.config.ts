@@ -17,7 +17,11 @@ export default defineConfig(async () => {
   const commonConfig: Options = {
     splitting: true,
     format: ['esm'],
-    treeshake: true,
+    // 'no-external' drops side-effect-only imports of external modules
+    // (e.g. `import 'storybook/internal/channels'`), which Storybook's
+    // Vite builder rewrites into invalid JS in consumer preview builds.
+    // See https://github.com/Sidnioulz/storybook-addon-tag-badges/issues/151
+    treeshake: { preset: 'recommended', moduleSideEffects: 'no-external' },
     clean: false,
     external: ['react', 'react-dom', '@storybook/icons'],
   }
