@@ -109,7 +109,7 @@ To set badges for a component (and its child stories), define `tags` in the comp
 
 ```ts
 // src/components/Button.stories.ts
-import type { Meta, StoryObj } from '@storybook/react'
+import type { Meta, StoryObj } from '@storybook/react-vite'
 import { Button } from './Button'
 
 const meta: Meta<typeof Button> = {
@@ -140,7 +140,7 @@ To set badges for a docs entry, pass a `tags` array to the [`docs` parameter](ht
 
 ```ts
 // src/components/Button.stories.ts
-import type { Meta, StoryObj } from '@storybook/react'
+import type { Meta, StoryObj } from '@storybook/react-vite'
 import { Button } from './Button'
 
 const meta: Meta<typeof Button> = {
@@ -160,7 +160,7 @@ In your manager file, you may redefine the config object used to map tags to bad
 
 ```ts
 // .storybook/manager.ts
-import { addons } from '@storybook/manager-api'
+import { addons } from 'storybook/manager-api'
 import {
   defaultConfig,
   type TagBadgeParameters,
@@ -329,7 +329,7 @@ Example of a custom style:
 
 ```ts
 // .storybook/manager.ts
-import { addons } from '@storybook/manager-api'
+import { addons } from 'storybook/manager-api'
 import {
   defaultConfig,
   type TagBadgeParameters,
@@ -374,7 +374,7 @@ Example of a dynamic badge function:
 
 ```ts
 // .storybook/manager.ts
-import { addons } from '@storybook/manager-api'
+import { addons } from 'storybook/manager-api'
 import {
   defaultConfig,
   type TagBadgeParameters,
@@ -420,7 +420,7 @@ To show badges for items that aren't customised by your own `renderLabel` logic,
 
 ```tsx
 // .storybook/manager.ts
-import { addons } from '@storybook/manager-api'
+import { addons } from 'storybook/manager-api'
 import type { API_HashEntry } from '@storybook/types'
 import { renderLabel, Sidebar } from 'storybook-addon-tag-badges/manager-helpers'
 
@@ -448,7 +448,7 @@ Likewise, if you define configuration for the `sidebar` option without including
 
 ```tsx
 // .storybook/manager.ts
-import { addons } from '@storybook/manager-api'
+import { addons } from 'storybook/manager-api'
 import { renderLabel } from 'storybook-addon-tag-badges/manager-helpers'
 
 addons.setConfig({
