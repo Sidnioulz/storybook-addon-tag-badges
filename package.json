@@ -114,7 +114,7 @@
     "typescript": "^5.9.3",
     "typescript-eslint": "^8.59.1",
     "vite": "^7.3.5",
-    "vitest": "^4.1.5",
+    "vitest": "^4.1.11",
     "zx": "^8.8.5"
   },
   "peerDependencies": {
