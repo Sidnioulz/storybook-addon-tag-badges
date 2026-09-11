@@ -1,9 +1,18 @@
 import React, { Fragment } from 'react'
 import type { HashEntry } from 'storybook/manager-api'
-import { WithTooltip, TooltipMessage } from 'storybook/internal/components'
+import {
+  Link,
+  PopoverProvider,
+  Tooltip,
+  TooltipProvider,
+} from 'storybook/internal/components'
 import { CSSObject, styled, useTheme } from 'storybook/theming'
 
-import type { Badge as BadgeConfigType, BadgeOrBadgeFn } from '../types/Badge'
+import type {
+  Badge as BadgeConfigType,
+  BadgeOrBadgeFn,
+  BadgeTooltipMessage,
+} from '../types/Badge'
 import { getTagParts, getTagPrefix, getTagSuffix } from '../utils/tag'
 
 interface BadgeProps extends BadgeConfigType {
@@ -16,10 +25,6 @@ interface WithBadgeProps {
   tag: string
   context: 'mdx' | 'sidebar' | 'toolbar'
 }
-
-const WithTooltipPatched = styled(WithTooltip)`
-  line-height: 1px;
-`
 
 const BadgeUI = styled.div<
   Pick<BadgeProps, 'context'> & { extraStyle: CSSObject; hasLongText: boolean }
@@ -55,6 +60,44 @@ const TooltipUI = styled.div(({ theme }) => ({
   color: theme.color.defaultText,
   lineHeight: '1.125rem',
 }))
+
+const TooltipMessageUI = styled.div(({ theme }) => ({
+  boxSizing: 'border-box',
+  color: theme.color.defaultText,
+  lineHeight: '1.125rem',
+  maxWidth: 280,
+}))
+
+const TooltipMessageTitleUI = styled.div(({ theme }) => ({
+  fontWeight: theme.typography.weight.bold,
+}))
+
+const TooltipMessageLinksUI = styled.div({
+  display: 'flex',
+  flexWrap: 'wrap',
+  gap: 12,
+  marginTop: 8,
+})
+
+const TooltipMessageContent: React.FC<BadgeTooltipMessage> = ({
+  title,
+  desc,
+  links,
+}) => (
+  <TooltipMessageUI>
+    {title ? <TooltipMessageTitleUI>{title}</TooltipMessageTitleUI> : null}
+    {desc ?? null}
+    {links?.length ? (
+      <TooltipMessageLinksUI>
+        {links.map(({ title: linkTitle, ...linkProps }) => (
+          <Link key={linkTitle} {...linkProps}>
+            {linkTitle}
+          </Link>
+        ))}
+      </TooltipMessageLinksUI>
+    ) : null}
+  </TooltipMessageUI>
+)
 
 export const Badge: React.FC<BadgeProps> = ({
   context,
@@ -133,39 +176,52 @@ export const Badge: React.FC<BadgeProps> = ({
 
   const hasLongText = text.length > 15
 
+  if (!tooltip || context == 'sidebar') {
+    return (
+      <BadgeUI
+        context={context}
+        extraStyle={extraStyle ?? {}}
+        hasLongText={hasLongText}
+        theme={theme}
+      >
+        {text}
+      </BadgeUI>
+    )
+  }
+
+  const badgeButton = (
+    <BadgeUI
+      as="button"
+      context={context}
+      extraStyle={extraStyle ?? {}}
+      hasLongText={hasLongText}
+      theme={theme}
+    >
+      {text}
+    </BadgeUI>
+  )
+
   return (
     <Fragment>
-      {!tooltip || context == 'sidebar' ? (
-        <BadgeUI
-          context={context}
-          extraStyle={extraStyle ?? {}}
-          hasLongText={hasLongText}
-          theme={theme}
-        >
-          {text}
-        </BadgeUI>
-      ) : (
-        <WithTooltipPatched
-          closeOnOutsideClick
-          placement={'bottom'}
+      {typeof tooltip === 'string' ? (
+        <TooltipProvider
+          placement="bottom"
           tooltip={
-            typeof tooltip === 'string' ? (
+            <Tooltip hasChrome>
               <TooltipUI>{tooltip}</TooltipUI>
-            ) : (
-              <TooltipMessage {...tooltip} />
-            )
+            </Tooltip>
           }
         >
-          <BadgeUI
-            as="button"
-            context={context}
-            extraStyle={extraStyle ?? {}}
-            hasLongText={hasLongText}
-            theme={theme}
-          >
-            {text}
-          </BadgeUI>
-        </WithTooltipPatched>
+          {badgeButton}
+        </TooltipProvider>
+      ) : (
+        <PopoverProvider
+          ariaLabel={typeof tooltip.title === 'string' ? tooltip.title : text}
+          placement="bottom"
+          popover={<TooltipMessageContent {...tooltip} />}
+        >
+          {badgeButton}
+        </PopoverProvider>
       )}
     </Fragment>
   )

@@ -74,6 +74,21 @@ export default {
 }
 ```
 
+If your project uses [CSF Next](https://storybook.js.org/docs/api/csf/csf-next) (the default in Storybook 11), also register the addon's preview annotations in `.storybook/preview.ts`:
+
+```ts
+// .storybook/preview.ts
+
+// Replace your-framework with the framework you are using (e.g., react-vite, nextjs-vite)
+import { definePreview } from '@storybook/your-framework'
+import tagBadges from 'storybook-addon-tag-badges'
+
+export default definePreview({
+  // ...rest of preview
+  addons: [tagBadges()], // 👈 register the addon here
+})
+```
+
 ## 🏁 Default Config
 
 This addon comes with a default config, allowing you to get started immediately by adding tags to your content.
@@ -300,7 +315,7 @@ The object has the following properties:
 | ----------- | -------------------------------- | --------------------------------------------- | ------------------------------------------------------------------- |
 | **text**    | `string`                         | The text displayed in the badge (required).   | 'New'                                                               |
 | **style**   | `string \| object`               | Preset color, or a CSS properties object.     | `'turquoise'` \| `{ color: 'red', fontSize: '1rem' }`               |
-| **tooltip** | `string \| TooltipMessageProps?` | A tooltip shown on click in the toolbar only. | `{ title: 'New Component', desc: 'Recently added to the library' }` |
+| **tooltip** | `string \| BadgeTooltipMessage?` | A tooltip shown in the toolbar only.          | `{ title: 'New Component', desc: 'Recently added to the library' }` |
 
 #### Style presets
 
@@ -403,7 +418,7 @@ addons.setConfig({
 
 Badges may have a tooltip when displayed in the toolbar. The tooltip is disabled in the sidebar to avoid conflicting with the sidebar's function, though feedback is welcome on this.
 
-You may pass a string to tooltips for a simple tooltip. You may also pass the same objects used by [Storybook's `TooltipMessage`](https://5ccbc373887ca40020446347-idzavsdems.chromatic.com/?path=/docs/tooltip-tooltipmessage--docs):
+You may pass a string for a simple text tooltip, shown when hovering or focusing the badge. You may also pass a `BadgeTooltipMessage` object (exported by this addon) to display a richer popover, opened by clicking the badge:
 
 * `title`: The title of the tooltip *[string]*
 * `desc`: Secondary text for the tooltip *[string]*

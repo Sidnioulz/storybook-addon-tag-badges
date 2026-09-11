@@ -12,7 +12,7 @@ import {
   smartComponents,
 } from './sampleWorkflows'
 import { mockEntry } from './__fixtures__/HashEntry'
-import { TagBadgeParameters } from 'src/types/TagBadgeParameters'
+import { TagBadgeParameters } from '../types/TagBadgeParameters'
 import { styled } from 'storybook/theming'
 import toSource from 'tosource'
 
