@@ -1,11 +1,16 @@
-import type { Preview } from '@storybook/react-vite'
+import addonA11y from '@storybook/addon-a11y'
+import addonDocs from '@storybook/addon-docs'
+import { definePreview } from '@storybook/react-vite'
 import { themes } from 'storybook/theming'
 
+import tagBadges from '../src/index.js'
 import ThemeProvider from './ThemeProvider'
 
-export const decorators = [ThemeProvider]
+export default definePreview({
+  addons: [addonDocs(), addonA11y(), tagBadges()],
 
-const preview: Preview = {
+  decorators: [ThemeProvider],
+
   parameters: {
     controls: {
       matchers: {
@@ -30,6 +35,4 @@ const preview: Preview = {
   initialGlobals: {
     background: { value: 'dark' },
   },
-}
-
-export default preview
+})

@@ -6,7 +6,12 @@ export { Sidebar } from './components/Sidebar'
 export { CustomBadge } from './components/CustomBadge'
 export { MDXBadges } from './components/MDXBadges'
 
-export type { Badge, BadgeOrBadgeFn } from './types/Badge'
+export type {
+  Badge,
+  BadgeOrBadgeFn,
+  BadgeTooltipLink,
+  BadgeTooltipMessage,
+} from './types/Badge'
 export type {
   Display,
   MDXDisplayOptions,
