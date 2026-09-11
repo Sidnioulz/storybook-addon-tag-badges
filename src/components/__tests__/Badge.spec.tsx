@@ -58,7 +58,7 @@ describe('Badge', () => {
       expect(badge.tagName).toBe('BUTTON')
     })
 
-    it('renders as a button in the toolbar when tooltip is set as TooltipMessage props', async () => {
+    it('renders as a button in the toolbar when tooltip is set as BadgeTooltipMessage props', async () => {
       const text = 'Tooltip Badge'
       const tooltip = {
         title: 'Tooltip Title',

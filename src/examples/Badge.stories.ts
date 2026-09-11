@@ -28,7 +28,8 @@ const meta: Meta<typeof Badge> = {
       description: 'Whether the badge renders in the sidebar or toolbar',
     },
     tooltip: {
-      description: 'Tooltip content; either as string or TooltipMessage props',
+      description:
+        'Tooltip content; either as string or BadgeTooltipMessage object',
       control: false,
     },
   },
@@ -85,7 +86,7 @@ export const RichTooltip: Story = {
     text: 'Text',
     tooltip: {
       title: 'Rich Tooltip',
-      desc: 'This badge uses a TooltipMessage component with title and description',
+      desc: 'This badge uses a rich tooltip with title and description',
     },
   },
 }
@@ -96,7 +97,7 @@ export const RichTooltipWithLink: Story = {
     text: 'Text',
     tooltip: {
       title: 'Rich Tooltip',
-      desc: 'This badge uses a TooltipMessage component with title and description',
+      desc: 'This badge uses a rich tooltip with title and description',
       links: [
         {
           title: 'Storybook',
