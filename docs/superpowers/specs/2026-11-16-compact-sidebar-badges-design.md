@@ -79,7 +79,7 @@ Badges gain an optional `shortText` string, next to `text`. Static badge objects
 ### The floating badge
 
 - It shows the badge's full `text`, with the badge's colours and style.
-- It shows when the pointer rests on the pill for 150ms, and immediately when the pill receives keyboard focus. The delay is part of its animation timing: leaving or pressing the pill before then closes it before it shows. It closes at once, without an exit animation, when the pointer leaves the pill, when the pill loses focus, on Escape and on any pointer press.
+- It shows as soon as the pointer enters the pill or the pill receives keyboard focus. It stays for 150ms after the pointer leaves the pill, and closes at once when the pill loses focus, on Escape and on any pointer press. It disappears without an exit animation.
 - A pill with keyboard focus keeps its badge open when the pointer passes over it and leaves.
 - It only opens when the pill doesn't already show the full text: when `shortText` is set, or when `text` is truncated.
 - Its right edge sits on the pill's right edge, and it is vertically centred on the pill. It grows leftwards over the label, up to the left edge of the row, and wraps onto a second line when the text is wider than that. Text beyond two lines is cut, without an ellipsis.

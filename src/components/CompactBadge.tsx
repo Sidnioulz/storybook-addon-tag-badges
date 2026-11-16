@@ -19,10 +19,10 @@ import { BadgeUI, getBadgeBorder } from './BadgeUI'
 /** Width in px of every compact badge, whatever its text. */
 export const COMPACT_BADGE_WIDTH = 40
 
-// How long the pointer rests on a pill before its floating badge shows. The
-// badge opens at once and its animations wait, so that leaving the pill or
-// pressing it before then closes a badge that never showed.
-const HOVER_DELAY = 150
+// How long the floating badge stays after the pointer leaves its pill. It then
+// disappears without an exit animation: Storybook unmounts tooltips as soon
+// as they close.
+const EXIT_DELAY = 150
 const ANIMATION_DURATION = 150
 // Decelerates into place.
 const EASING = 'cubic-bezier(0.2, 0.8, 0.2, 1)'
@@ -30,13 +30,6 @@ const EASING = 'cubic-bezier(0.2, 0.8, 0.2, 1)'
 const PILL_PADDING = 6
 // The inline padding of sidebar badges, in BadgeUI.
 const BADGE_PADDING = 8
-
-// Holds an element invisible: with `backwards`, until its delay ends; with
-// `forwards`, from the end of its delay.
-const hidden = keyframes({
-  from: { opacity: 0 },
-  to: { opacity: 0 },
-})
 
 // The floating badge clipped to the pill's area. The pill is 18px tall: a
 // two-line badge also grows vertically.
@@ -56,19 +49,19 @@ const slideIn = keyframes({
   to: { transform: 'none' },
 })
 
-const motion = (keyframesName: string, delay: number): CSSObject => ({
+const motion = (keyframesName: string): CSSObject => ({
   '@media (prefers-reduced-motion: no-preference)': {
-    animation: `${keyframesName} ${ANIMATION_DURATION}ms ${EASING} ${delay}ms backwards`,
+    animation: `${keyframesName} ${ANIMATION_DURATION}ms ${EASING}`,
   },
 })
 
 // Cuts the text after two lines, without an ellipsis.
-const FloatingText = styled.span<{ delay: number }>(({ delay }) => ({
+const FloatingText = styled.span({
   display: 'block',
   maxHeight: '1.5rem',
   overflow: 'hidden',
-  ...motion(slideIn, delay),
-}))
+  ...motion(slideIn),
+})
 
 // Applied after custom styles, so that every pill keeps the same width.
 const PILL_STYLE: CSSObject = {
@@ -108,11 +101,12 @@ function joinShadows(...shadows: string[]) {
 }
 
 // react-aria closes tooltips when the pointer leaves their trigger, even
-// while the trigger has keyboard focus. Its close request runs within the
-// browser's pointer event.
-function isPointerLeaving() {
+// while the trigger has keyboard focus. Key and pointer presses close them
+// from within the browser's event, unlike the pointer leaving, whose close
+// waits for the exit delay.
+function isPress() {
   const type = window.event?.type
-  return type === 'pointerout' || type === 'mouseout'
+  return type === 'keydown' || type === 'pointerdown' || type === 'mousedown'
 }
 
 interface CompactBadgeProps {
@@ -135,13 +129,12 @@ export const CompactBadge: FC<CompactBadgeProps> = ({
   const [isOpen, setIsOpen] = useState(false)
   const [maxWidth, setMaxWidth] = useState<number>()
   const [hasFocusRing, setHasFocusRing] = useState(false)
-  const delay = hasFocusRing ? 0 : HOVER_DELAY
 
   const onVisibleChange = (visible: boolean) => {
     const pill = pillRef.current
     if (!visible || !pill) {
       // Leaving a pill with the pointer keeps a keyboard user's badge open.
-      if (!(isPointerLeaving() && pill?.matches(':focus-visible'))) {
+      if (isPress() || !pill?.matches(':focus-visible')) {
         setIsOpen(false)
       }
       return
@@ -174,10 +167,7 @@ export const CompactBadge: FC<CompactBadgeProps> = ({
     whiteSpace: 'normal',
     overflowWrap: 'break-word',
     textOverflow: 'clip',
-    animation: `${hidden} 0s ${delay}ms backwards`,
-    '@media (prefers-reduced-motion: no-preference)': {
-      animation: `${hidden} 0s ${delay}ms backwards, ${expand} ${ANIMATION_DURATION}ms ${EASING} ${delay}ms backwards`,
-    },
+    ...motion(expand),
     // An inner ring in the app's background keeps the focus ring visible on
     // the selected row, whose background has the focus ring's colour.
     ...(hasFocusRing && {
@@ -195,7 +185,7 @@ export const CompactBadge: FC<CompactBadgeProps> = ({
       placement="left"
       offset={-COMPACT_BADGE_WIDTH}
       delayShow={0}
-      delayHide={0}
+      delayHide={EXIT_DELAY}
       visible={isOpen}
       onVisibleChange={onVisibleChange}
       tooltip={
@@ -207,7 +197,7 @@ export const CompactBadge: FC<CompactBadgeProps> = ({
           hasLongText={false}
           theme={theme}
         >
-          <FloatingText delay={delay}>{text}</FloatingText>
+          <FloatingText>{text}</FloatingText>
         </BadgeUI>
       }
       {...TOOLTIP_PASSTHROUGH_PROPS}
@@ -221,8 +211,8 @@ export const CompactBadge: FC<CompactBadgeProps> = ({
           ...extraStyle,
           ...PILL_STYLE,
           // The floating badge replaces the pill, along with its focus ring,
-          // once it shows. Opacity keeps the pill focusable underneath.
-          ...(isOpen && { animation: `${hidden} 0s ${delay}ms forwards` }),
+          // while it shows. Opacity keeps the pill focusable underneath.
+          opacity: isOpen ? 0 : 1,
           // Drawn inside the pill, which sidebar rows clip, and over the
           // badge's own colour rather than the row's.
           '&:focus-visible': {
