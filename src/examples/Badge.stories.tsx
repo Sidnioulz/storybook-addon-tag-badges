@@ -148,6 +148,12 @@ const expectNoFloatingAfterHover = async (pill: HTMLElement) => {
   await expect(getFloating()).toBeNull()
   await userEvent.unhover(pill)
 }
+const getVisibleFloating = () => {
+  const floating = getFloating()
+  return floating && getComputedStyle(floating).opacity !== '0'
+    ? floating
+    : null
+}
 const waitForFloating = () =>
   waitFor(() => {
     const element = getFloating()
@@ -211,9 +217,12 @@ export const CompactTruncated: Story = {
     ).toBeLessThanOrEqual(1)
     await expect(pill).not.toHaveAttribute('aria-describedby')
     await expect(getComputedStyle(pill).opacity).toBe('0')
-    // It closes at once, without an exit animation.
+    // It stays a moment after the pointer leaves, then closes without an
+    // exit animation.
     await userEvent.unhover(pill)
-    await waitFor(() => expect(getFloating()).toBeNull(), { timeout: 50 })
+    await new Promise((resolve) => setTimeout(resolve, 80))
+    await expect(getVisibleFloating()).not.toBeNull()
+    await waitFor(() => expect(getFloating()).toBeNull())
     await expect(getComputedStyle(pill).opacity).toBe('1')
   },
 }
@@ -323,7 +332,7 @@ export const CompactKeyboardFocus: Story = {
   },
 }
 
-export const CompactPressCancelsHover: Story = {
+export const CompactPressCloses: Story = {
   decorators: [SidebarRow],
   args: {
     context: 'sidebar',
@@ -415,14 +424,7 @@ export const CompactUnrollsFromPill: Story = {
   },
 }
 
-const getVisibleFloating = () => {
-  const floating = getFloating()
-  return floating && getComputedStyle(floating).opacity !== '0'
-    ? floating
-    : null
-}
-
-export const CompactHoverDelay: Story = {
+export const CompactHoverOpensAtOnce: Story = {
   decorators: [SidebarRow],
   args: {
     context: 'sidebar',
@@ -433,10 +435,9 @@ export const CompactHoverDelay: Story = {
   play: async ({ canvasElement }) => {
     const pill = getPill(canvasElement)
     await userEvent.hover(pill)
-    await new Promise((resolve) => setTimeout(resolve, 100))
-    await expect(getVisibleFloating()).toBeNull()
-    await expect(getComputedStyle(pill).opacity).toBe('1')
-    await waitFor(() => expect(getVisibleFloating()).not.toBeNull())
+    await waitFor(() => expect(getVisibleFloating()).not.toBeNull(), {
+      timeout: 50,
+    })
     await expect(getComputedStyle(pill).opacity).toBe('0')
     await userEvent.unhover(pill)
   },
