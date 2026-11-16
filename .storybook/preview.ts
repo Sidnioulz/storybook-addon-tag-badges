@@ -1,7 +1,7 @@
 import addonA11y from '@storybook/addon-a11y'
 import addonDocs from '@storybook/addon-docs'
 import { definePreview } from '@storybook/react-vite'
-import { themes } from 'storybook/theming'
+import { themes } from 'storybook/theming/emotion'
 
 import tagBadges from '../src/index.js'
 import ThemeProvider from './ThemeProvider'
