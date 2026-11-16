@@ -4,22 +4,24 @@ import React, {
   forwardRef,
   useCallback,
   useEffect,
+  useId,
   useRef,
   useState,
 } from 'react'
+import { createPortal } from 'react-dom'
 import { TooltipProvider } from 'storybook/internal/components'
 import {
   type CSSObject,
   keyframes,
+  srOnlyStyles,
   styled,
-  useTheme,
 } from 'storybook/theming/emotion'
 
 import { ROW_SELECTOR } from '../utils/rowEndAlignment'
 import { BadgeUI } from './BadgeUI'
 
 /** Width in px of every compact badge, whatever its text. */
-export const COMPACT_BADGE_WIDTH = 40
+const COMPACT_BADGE_WIDTH = 40
 
 // How long the floating badge stays after the pointer leaves its pill. It then
 // disappears without an exit animation: Storybook unmounts tooltips as soon
@@ -32,6 +34,13 @@ const EASING = 'cubic-bezier(0.2, 0.8, 0.2, 1)'
 const PILL_PADDING = 6
 // The inline padding of sidebar badges, in BadgeUI.
 const BADGE_PADDING = 8
+
+// The badge of a focused row follows its pill as the sidebar scrolls, which
+// takes CSS anchor positioning. Without it, only hovering shows the badge.
+const supportsAnchorPositioning =
+  typeof CSS !== 'undefined' &&
+  !!CSS.supports?.('anchor-name: --tag-badge') &&
+  !!CSS.supports?.('position-visibility: anchors-visible')
 
 // The floating badge clipped to the pill's area. The pill is 18px tall: a
 // two-line badge also grows vertically.
@@ -67,6 +76,41 @@ const FloatingText = styled.span({
   ...motion(slideIn),
 })
 
+interface FloatingBadgeProps {
+  extraStyle: CSSObject
+  maxWidth?: number
+  text: string
+}
+
+// The full badge, drawn over its pill and expanding to the left of it. Pills
+// carry the text for assistive technologies.
+const FloatingBadge = forwardRef<HTMLDivElement, FloatingBadgeProps>(
+  function FloatingBadge({ extraStyle, maxWidth, text }, ref) {
+    return (
+      <BadgeUI
+        ref={ref}
+        aria-hidden
+        context="sidebar"
+        data-tag-badge="floating"
+        extraStyle={{
+          ...extraStyle,
+          // A block fills the tooltip's box, which is centred on the pill. An
+          // inline block would sit on a line box taller than itself.
+          display: 'block',
+          width: 'max-content',
+          maxWidth,
+          whiteSpace: 'normal',
+          overflowWrap: 'break-word',
+          textOverflow: 'clip',
+          ...motion(expand),
+        }}
+      >
+        <FloatingText>{text}</FloatingText>
+      </BadgeUI>
+    )
+  },
+)
+
 // Applied after custom styles, so that every pill keeps the same width.
 const PILL_STYLE: CSSObject = {
   width: COMPACT_BADGE_WIDTH,
@@ -75,6 +119,8 @@ const PILL_STYLE: CSSObject = {
   paddingInline: PILL_PADDING,
   boxSizing: 'border-box',
   textAlign: 'center',
+  // Lets the hover area extend past the pill. The text clips itself.
+  overflow: 'visible',
 }
 
 // Cuts the pill's text where its padding starts, without an ellipsis.
@@ -82,8 +128,9 @@ const PillText = styled.span({
   display: 'block',
   overflow: 'hidden',
   whiteSpace: 'nowrap',
-  textOverflow: 'clip',
 })
+
+const HiddenText = styled.span(srOnlyStyles)
 
 // Props that TooltipProvider forwards to react-aria without declaring them.
 // The floating badge covers the pill: it must let the pointer through to the
@@ -97,7 +144,7 @@ const TOOLTIP_PASSTHROUGH_PROPS = {
 
 // The pill takes no focus: its tree row does, and shows its badge. The pill
 // drops the tab index react-aria gives tooltip triggers, and the description
-// pointing to the floating badge, which only repeats the pill's label.
+// pointing to the floating badge, which only repeats the pill's text.
 const Pill = forwardRef<HTMLDivElement, ComponentProps<typeof BadgeUI>>(
   function Pill(props, ref) {
     const pillProps: Record<string, unknown> = { ...props }
@@ -106,13 +153,6 @@ const Pill = forwardRef<HTMLDivElement, ComponentProps<typeof BadgeUI>>(
     return <BadgeUI ref={ref} {...(pillProps as typeof props)} />
   },
 )
-
-// Key and pointer presses dismiss the badge from within the browser's event.
-// Other closes, such as the pointer leaving the pill, run after a delay.
-function isDismissal() {
-  const type = window.event?.type
-  return type === 'keydown' || type === 'pointerdown' || type === 'mousedown'
-}
 
 interface CompactBadgeProps {
   extraStyle: CSSObject
@@ -130,13 +170,16 @@ export const CompactBadge: FC<CompactBadgeProps> = ({
   shortText,
   text,
 }) => {
-  const theme = useTheme()
   const pillRef = useRef<HTMLDivElement>(null)
   const pillTextRef = useRef<HTMLSpanElement>(null)
+  const anchorName = `--tag-badge-${useId().replace(/[^\w-]/g, '')}`
   const [isHovered, setIsHovered] = useState(false)
   const [isRowFocused, setIsRowFocused] = useState(false)
   const [maxWidth, setMaxWidth] = useState<number>()
-  const isOpen = isHovered || isRowFocused
+  const [hoverArea, setHoverArea] = useState<{
+    width: number
+    height: number
+  }>()
 
   // Whether the pill hides part of its text. If so, measures the room the
   // floating badge has to the left of the pill.
@@ -163,95 +206,124 @@ export const CompactBadge: FC<CompactBadgeProps> = ({
 
   // The badge shows while its tree row itself has keyboard focus, which
   // react-aria reports with an attribute. The browser's :focus-visible can
-  // also match a row focused by a press after keyboard navigation.
+  // also match a row focused by a press after keyboard navigation. Escape
+  // hides it until the row is focused again, and still reaches the sidebar.
   useEffect(() => {
-    const row = pillRef.current?.closest(ROW_SELECTOR)
-    if (!row) {
+    const row = pillRef.current?.closest<HTMLElement>(ROW_SELECTOR)
+    if (!row || !supportsAnchorPositioning) {
       return
     }
     const update = () =>
-      setIsRowFocused(row.hasAttribute('data-focus-visible') && prepareToOpen())
+      setIsRowFocused(row.dataset.focusVisible !== undefined && prepareToOpen())
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        setIsRowFocused(false)
+      }
+    }
     update()
     const observer = new MutationObserver(update)
     observer.observe(row, {
       attributes: true,
       attributeFilter: ['data-focus-visible'],
     })
-    return () => observer.disconnect()
+    row.addEventListener('keydown', onKeyDown)
+    return () => {
+      observer.disconnect()
+      row.removeEventListener('keydown', onKeyDown)
+    }
   }, [prepareToOpen])
 
-  // Reports hovering the pill, and dismissals with Escape or a press, which
-  // also hide the badge of a focused row until it is focused again.
-  const onVisibleChange = (visible: boolean) => {
-    if (visible) {
-      setIsHovered(prepareToOpen())
-      return
-    }
-    setIsHovered(false)
-    if (isDismissal()) {
-      setIsRowFocused(false)
-    }
-  }
+  const onVisibleChange = useCallback(
+    (visible: boolean) => setIsHovered(visible && prepareToOpen()),
+    [prepareToOpen],
+  )
 
-  const floatingStyle: CSSObject = {
-    ...extraStyle,
-    // A block fills the tooltip's box, which is centred on the pill. An
-    // inline block would sit on a line box taller than itself.
-    display: 'block',
-    width: 'max-content',
-    maxWidth,
-    whiteSpace: 'normal',
-    overflowWrap: 'break-word',
-    textOverflow: 'clip',
-    ...motion(expand),
-  }
+  const measureHoverArea = useCallback((badge: HTMLDivElement | null) => {
+    if (badge) {
+      setHoverArea({ width: badge.offsetWidth, height: badge.offsetHeight })
+    }
+  }, [])
 
   return (
-    <TooltipProvider
-      placement="left"
-      offset={-COMPACT_BADGE_WIDTH}
-      delayShow={0}
-      delayHide={EXIT_DELAY}
-      visible={isOpen}
-      onVisibleChange={onVisibleChange}
-      tooltip={
-        <BadgeUI
-          aria-hidden
-          context="sidebar"
-          data-tag-badge="floating"
-          extraStyle={floatingStyle}
-          hasLongText={false}
-          theme={theme}
-        >
-          <FloatingText>{text}</FloatingText>
-        </BadgeUI>
-      }
-      {...TOOLTIP_PASSTHROUGH_PROPS}
-    >
-      <Pill
-        ref={pillRef}
-        aria-label={text}
-        context="sidebar"
-        data-tag-badge="pill"
-        extraStyle={{
-          ...extraStyle,
-          ...PILL_STYLE,
-          // The floating badge replaces the pill while it shows.
-          opacity: isOpen ? 0 : 1,
-        }}
-        hasLongText={false}
-        // react-aria only opens tooltips on hover once a pointer has moved in
-        // a document where its input modality listeners run, which a page
-        // without other react-aria components never sets up.
-        onPointerEnter={(event) => {
-          if (event.pointerType === 'mouse') {
-            onVisibleChange(true)
-          }
-        }}
-        theme={theme}
+    <>
+      <TooltipProvider
+        placement="left"
+        offset={-COMPACT_BADGE_WIDTH}
+        delayShow={0}
+        delayHide={EXIT_DELAY}
+        // The badge of a focused row replaces the one shown on hover.
+        disabled={isRowFocused}
+        visible={isHovered}
+        onVisibleChange={onVisibleChange}
+        tooltip={
+          <FloatingBadge
+            ref={measureHoverArea}
+            extraStyle={extraStyle}
+            maxWidth={maxWidth}
+            text={text}
+          />
+        }
+        {...TOOLTIP_PASSTHROUGH_PROPS}
       >
-        <PillText ref={pillTextRef}>{shortText ?? text}</PillText>
-      </Pill>
-    </TooltipProvider>
+        <Pill
+          ref={pillRef}
+          context="sidebar"
+          data-tag-badge="pill"
+          extraStyle={{
+            ...extraStyle,
+            ...PILL_STYLE,
+            // The floating badge replaces the pill while it shows.
+            opacity: isHovered || isRowFocused ? 0 : 1,
+            anchorName: isRowFocused ? anchorName : undefined,
+            // While the badge shows on hover, the pill's area grows to match
+            // it, so that the pointer can move over the badge and presses
+            // there still reach the row. The row's label clips this area.
+            ...(isHovered &&
+              hoverArea && {
+                '&::before': {
+                  content: '""',
+                  position: 'absolute',
+                  right: 0,
+                  top: '50%',
+                  translate: '0 -50%',
+                  ...hoverArea,
+                },
+              }),
+          }}
+          // react-aria only opens tooltips on hover once a pointer has moved
+          // in a document where its input modality listeners run, which a
+          // page without other react-aria components never sets up.
+          onPointerEnter={(event) => {
+            if (event.pointerType === 'mouse' && !isRowFocused) {
+              onVisibleChange(true)
+            }
+          }}
+        >
+          <PillText aria-hidden ref={pillTextRef}>
+            {shortText ?? text}
+          </PillText>
+          <HiddenText>{text}</HiddenText>
+        </Pill>
+      </TooltipProvider>
+      {isRowFocused &&
+        createPortal(
+          <FloatingBadge
+            extraStyle={{
+              ...extraStyle,
+              position: 'fixed',
+              zIndex: 100000,
+              positionAnchor: anchorName,
+              positionVisibility: 'anchors-visible',
+              right: 'anchor(right)',
+              top: 'anchor(center)',
+              translate: '0 -50%',
+              pointerEvents: 'none',
+            }}
+            maxWidth={maxWidth}
+            text={text}
+          />,
+          document.body,
+        )}
+    </>
   )
 }

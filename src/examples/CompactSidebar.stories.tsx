@@ -56,7 +56,7 @@ function findBadge(tags: string[]) {
 
 // Mimics a Storybook sidebar row: a fixed-height box, indented by depth,
 // whose label box truncates.
-function Row({ row }: { row: MockRow }) {
+function Row({ row }: Readonly<{ row: MockRow }>) {
   const theme = useTheme()
   const badge = findBadge(row.tags)
   const entry = {
@@ -104,7 +104,7 @@ function Row({ row }: { row: MockRow }) {
   )
 }
 
-function MockSidebar({ width }: { width: number }) {
+function MockSidebar({ width }: Readonly<{ width: number }>) {
   const theme = useTheme()
   return (
     <nav
@@ -133,20 +133,25 @@ const firstSidebar = (canvasElement: HTMLElement) =>
 export const Sidebar: Story = {
   args: { width: 280 },
   play: async ({ canvasElement }) => {
-    const pills = firstSidebar(canvasElement).querySelectorAll<HTMLElement>(
-      '[data-tag-badge="pill"]',
+    const pills = Array.from(
+      firstSidebar(canvasElement).querySelectorAll<HTMLElement>(
+        '[data-tag-badge="pill"]',
+      ),
     )
     await expect(pills.length).toBe(6)
-    for (const pill of pills) {
-      const row = pill.closest('[data-item-id]')!.getBoundingClientRect()
-      const box = pill.getBoundingClientRect()
-      await waitFor(() =>
-        expect(Math.round(row.right - pill.getBoundingClientRect().right)).toBe(
-          30,
+    await waitFor(() =>
+      expect(
+        pills.map((pill) =>
+          Math.round(
+            pill.closest('[data-item-id]')!.getBoundingClientRect().right -
+              pill.getBoundingClientRect().right,
+          ),
         ),
-      )
-      await expect(box.width).toBe(40)
-    }
+      ).toEqual(pills.map(() => 30)),
+    )
+    await expect(
+      pills.map((pill) => pill.getBoundingClientRect().width),
+    ).toEqual(pills.map(() => 40))
   },
 }
 
