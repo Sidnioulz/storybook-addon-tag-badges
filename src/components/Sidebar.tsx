@@ -10,11 +10,6 @@ import { WithBadge } from './Badge'
 export interface SidebarProps {
   children: ReactNode
   item: API_HashEntry
-  /**
-   * @deprecated Has no effect. Badges are aligned with the row's status icons
-   * and context menu button automatically.
-   */
-  hasStatusWithUI?: boolean
 }
 
 // Sidebar rows have a fixed height, so the label and badge share one line.
