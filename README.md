@@ -43,6 +43,7 @@
 - [Default Config](#-default-config)
 - [Usage](#-usage)
 - [Customise Badge Config](#-customise-badge-config)
+- [Global Options](#global-options)
 - [Sidebar Config](#-sidebar-config)
 - [Workflow Examples](#-workflow-examples)
 - [Limitations](#-limitations)
@@ -313,11 +314,12 @@ The `badge` property defines the appearance and content of the badge to display.
 
 The object has the following properties:
 
-| Name        | Type                             | Description                                   | Example                                                             |
-| ----------- | -------------------------------- | --------------------------------------------- | ------------------------------------------------------------------- |
-| **text**    | `string`                         | The text displayed in the badge (required).   | 'New'                                                               |
-| **style**   | `string \| object`               | Preset color, or a CSS properties object.     | `'turquoise'` \| `{ color: 'red', fontSize: '1rem' }`               |
-| **tooltip** | `string \| BadgeTooltipMessage?` | A tooltip shown in the toolbar only.          | `{ title: 'New Component', desc: 'Recently added to the library' }` |
+| Name          | Type                             | Description                                                                                    | Example                                                             |
+| ------------- | -------------------------------- | ---------------------------------------------------------------------------------------------- | ------------------------------------------------------------------- |
+| **text**      | `string`                         | The text displayed in the badge (required).                                                    | 'New'                                                               |
+| **shortText** | `string?`                        | Text shown by [compact sidebar](#compact-sidebar) badges instead of `text`. Ignored elsewhere. | 'Exp'                                                               |
+| **style**     | `string \| object`               | Preset color, or a CSS properties object.                                                      | `'turquoise'` \| `{ color: 'red', fontSize: '1rem' }`               |
+| **tooltip**   | `string \| BadgeTooltipMessage?` | A tooltip shown in the toolbar only.                                                           | `{ title: 'New Component', desc: 'Recently added to the library' }` |
 
 #### Style presets
 
@@ -387,6 +389,8 @@ Dynamic badge functions allow you to customize the badge based on the current en
 - `getTagParts`, `getTagPrefix`, `getTagSuffix`: Utility functions to extract parts of the tag
 - `tag`: The matched tag string
 
+Like static badge objects, they may return a `shortText` for compact sidebar badges.
+
 Example of a dynamic badge function:
 
 ```ts
@@ -428,6 +432,27 @@ You may pass a string for a simple text tooltip, shown when hovering or focusing
   * `title`: The title of the link
   * `href`: The URL to which the link points (navigates in-place)
   * `onClick`: A callback when the link is clicked (can be used to navigate in a new browser tab)
+
+## Global Options
+
+Global options apply to your whole Storybook. Set them with `tagBadgesOptions` in your manager config.
+
+### Compact Sidebar
+
+With `compactSidebar`, every sidebar badge renders as a 48px wide pill, so that badges line up and labels keep most of the row. The pill shows the badge's [`shortText`](#static-badge-object), or the start of its `text`. Hovering the pill shows the full badge over it, and so does moving focus onto it with the arrow keys. Toolbar and MDX badges are not affected.
+
+```ts
+// .storybook/manager.ts
+import { addons } from 'storybook/manager-api'
+
+addons.setConfig({
+  tagBadgesOptions: {
+    compactSidebar: true,
+  },
+})
+```
+
+Touch screens can't hover, so they only show the pill.
 
 ## Sidebar Config
 
@@ -561,7 +586,7 @@ In particular, if a component `meta` defines two tags `outdated` and `version:1.
 
 ### Sidebar Space
 
-Storybook only renders the sidebar rows that are in view, and relies on every row having the same height to do so. Sidebar labels and badges therefore can't wrap onto several lines, and are truncated when a row is too narrow, e.g. for deeply nested entries. Keep the text of sidebar badges short, and use the toolbar or MDX badges, which show full text, for longer descriptions. Use the [`display` option](#display-advanced-usage) to show a badge in the toolbar but not in the sidebar.
+Storybook only renders the sidebar rows that are in view, and relies on every row having the same height to do so. Sidebar labels and badges therefore can't wrap onto several lines, and are truncated when a row is too narrow, e.g. for deeply nested entries. Keep the text of sidebar badges short, and use the toolbar or MDX badges, which show full text, for longer descriptions. Use the [`display` option](#display-advanced-usage) to show a badge in the toolbar but not in the sidebar, or turn on the [compact sidebar](#compact-sidebar) to give labels most of the row.
 
 ## 👩🏽‍💻 Contributing
 
