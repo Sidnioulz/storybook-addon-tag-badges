@@ -79,12 +79,12 @@ Badges gain an optional `shortText` string, next to `text`. Static badge objects
 ### The floating badge
 
 - It shows the badge's full `text`, with the badge's colours and style.
-- It shows when the pointer rests on the pill for 200ms, and immediately when the pill receives keyboard focus. The delay is part of its animation timing: leaving or pressing the pill before then closes it before it shows. It closes at once, without an exit animation, when the pointer leaves the pill, when the pill loses focus, on Escape and on any pointer press.
+- It shows when the pointer rests on the pill for 150ms, and immediately when the pill receives keyboard focus. The delay is part of its animation timing: leaving or pressing the pill before then closes it before it shows. It closes at once, without an exit animation, when the pointer leaves the pill, when the pill loses focus, on Escape and on any pointer press.
 - A pill with keyboard focus keeps its badge open when the pointer passes over it and leaves.
 - It only opens when the pill doesn't already show the full text: when `shortText` is set, or when `text` is truncated.
 - Its right edge sits on the pill's right edge, and it is vertically centred on the pill. It grows leftwards over the label, up to the left edge of the row, and wraps onto a second line when the text is wider than that. Text beyond two lines is cut, without an ellipsis.
 - It never flips to the right of the pill, and never extends outside the row horizontally. It may extend above and below the row when it wraps.
-- Unless the user prefers reduced motion, it unrolls from the pill towards the left over 120ms with a decelerating curve, its text sliding from where the pill shows it into place. With reduced motion, it shows at once.
+- Unless the user prefers reduced motion, it unrolls from the pill towards the left over 150ms with a decelerating curve, its text sliding from where the pill shows it into place. With reduced motion, it shows at once.
 - It does not receive pointer events, so that the pointer stays on the pill underneath and clicks reach the row.
 - It is drawn above the sidebar, including sticky rows and the context menu button's shadow on the selected row.
 - When it opens on keyboard focus, it draws the focus ring, since it covers the focused pill. The ring has an inner ring in the app's background, so that it shows on the selected row, whose background has the focus ring's colour.
@@ -93,8 +93,8 @@ Badges gain an optional `shortText` string, next to `text`. Static badge objects
 ### Keyboard and screen readers
 
 - The pill draws its own focus ring inside its box, in two tones, so that sidebar rows can't clip it.
-- The pill has `tabIndex={-1}`. It is not a Tab stop, and the tree's ArrowRight and ArrowLeft reach it like any other focusable element in a row. Pills in sticky copies are therefore never focused.
-- The pill has `role="img"` and the badge's full `text` as its accessible name, like Storybook's status icons in the same row.
+- The pill has `tabIndex={0}`. The tree's ArrowRight and ArrowLeft reach it like any other focusable element in a row.
+- The pill has the badge's full `text` as its `aria-label`, and no role.
 - The floating badge is hidden from assistive technologies, and the pill does not get the tooltip as its description, so that a focused pill's text is announced once. Removing the description is required: hiding the floating badge alone is not handled consistently across browsers.
 - `renderAriaLabel` is unchanged: the row's accessible name includes the badge's full `text`, whether compact mode is on or not.
 

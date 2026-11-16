@@ -188,7 +188,6 @@ export const CompactTruncated: Story = {
   play: async ({ canvasElement }) => {
     const pill = getPill(canvasElement)
     await expect(pill.getBoundingClientRect().width).toBe(40)
-    await expect(pill).toHaveAttribute('role', 'img')
     await expect(pill).toHaveAccessibleName('Deprecated')
     await expect(getComputedStyle(pill).textOverflow).toBe('clip')
 
