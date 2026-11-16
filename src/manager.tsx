@@ -52,10 +52,12 @@ addons.register(ADDON_ID, (api) => {
   // the badge shown by the addon's label, so it only applies alongside it: a
   // custom renderLabel may not show badges at all.
   const userSidebar = addons.getConfig()?.sidebar
+  const showsAddonLabel =
+    !userSidebar?.renderLabel || userSidebar.renderLabel === renderLabel
   addons.setConfig({
     [KEY]: readConfig(),
     sidebar: {
-      ...(userSidebar?.renderLabel ? {} : { renderLabel, renderAriaLabel }),
+      ...(showsAddonLabel && { renderLabel, renderAriaLabel }),
       ...userSidebar,
     },
   })
