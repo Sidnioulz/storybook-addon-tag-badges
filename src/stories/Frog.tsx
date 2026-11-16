@@ -29,7 +29,7 @@ export const Frog = ({
       role="img"
       aria-label="Frog"
       className={['frog', `frog--size_${size}`].join(' ')}
-      style={{ '--anchor-id': anchorId }}
+      style={{ '--anchor-id': anchorId } as React.CSSProperties}
     >
       <span className="frog__frog">🐸</span>
       {preferredInsects.length > 0 && (
