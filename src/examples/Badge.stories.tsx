@@ -128,6 +128,10 @@ const SidebarRow: Decorator = (Story, { parameters }) => (
       alignItems: 'center',
       width: parameters.rowWidth ?? 260,
       height: 28,
+      ...(parameters.atViewportBottom && {
+        position: 'absolute',
+        bottom: 2,
+      }),
     }}
   >
     <Story />
@@ -291,5 +295,66 @@ export const CompactKeyboardFocus: Story = {
       'rgb(246, 249, 252)',
     )
     pill.blur()
+  },
+}
+
+export const CompactPressCancelsHover: Story = {
+  decorators: [SidebarRow],
+  args: {
+    context: 'sidebar',
+    compact: true,
+    text: 'Deprecated',
+    style: 'orange',
+  },
+  play: async ({ canvasElement }) => {
+    const pill = getPill(canvasElement)
+    await userEvent.hover(pill)
+    await new Promise((resolve) => setTimeout(resolve, 50))
+    await userEvent.pointer({ keys: '[MouseLeft]', target: pill })
+    await new Promise((resolve) => setTimeout(resolve, 400))
+    await expect(getFloating()).toBeNull()
+    await userEvent.unhover(pill)
+    pill.blur()
+  },
+}
+
+export const CompactFitsKeyboardFocus: Story = {
+  decorators: [SidebarRow],
+  args: { context: 'sidebar', compact: true, text: 'New', style: 'green' },
+  play: async ({ canvasElement }) => {
+    const pill = getPill(canvasElement)
+    await userEvent.keyboard('{Escape}')
+    pill.focus()
+    await new Promise((resolve) => setTimeout(resolve, 100))
+    await expect(getFloating()).toBeNull()
+    // Drawn inside the pill, so that its ancestors can't clip it.
+    const { boxShadow } = getComputedStyle(pill)
+    await expect(boxShadow).toMatch(
+      /^rgb\([^)]+\) 0px 0px 0px 2px inset, rgb\(246, 249, 252\) 0px 0px 0px 3px inset/,
+    )
+    pill.blur()
+  },
+}
+
+export const CompactAtViewportEdge: Story = {
+  decorators: [SidebarRow],
+  parameters: { atViewportBottom: true },
+  args: {
+    context: 'sidebar',
+    compact: true,
+    text: 'Deprecated',
+    style: 'orange',
+  },
+  play: async ({ canvasElement }) => {
+    const pill = getPill(canvasElement)
+    const floating = await hoverUntilFloating(pill)
+    const centre = (box: DOMRect) => box.top + box.height / 2
+    await expect(
+      Math.abs(
+        centre(floating.getBoundingClientRect()) -
+          centre(pill.getBoundingClientRect()),
+      ),
+    ).toBeLessThanOrEqual(1)
+    await userEvent.unhover(pill)
   },
 }
