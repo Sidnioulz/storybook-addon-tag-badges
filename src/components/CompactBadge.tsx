@@ -22,8 +22,8 @@ export const COMPACT_BADGE_WIDTH = 40
 // How long the pointer rests on a pill before its floating badge shows. The
 // badge opens at once and its animations wait, so that leaving the pill or
 // pressing it before then closes a badge that never showed.
-const HOVER_DELAY = 200
-const ANIMATION_DURATION = 120
+const HOVER_DELAY = 150
+const ANIMATION_DURATION = 150
 // Decelerates into place.
 const EASING = 'cubic-bezier(0.2, 0.8, 0.2, 1)'
 
