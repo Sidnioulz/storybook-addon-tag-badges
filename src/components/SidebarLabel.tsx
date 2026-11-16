@@ -45,7 +45,7 @@ export const SidebarLabel: FC<SidebarLabelProps> = ({
   entry,
 }) => {
   const containerRef = useRef<HTMLDivElement>(null)
-  useRowEndAlignment(containerRef, true)
+  useRowEndAlignment(containerRef)
 
   return (
     <Container compact={compact} ref={containerRef}>
