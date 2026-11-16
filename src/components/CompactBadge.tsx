@@ -2,6 +2,8 @@ import React, {
   type ComponentProps,
   type FC,
   forwardRef,
+  useCallback,
+  useEffect,
   useRef,
   useState,
 } from 'react'
@@ -14,7 +16,7 @@ import {
 } from 'storybook/theming/emotion'
 
 import { ROW_SELECTOR } from '../utils/rowEndAlignment'
-import { BadgeUI, getBadgeBorder } from './BadgeUI'
+import { BadgeUI } from './BadgeUI'
 
 /** Width in px of every compact badge, whatever its text. */
 export const COMPACT_BADGE_WIDTH = 40
@@ -93,25 +95,21 @@ const TOOLTIP_PASSTHROUGH_PROPS = {
   style: { outline: 'none', pointerEvents: 'none' },
 } as object
 
-// The pill is named by its own label. The floating badge only repeats it, so
-// the pill must not get it as a description.
+// The pill takes no focus: its tree row does, and shows its badge. The pill
+// drops the tab index react-aria gives tooltip triggers, and the description
+// pointing to the floating badge, which only repeats the pill's label.
 const Pill = forwardRef<HTMLDivElement, ComponentProps<typeof BadgeUI>>(
   function Pill(props, ref) {
     const pillProps: Record<string, unknown> = { ...props }
     delete pillProps['aria-describedby']
+    delete pillProps.tabIndex
     return <BadgeUI ref={ref} {...(pillProps as typeof props)} />
   },
 )
 
-function joinShadows(...shadows: string[]) {
-  return shadows.filter((shadow) => shadow !== 'none').join(', ')
-}
-
-// react-aria closes tooltips when the pointer leaves their trigger, even
-// while the trigger has keyboard focus. Key and pointer presses close them
-// from within the browser's event, unlike the pointer leaving, whose close
-// waits for the exit delay.
-function isPress() {
+// Key and pointer presses dismiss the badge from within the browser's event.
+// Other closes, such as the pointer leaving the pill, run after a delay.
+function isDismissal() {
   const type = window.event?.type
   return type === 'keydown' || type === 'pointerdown' || type === 'mousedown'
 }
@@ -123,8 +121,9 @@ interface CompactBadgeProps {
 }
 
 /**
- * A sidebar badge shown as a fixed-width pill. Hovering or focusing the pill
- * shows the full badge over it, when the pill doesn't already show all of it.
+ * A sidebar badge shown as a fixed-width pill. Hovering the pill, or focusing
+ * its tree row with the keyboard, shows the full badge over it, when the pill
+ * doesn't already show all of it.
  */
 export const CompactBadge: FC<CompactBadgeProps> = ({
   extraStyle,
@@ -134,37 +133,64 @@ export const CompactBadge: FC<CompactBadgeProps> = ({
   const theme = useTheme()
   const pillRef = useRef<HTMLDivElement>(null)
   const pillTextRef = useRef<HTMLSpanElement>(null)
-  const [isOpen, setIsOpen] = useState(false)
+  const [isHovered, setIsHovered] = useState(false)
+  const [isRowFocused, setIsRowFocused] = useState(false)
   const [maxWidth, setMaxWidth] = useState<number>()
-  const [hasFocusRing, setHasFocusRing] = useState(false)
+  const isOpen = isHovered || isRowFocused
 
-  const onVisibleChange = (visible: boolean) => {
+  // Whether the pill hides part of its text. If so, measures the room the
+  // floating badge has to the left of the pill.
+  const prepareToOpen = useCallback(() => {
     const pill = pillRef.current
-    if (!visible || !pill) {
-      // Leaving a pill with the pointer keeps a keyboard user's badge open.
-      if (isPress() || !pill?.matches(':focus-visible')) {
-        setIsOpen(false)
-      }
-      return
-    }
-
     const pillText = pillTextRef.current
+    if (!pill || !pillText) {
+      return false
+    }
     const showsFullText =
       (shortText === undefined || shortText === text) &&
-      pillText !== null &&
       pillText.scrollWidth <= pillText.clientWidth
-    if (isOpen || showsFullText) {
-      return
+    if (showsFullText) {
+      return false
     }
-
     const bounds = (pill.closest(ROW_SELECTOR) ?? pill.parentElement)!
     setMaxWidth(
       pill.getBoundingClientRect().right -
         bounds.getBoundingClientRect().left -
         4,
     )
-    setHasFocusRing(pill.matches(':focus-visible'))
-    setIsOpen(true)
+    return true
+  }, [shortText, text])
+
+  // The badge shows while its tree row itself has keyboard focus, which
+  // react-aria reports with an attribute. The browser's :focus-visible can
+  // also match a row focused by a press after keyboard navigation.
+  useEffect(() => {
+    const row = pillRef.current?.closest(ROW_SELECTOR)
+    if (!row) {
+      return
+    }
+    const update = () =>
+      setIsRowFocused(row.hasAttribute('data-focus-visible') && prepareToOpen())
+    update()
+    const observer = new MutationObserver(update)
+    observer.observe(row, {
+      attributes: true,
+      attributeFilter: ['data-focus-visible'],
+    })
+    return () => observer.disconnect()
+  }, [prepareToOpen])
+
+  // Reports hovering the pill, and dismissals with Escape or a press, which
+  // also hide the badge of a focused row until it is focused again.
+  const onVisibleChange = (visible: boolean) => {
+    if (visible) {
+      setIsHovered(prepareToOpen())
+      return
+    }
+    setIsHovered(false)
+    if (isDismissal()) {
+      setIsRowFocused(false)
+    }
   }
 
   const floatingStyle: CSSObject = {
@@ -178,16 +204,6 @@ export const CompactBadge: FC<CompactBadgeProps> = ({
     overflowWrap: 'break-word',
     textOverflow: 'clip',
     ...motion(expand),
-    // An inner ring in the app's background keeps the focus ring visible on
-    // the selected row, whose background has the focus ring's colour.
-    ...(hasFocusRing && {
-      boxShadow: joinShadows(
-        getBadgeBorder(theme, extraStyle),
-        `0 0 0 2px ${theme.background.app}`,
-      ),
-      outline: `2px solid ${theme.color.secondary}`,
-      outlineOffset: 2,
-    }),
   }
 
   return (
@@ -220,19 +236,8 @@ export const CompactBadge: FC<CompactBadgeProps> = ({
         extraStyle={{
           ...extraStyle,
           ...PILL_STYLE,
-          // The floating badge replaces the pill, along with its focus ring,
-          // while it shows. Opacity keeps the pill focusable underneath.
+          // The floating badge replaces the pill while it shows.
           opacity: isOpen ? 0 : 1,
-          // Drawn inside the pill, which sidebar rows clip, and over the
-          // badge's own colour rather than the row's.
-          '&:focus-visible': {
-            outline: 'none',
-            boxShadow: joinShadows(
-              `inset 0 0 0 2px ${theme.color.secondary}`,
-              `inset 0 0 0 3px ${theme.background.app}`,
-              getBadgeBorder(theme, extraStyle),
-            ),
-          },
         }}
         hasLongText={false}
         // react-aria only opens tooltips on hover once a pointer has moved in
@@ -243,7 +248,6 @@ export const CompactBadge: FC<CompactBadgeProps> = ({
             onVisibleChange(true)
           }
         }}
-        tabIndex={0}
         theme={theme}
       >
         <PillText ref={pillTextRef}>{shortText ?? text}</PillText>

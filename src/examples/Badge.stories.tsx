@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { type ReactNode, useState } from 'react'
 import type { Decorator, Meta, StoryObj } from '@storybook/react-vite'
 import { expect, userEvent, waitFor } from 'storybook/test'
 
@@ -118,10 +118,47 @@ export const SidebarBadge: Story = {
   },
 }
 
+interface MockRowProps {
+  children: ReactNode
+  focusable: boolean
+  // Whether the row reports keyboard focus, like react-aria's tree rows do
+  // with a data-focus-visible attribute.
+  reportsFocusVisible: boolean
+  style: React.CSSProperties
+}
+
+function MockRow({
+  children,
+  focusable,
+  reportsFocusVisible,
+  style,
+}: MockRowProps) {
+  const [isFocusVisible, setIsFocusVisible] = useState(false)
+  return (
+    <div
+      data-item-id="badge-story"
+      data-focus-visible={isFocusVisible || undefined}
+      tabIndex={focusable ? 0 : undefined}
+      onFocus={(event) =>
+        setIsFocusVisible(
+          reportsFocusVisible &&
+            event.target === event.currentTarget &&
+            event.currentTarget.matches(':focus-visible'),
+        )
+      }
+      onBlur={() => setIsFocusVisible(false)}
+      style={style}
+    >
+      {children}
+    </div>
+  )
+}
+
 // Mimics a Storybook sidebar row, whose left edge bounds the floating badge.
 const SidebarRow: Decorator = (Story, { parameters }) => (
-  <div
-    data-item-id="badge-story"
+  <MockRow
+    focusable={parameters.rowFocusable !== false}
+    reportsFocusVisible={parameters.rowReportsFocusVisible !== false}
     style={{
       display: 'flex',
       justifyContent: 'flex-end',
@@ -135,7 +172,7 @@ const SidebarRow: Decorator = (Story, { parameters }) => (
     }}
   >
     <Story />
-  </div>
+  </MockRow>
 )
 
 // Stories that hover or focus a badge to test it, kept out of the sidebar and
@@ -199,6 +236,7 @@ export const CompactTruncated: Story = {
     const pill = getPill(canvasElement)
     await expect(pill.getBoundingClientRect().width).toBe(40)
     await expect(pill).toHaveAccessibleName('Deprecated')
+    await expect(pill).not.toHaveAttribute('tabindex')
     // The text is cut where the pill's padding starts.
     const text = pill.firstElementChild as HTMLElement
     await expect(text.scrollWidth).toBeGreaterThan(text.clientWidth)
@@ -344,41 +382,12 @@ export const CompactCustomStyle: Story = {
   },
 }
 
-export const CompactKeyboardFocus: Story = {
-  tags: testOnly,
-  decorators: [SidebarRow],
-  args: {
-    context: 'sidebar',
-    compact: true,
-    text: 'Deprecated',
-    style: 'orange',
-  },
-  play: async ({ canvasElement }) => {
-    const pill = getPill(canvasElement)
-    await userEvent.keyboard('{Escape}')
-    pill.focus()
-    const floating = await waitFor(
-      () => {
-        const element = getFloating()
-        expect(element).not.toBeNull()
-        return element!
-      },
-      { timeout: 150 },
-    )
-    await expect(getComputedStyle(floating).opacity).toBe('1')
-    await expect(getComputedStyle(floating).outlineStyle).not.toBe('none')
-    // The light theme's app background, which keeps the ring visible on the
-    // selected row, whose background is the ring's colour.
-    await expect(getComputedStyle(floating).boxShadow).toContain(
-      'rgb(246, 249, 252)',
-    )
-    pill.blur()
-  },
-}
-
 export const CompactPressCloses: Story = {
   tags: testOnly,
   decorators: [SidebarRow],
+  // user-event focuses the row of a pressed pill from a script, which
+  // browsers show as keyboard focus. A real press focuses it without that.
+  parameters: { rowFocusable: false },
   args: {
     context: 'sidebar',
     compact: true,
@@ -393,25 +402,6 @@ export const CompactPressCloses: Story = {
     await new Promise((resolve) => setTimeout(resolve, 400))
     await expect(getFloating()).toBeNull()
     await userEvent.unhover(pill)
-    pill.blur()
-  },
-}
-
-export const CompactFitsKeyboardFocus: Story = {
-  tags: testOnly,
-  decorators: [SidebarRow],
-  args: { context: 'sidebar', compact: true, text: 'New', style: 'green' },
-  play: async ({ canvasElement }) => {
-    const pill = getPill(canvasElement)
-    await userEvent.keyboard('{Escape}')
-    pill.focus()
-    await new Promise((resolve) => setTimeout(resolve, 100))
-    await expect(getFloating()).toBeNull()
-    // Drawn inside the pill, so that its ancestors can't clip it.
-    const { boxShadow } = getComputedStyle(pill)
-    await expect(boxShadow).toMatch(
-      /^rgb\([^)]+\) 0px 0px 0px 2px inset, rgb\(246, 249, 252\) 0px 0px 0px 3px inset/,
-    )
     pill.blur()
   },
 }
@@ -492,7 +482,14 @@ export const CompactHoverOpensAtOnce: Story = {
   },
 }
 
-export const CompactHoverKeepsFocus: Story = {
+const focusRowWithKeyboard = async (pill: HTMLElement) => {
+  const row = pill.closest<HTMLElement>('[data-item-id]')!
+  await userEvent.keyboard('{Escape}')
+  row.focus()
+  return row
+}
+
+export const CompactRowFocus: Story = {
   tags: testOnly,
   decorators: [SidebarRow],
   args: {
@@ -503,14 +500,88 @@ export const CompactHoverKeepsFocus: Story = {
   },
   play: async ({ canvasElement }) => {
     const pill = getPill(canvasElement)
-    await userEvent.keyboard('{Escape}')
-    pill.focus()
+    const row = await focusRowWithKeyboard(pill)
+    await waitFor(() => expect(getVisibleFloating()).not.toBeNull(), {
+      timeout: 50,
+    })
+    await expect(getComputedStyle(pill).opacity).toBe('0')
+    row.blur()
+    await waitFor(() => expect(getFloating()).toBeNull(), { timeout: 50 })
+  },
+}
+
+export const CompactRowFocusFits: Story = {
+  tags: testOnly,
+  decorators: [SidebarRow],
+  args: { context: 'sidebar', compact: true, text: 'New', style: 'green' },
+  play: async ({ canvasElement }) => {
+    const row = await focusRowWithKeyboard(getPill(canvasElement))
+    await new Promise((resolve) => setTimeout(resolve, 100))
+    await expect(getFloating()).toBeNull()
+    row.blur()
+  },
+}
+
+export const CompactRowFocusSurvivesHover: Story = {
+  tags: testOnly,
+  decorators: [SidebarRow],
+  args: {
+    context: 'sidebar',
+    compact: true,
+    text: 'Deprecated',
+    style: 'orange',
+  },
+  play: async ({ canvasElement }) => {
+    const pill = getPill(canvasElement)
+    const row = await focusRowWithKeyboard(pill)
     await waitFor(() => expect(getVisibleFloating()).not.toBeNull())
     await userEvent.hover(pill)
     await userEvent.unhover(pill)
     await new Promise((resolve) => setTimeout(resolve, 400))
     await expect(getVisibleFloating()).not.toBeNull()
-    pill.blur()
+    row.blur()
     await waitFor(() => expect(getFloating()).toBeNull())
+  },
+}
+
+export const CompactRowFocusEscape: Story = {
+  tags: testOnly,
+  decorators: [SidebarRow],
+  args: {
+    context: 'sidebar',
+    compact: true,
+    text: 'Deprecated',
+    style: 'orange',
+  },
+  play: async ({ canvasElement }) => {
+    const pill = getPill(canvasElement)
+    const row = await focusRowWithKeyboard(pill)
+    await waitFor(() => expect(getVisibleFloating()).not.toBeNull())
+    await userEvent.keyboard('{Escape}')
+    await waitFor(() => expect(getFloating()).toBeNull())
+    await expect(document.activeElement).toBe(row)
+    await new Promise((resolve) => setTimeout(resolve, 100))
+    await expect(getFloating()).toBeNull()
+    row.blur()
+  },
+}
+
+export const CompactRowFocusWithoutKeyboard: Story = {
+  tags: testOnly,
+  decorators: [SidebarRow],
+  // A row focused by a press, which react-aria doesn't report as keyboard
+  // focus even when the browser matches :focus-visible.
+  parameters: { rowReportsFocusVisible: false },
+  args: {
+    context: 'sidebar',
+    compact: true,
+    text: 'Deprecated',
+    style: 'orange',
+  },
+  play: async ({ canvasElement }) => {
+    const row = await focusRowWithKeyboard(getPill(canvasElement))
+    await new Promise((resolve) => setTimeout(resolve, 100))
+    await expect(getFloating()).toBeNull()
+    row.blur()
   },
 }
