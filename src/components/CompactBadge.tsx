@@ -1,9 +1,7 @@
 import React, {
   type ComponentProps,
   type FC,
-  type PointerEvent,
   forwardRef,
-  useEffect,
   useRef,
   useState,
 } from 'react'
@@ -21,69 +19,55 @@ import { BadgeUI, getBadgeBorder } from './BadgeUI'
 /** Width in px of every compact badge, whatever its text. */
 export const COMPACT_BADGE_WIDTH = 40
 
+// How long the pointer rests on a pill before its floating badge shows. The
+// badge opens at once and its animations wait, so that leaving the pill or
+// pressing it before then closes a badge that never showed.
 const HOVER_DELAY = 200
 const ANIMATION_DURATION = 120
-const EXIT_DELAY = 200
-// The badge decelerates into place as it opens, and accelerates away as it
-// closes.
-const ENTER_EASING = 'cubic-bezier(0.2, 0.8, 0.2, 1)'
-const EXIT_EASING = 'cubic-bezier(0.8, 0, 0.8, 0.2)'
-
-// The floating badge clipped to the pill's area. The pill is 18px tall: a
-// two-line badge also grows vertically.
-const PILL_CLIP = `inset(calc(50% - 9px) 0 calc(50% - 9px) calc(100% - ${COMPACT_BADGE_WIDTH}px) round 999px)`
-const FULL_CLIP = 'inset(0 round 999px)'
-
-// Two keyframes rather than one played in reverse: changing only the
-// direction of a running animation would not restart it.
-const expand = keyframes({
-  from: { clipPath: PILL_CLIP },
-  to: { clipPath: FULL_CLIP },
-})
-const collapse = keyframes({
-  from: { clipPath: FULL_CLIP },
-  to: { clipPath: PILL_CLIP },
-})
+// Decelerates into place.
+const EASING = 'cubic-bezier(0.2, 0.8, 0.2, 1)'
 
 const PILL_PADDING = 6
 // The inline padding of sidebar badges, in BadgeUI.
 const BADGE_PADDING = 8
 
+// Holds an element invisible: with `backwards`, until its delay ends; with
+// `forwards`, from the end of its delay.
+const hidden = keyframes({
+  from: { opacity: 0 },
+  to: { opacity: 0 },
+})
+
+// The floating badge clipped to the pill's area. The pill is 18px tall: a
+// two-line badge also grows vertically.
+const expand = keyframes({
+  from: {
+    clipPath: `inset(calc(50% - 9px) 0 calc(50% - 9px) calc(100% - ${COMPACT_BADGE_WIDTH}px) round 999px)`,
+  },
+  to: { clipPath: 'inset(0 round 999px)' },
+})
+
 // The text starts where the pill shows it, and slides into place as the badge
 // opens, so that the badge unrolls from the pill rather than replacing it.
-const TEXT_AT_PILL = `translateX(calc(100% + ${BADGE_PADDING + PILL_PADDING - COMPACT_BADGE_WIDTH}px))`
 const slideIn = keyframes({
-  from: { transform: TEXT_AT_PILL },
+  from: {
+    transform: `translateX(calc(100% + ${BADGE_PADDING + PILL_PADDING - COMPACT_BADGE_WIDTH}px))`,
+  },
   to: { transform: 'none' },
 })
-const slideOut = keyframes({
-  from: { transform: 'none' },
-  to: { transform: TEXT_AT_PILL },
-})
 
-type Animation = 'enter' | 'exit' | 'none'
-
-const animations = (
-  animation: Animation,
-  enterKeyframes: string,
-  exitKeyframes: string,
-): CSSObject => ({
+const motion = (keyframesName: string, delay: number): CSSObject => ({
   '@media (prefers-reduced-motion: no-preference)': {
-    ...(animation === 'enter' && {
-      animation: `${enterKeyframes} ${ANIMATION_DURATION}ms ${ENTER_EASING} backwards`,
-    }),
-    ...(animation === 'exit' && {
-      animation: `${exitKeyframes} ${ANIMATION_DURATION}ms ${EXIT_EASING} ${EXIT_DELAY}ms forwards`,
-    }),
+    animation: `${keyframesName} ${ANIMATION_DURATION}ms ${EASING} ${delay}ms backwards`,
   },
 })
 
 // Cuts the text after two lines, without an ellipsis.
-const FloatingText = styled.span<{ animation: Animation }>(({ animation }) => ({
+const FloatingText = styled.span<{ delay: number }>(({ delay }) => ({
   display: 'block',
   maxHeight: '1.5rem',
   overflow: 'hidden',
-  ...animations(animation, slideIn, slideOut),
+  ...motion(slideIn, delay),
 }))
 
 // Applied after custom styles, so that every pill keeps the same width.
@@ -123,6 +107,14 @@ function joinShadows(...shadows: string[]) {
   return shadows.filter((shadow) => shadow !== 'none').join(', ')
 }
 
+// react-aria closes tooltips when the pointer leaves their trigger, even
+// while the trigger has keyboard focus. Its close request runs within the
+// browser's pointer event.
+function isPointerLeaving() {
+  const type = window.event?.type
+  return type === 'pointerout' || type === 'mouseout'
+}
+
 interface CompactBadgeProps {
   extraStyle: CSSObject
   shortText?: string
@@ -141,52 +133,24 @@ export const CompactBadge: FC<CompactBadgeProps> = ({
   const theme = useTheme()
   const pillRef = useRef<HTMLDivElement>(null)
   const [isOpen, setIsOpen] = useState(false)
-  const [animation, setAnimation] = useState<Animation>('none')
   const [maxWidth, setMaxWidth] = useState<number>()
   const [hasFocusRing, setHasFocusRing] = useState(false)
-
-  const hoverTimer = useRef<ReturnType<typeof setTimeout>>(undefined)
-  const closeTimer = useRef<ReturnType<typeof setTimeout>>(undefined)
-  useEffect(
-    () => () => {
-      clearTimeout(hoverTimer.current)
-      clearTimeout(closeTimer.current)
-    },
-    [],
-  )
-
-  const close = (pill: HTMLElement | null) => {
-    clearTimeout(hoverTimer.current)
-    if (!isOpen || animation === 'exit') {
-      return
-    }
-    // A pill that lost its box can't anchor an animation, and users who ask
-    // for reduced motion get none.
-    const animates =
-      pill?.getBoundingClientRect().width &&
-      window.matchMedia?.('(prefers-reduced-motion: no-preference)').matches
-    if (!animates) {
-      setIsOpen(false)
-      return
-    }
-    setAnimation('exit')
-    closeTimer.current = setTimeout(
-      () => setIsOpen(false),
-      EXIT_DELAY + ANIMATION_DURATION,
-    )
-  }
+  const delay = hasFocusRing ? 0 : HOVER_DELAY
 
   const onVisibleChange = (visible: boolean) => {
     const pill = pillRef.current
     if (!visible || !pill) {
-      close(pill)
+      // Leaving a pill with the pointer keeps a keyboard user's badge open.
+      if (!(isPointerLeaving() && pill?.matches(':focus-visible'))) {
+        setIsOpen(false)
+      }
       return
     }
 
     const showsFullText =
       (shortText === undefined || shortText === text) &&
       pill.scrollWidth <= pill.clientWidth
-    if (showsFullText) {
+    if (isOpen || showsFullText) {
       return
     }
 
@@ -197,28 +161,7 @@ export const CompactBadge: FC<CompactBadgeProps> = ({
         4,
     )
     setHasFocusRing(pill.matches(':focus-visible'))
-    clearTimeout(closeTimer.current)
-    // A badge that is still closing reopens without growing again.
-    setAnimation(isOpen ? 'none' : 'enter')
     setIsOpen(true)
-  }
-
-  // react-aria only opens tooltips on hover once a pointer has moved in a
-  // document where its input modality listeners run, which a page without
-  // other react-aria components never sets up. The pill handles mouse hover
-  // itself, and leaves focus and dismissal to react-aria.
-  const onPointerEnter = (event: PointerEvent) => {
-    if (event.pointerType !== 'mouse') {
-      return
-    }
-    clearTimeout(hoverTimer.current)
-    hoverTimer.current = setTimeout(() => onVisibleChange(true), HOVER_DELAY)
-  }
-  const onPointerLeave = () => {
-    clearTimeout(hoverTimer.current)
-    if (document.activeElement !== pillRef.current) {
-      onVisibleChange(false)
-    }
   }
 
   const floatingStyle: CSSObject = {
@@ -231,7 +174,10 @@ export const CompactBadge: FC<CompactBadgeProps> = ({
     whiteSpace: 'normal',
     overflowWrap: 'break-word',
     textOverflow: 'clip',
-    ...animations(animation, expand, collapse),
+    animation: `${hidden} 0s ${delay}ms backwards`,
+    '@media (prefers-reduced-motion: no-preference)': {
+      animation: `${hidden} 0s ${delay}ms backwards, ${expand} ${ANIMATION_DURATION}ms ${EASING} ${delay}ms backwards`,
+    },
     // An inner ring in the app's background keeps the focus ring visible on
     // the selected row, whose background has the focus ring's colour.
     ...(hasFocusRing && {
@@ -248,7 +194,7 @@ export const CompactBadge: FC<CompactBadgeProps> = ({
     <TooltipProvider
       placement="left"
       offset={-COMPACT_BADGE_WIDTH}
-      delayShow={HOVER_DELAY}
+      delayShow={0}
       delayHide={0}
       visible={isOpen}
       onVisibleChange={onVisibleChange}
@@ -261,7 +207,7 @@ export const CompactBadge: FC<CompactBadgeProps> = ({
           hasLongText={false}
           theme={theme}
         >
-          <FloatingText animation={animation}>{text}</FloatingText>
+          <FloatingText delay={delay}>{text}</FloatingText>
         </BadgeUI>
       }
       {...TOOLTIP_PASSTHROUGH_PROPS}
@@ -274,9 +220,9 @@ export const CompactBadge: FC<CompactBadgeProps> = ({
         extraStyle={{
           ...extraStyle,
           ...PILL_STYLE,
-          // The floating badge replaces the pill while it shows, along with
-          // its focus ring. Opacity keeps the pill focusable underneath.
-          opacity: isOpen ? 0 : 1,
+          // The floating badge replaces the pill, along with its focus ring,
+          // once it shows. Opacity keeps the pill focusable underneath.
+          ...(isOpen && { animation: `${hidden} 0s ${delay}ms forwards` }),
           // Drawn inside the pill, which sidebar rows clip, and over the
           // badge's own colour rather than the row's.
           '&:focus-visible': {
@@ -289,9 +235,14 @@ export const CompactBadge: FC<CompactBadgeProps> = ({
           },
         }}
         hasLongText={false}
-        onPointerDown={() => clearTimeout(hoverTimer.current)}
-        onPointerEnter={onPointerEnter}
-        onPointerLeave={onPointerLeave}
+        // react-aria only opens tooltips on hover once a pointer has moved in
+        // a document where its input modality listeners run, which a page
+        // without other react-aria components never sets up.
+        onPointerEnter={(event) => {
+          if (event.pointerType === 'mouse') {
+            onVisibleChange(true)
+          }
+        }}
         role="img"
         tabIndex={-1}
         theme={theme}
