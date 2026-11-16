@@ -11,6 +11,13 @@ vi.mock('storybook/manager-api', () => ({
       if (id === 'mock-component') {
         return { type: 'component', tags: ['test1', 'test2', 'test3'] }
       }
+      if (id === 'mock-story') {
+        return {
+          type: 'story',
+          parent: 'mock-component',
+          tags: ['test1', 'test2', 'test3'],
+        }
+      }
       if (id === 'mock-composed-component' && refId === 'child-ref') {
         return { type: 'component', tags: ['test2'] }
       }
@@ -363,6 +370,21 @@ describe('useBadgesToDisplay', () => {
           context: 'sidebar',
           parameters,
           parent: 'mock-component',
+          tags: ['test2'],
+          type: 'story',
+        }),
+      )
+
+      expect(result.current).toHaveLength(0)
+    })
+
+    it('does not display tags that an ancestor further up displays', () => {
+      // The parent story skips the tag, as its own parent displays it.
+      const { result } = renderHook(() =>
+        useBadgesToDisplay({
+          context: 'sidebar',
+          parameters,
+          parent: 'mock-story',
           tags: ['test2'],
           type: 'story',
         }),

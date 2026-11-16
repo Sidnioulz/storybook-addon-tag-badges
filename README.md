@@ -290,7 +290,7 @@ A condition for the sidebar takes two properties:
 | Property        | Description                                                                                          | Type      | Example value |
 | --------------- | ---------------------------------------------------------------------------------------------------- | --------- | ------------- |
 | `type`          | The type of entry to match                                                                           | `string`  | `'docs'`      |
-| `skipInherited` | Whether to skip showing the badge if a parent entry in the UI already shows a badge for the same tag | `boolean` | `true`        |
+| `skipInherited` | Whether to skip showing the badge if an ancestor entry in the UI already shows a badge for the same tag | `boolean` | `true`        |
 
 Using the default config for `display` is heavily recommended. It is defined as follows:
 ```ts

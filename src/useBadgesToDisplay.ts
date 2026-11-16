@@ -25,10 +25,13 @@ type BadgesToDisplay = { badge: BadgeOrBadgeFn; tag: string }[]
  *
  * @param options.api The manager API, used to resolve parent entries for
  * `skipInherited`. Without it, inherited badges are not skipped.
+ * @param options.includeInherited Also returns the badges skipped because an
+ * ancestor shows them, so that descendants skip them too.
  */
 export function getBadgesToDisplay({
   api,
   context,
+  includeInherited = false,
   parameters,
   parent,
   refId,
@@ -36,6 +39,7 @@ export function getBadgesToDisplay({
   type,
 }: UseBadgesToDisplayOptions & {
   api?: API
+  includeInherited?: boolean
 }): BadgesToDisplay {
   /* Handle potentially missing data from callees. */
   if (!tags || !type) {
@@ -74,9 +78,10 @@ export function getBadgesToDisplay({
         resolvedParent.type !== 'root' &&
         parentTags?.includes(current.tag)
       ) {
-        const displayParent = getBadgesToDisplay({
+        const shownAbove = getBadgesToDisplay({
           api,
           context,
+          includeInherited: true,
           parameters,
           parent: resolvedParent.parent,
           refId,
@@ -84,7 +89,10 @@ export function getBadgesToDisplay({
           type: resolvedParent.type,
         })
 
-        if (displayParent.find(({ tag }) => tag === current.tag)) {
+        if (
+          !includeInherited &&
+          shownAbove.some(({ tag }) => tag === current.tag)
+        ) {
           return acc
         }
       }
