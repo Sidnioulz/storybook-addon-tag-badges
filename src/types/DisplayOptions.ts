@@ -1,6 +1,12 @@
 import { API_HashEntry } from 'storybook/internal/types'
 
 /**
+ * The type of a Storybook entry, as display conditions name it. Story tests
+ * are story entries of the `test` subtype, and are named `test`.
+ */
+export type DisplayEntryType = API_HashEntry['type'] | 'test'
+
+/**
  * Display options for badges in MDX pages. Only applicable to components
  * and stories referenced in MDX files.
  */
@@ -16,17 +22,17 @@ export type SidebarDisplayOptionItem =
   | boolean
   | {
       skipInherited: boolean
-      type: Exclude<API_HashEntry['type'], 'root'>
+      type: Exclude<DisplayEntryType, 'root'>
     }
 export type SidebarDisplayOptions =
   SidebarDisplayOptionItem | SidebarDisplayOptionItem[]
 
 /**
- * Display options for badges in MDX pages. Only applicable to docs and stories
- * which are the two types that have a preview canvas, and thus, a toolbar.
+ * Display options for badges in the toolbar. Only applicable to docs, stories
+ * and story tests, which have a preview canvas, and thus, a toolbar.
  */
 export type ToolbarDisplayOptionItem =
-  boolean | Exclude<API_HashEntry['type'], 'root' | 'component' | 'group'>
+  boolean | Exclude<DisplayEntryType, 'root' | 'component' | 'group'>
 export type ToolbarDisplayOptions =
   ToolbarDisplayOptionItem | ToolbarDisplayOptionItem[]
 

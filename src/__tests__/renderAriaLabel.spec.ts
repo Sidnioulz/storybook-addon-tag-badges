@@ -16,6 +16,11 @@ const parameters: TagBadgeParameters = [
     display: { sidebar: true },
   },
   {
+    tags: 'flaky',
+    badge: { text: 'Flaky' },
+    display: { sidebar: [{ type: 'test', skipInherited: true }] },
+  },
+  {
     tags: 'inherited',
     badge: { text: 'Inherited' },
     display: {
@@ -74,6 +79,13 @@ describe('renderAriaLabel', () => {
     expect(renderAriaLabel(entry(['version:2.0.0']), api, sidebar)).toBe(
       'Primary. v2.0.0',
     )
+  })
+
+  it('names the badges of story tests', () => {
+    const test = entry(['flaky'], { subtype: 'test', name: 'Renders' })
+
+    expect(renderAriaLabel(test, api, sidebar)).toBe('Renders. Flaky')
+    expect(renderAriaLabel(entry(['flaky']), api, sidebar)).toBe('Primary')
   })
 
   it('returns the name alone when no badge matches', () => {

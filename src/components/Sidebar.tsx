@@ -3,6 +3,7 @@ import type { API_HashEntry } from 'storybook/internal/types'
 
 import { useBadgesToDisplay } from '../useBadgesToDisplay'
 import { readConfig, readOptions } from '../utils/config'
+import { getDisplayType } from '../utils/display'
 import { SidebarLabel } from './SidebarLabel'
 
 export interface SidebarProps {
@@ -21,7 +22,7 @@ export const Sidebar: FC<SidebarProps> = ({ children, item }) => {
     parent: 'parent' in item ? item.parent : undefined,
     refId: item.refId,
     tags: item.tags,
-    type: item.type,
+    type: getDisplayType(item),
   })
 
   if (!firstBadge) {
