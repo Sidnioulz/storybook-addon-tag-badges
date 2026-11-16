@@ -11,6 +11,13 @@ export const newBadge: TagBadgeParameter = {
   },
 }
 
+const PRE_RELEASE_SHORT_TEXTS: Record<string, string> = {
+  alpha: 'α',
+  beta: 'β',
+  rc: 'RC',
+  experimental: 'Exp',
+}
+
 export const preReleaseBadge: TagBadgeParameter = {
   tags: ['alpha', 'beta', 'rc', 'experimental'],
   badge: ({ tag }) => {
@@ -19,6 +26,7 @@ export const preReleaseBadge: TagBadgeParameter = {
 
     return {
       text: tag === 'rc' ? 'Release candidate' : upperFirst(tag),
+      shortText: PRE_RELEASE_SHORT_TEXTS[tag],
       style: 'purple',
     }
   },
@@ -28,6 +36,7 @@ export const deprecatedBadge: TagBadgeParameter = {
   tags: 'deprecated',
   badge: {
     text: 'Deprecated',
+    shortText: 'Depr',
     style: 'yellow',
   },
 }
@@ -36,6 +45,7 @@ export const outdatedBadge: TagBadgeParameter = {
   tags: 'outdated',
   badge: {
     text: 'Outdated',
+    shortText: 'Old',
     style: 'orange',
   },
 }
@@ -44,6 +54,8 @@ export const dangerBadge: TagBadgeParameter = {
   tags: 'danger',
   badge: {
     text: 'Danger',
+    // The warning sign, shown as text rather than as an emoji.
+    shortText: '\u26A0\uFE0E',
     style: 'red',
   },
 }
@@ -52,6 +64,7 @@ export const codeOnlyBadge: TagBadgeParameter = {
   tags: ['code-only'],
   badge: {
     text: 'Code Only',
+    shortText: 'Code',
     style: 'grey',
   },
 }
@@ -71,6 +84,8 @@ export const versionBadge: TagBadgeParameter = {
 
     return {
       text: `${version}`,
+      // The major and minor versions.
+      shortText: version?.split('.').slice(0, 2).join('.'),
       style: isExperimental ? 'turquoise' : 'blue',
     }
   },
