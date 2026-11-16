@@ -1,6 +1,7 @@
 export const ADDON_ID = 'storybook/addon-tag-badges'
 export const TOOL_ID = `${ADDON_ID}/tool`
 export const KEY = `tagBadges`
+export const OPTIONS_KEY = `tagBadgesOptions`
 export const EVENTS = {
   REQUEST_MDX_BADGE_RENDER: `${ADDON_ID}/requestMdxBadgeRender`,
   MDX_BADGE_RENDER_RESPONSE: `${ADDON_ID}/mdxBadgeRenderResponse`,
