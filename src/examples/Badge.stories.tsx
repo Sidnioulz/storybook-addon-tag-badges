@@ -148,13 +148,23 @@ const expectNoFloatingAfterHover = async (pill: HTMLElement) => {
   await expect(getFloating()).toBeNull()
   await userEvent.unhover(pill)
 }
+const waitForFloating = () =>
+  waitFor(() => {
+    const element = getFloating()
+    expect(element).not.toBeNull()
+    return element!
+  })
+// Resolves once the floating badge has finished opening, so that its
+// geometry is settled.
 const hoverUntilFloating = async (pill: HTMLElement) => {
   await userEvent.hover(pill)
-  return waitFor(() => {
-    const floating = getFloating()
-    expect(floating).not.toBeNull()
-    return floating!
-  })
+  const floating = await waitForFloating()
+  await Promise.all(
+    floating
+      .getAnimations({ subtree: true })
+      .map((animation) => animation.finished),
+  )
+  return floating
 }
 
 export const CompactFits: Story = {
@@ -162,7 +172,7 @@ export const CompactFits: Story = {
   args: { context: 'sidebar', compact: true, text: 'New', style: 'green' },
   play: async ({ canvasElement }) => {
     const pill = getPill(canvasElement)
-    await expect(pill.getBoundingClientRect().width).toBe(48)
+    await expect(pill.getBoundingClientRect().width).toBe(40)
     await expectNoFloatingAfterHover(pill)
   },
 }
@@ -177,12 +187,22 @@ export const CompactTruncated: Story = {
   },
   play: async ({ canvasElement }) => {
     const pill = getPill(canvasElement)
-    await expect(pill.getBoundingClientRect().width).toBe(48)
+    await expect(pill.getBoundingClientRect().width).toBe(40)
     await expect(pill).toHaveAttribute('role', 'img')
     await expect(pill).toHaveAccessibleName('Deprecated')
+    await expect(getComputedStyle(pill).textOverflow).toBe('clip')
 
     const floating = await hoverUntilFloating(pill)
     await expect(floating).toHaveTextContent('Deprecated')
+    const animation = getComputedStyle(floating)
+    await expect(animation.animationName).not.toBe('none')
+    await expect(
+      parseFloat(animation.animationDuration),
+    ).toBeGreaterThanOrEqual(0.1)
+    await expect(parseFloat(animation.animationDuration)).toBeLessThanOrEqual(
+      0.15,
+    )
+    await expect(animation.animationTimingFunction).not.toBe('linear')
     await expect(
       Math.abs(
         floating.getBoundingClientRect().right -
@@ -191,8 +211,15 @@ export const CompactTruncated: Story = {
     ).toBeLessThanOrEqual(1)
     await expect(pill).not.toHaveAttribute('aria-describedby')
     await expect(getComputedStyle(pill).opacity).toBe('0')
+    // Reading the badge takes longer than its opening animation.
+    await new Promise((resolve) => setTimeout(resolve, 300))
     await userEvent.unhover(pill)
-    await waitFor(() => expect(getComputedStyle(pill).opacity).toBe('1'))
+    // The exit animation starts at least 200ms after the pointer leaves.
+    await new Promise((resolve) => setTimeout(resolve, 150))
+    await expect(getFloating()).not.toBeNull()
+    await expect(getComputedStyle(getFloating()!).clipPath).toBe('none')
+    await waitFor(() => expect(getFloating()).toBeNull())
+    await expect(getComputedStyle(pill).opacity).toBe('1')
   },
 }
 
@@ -230,7 +257,7 @@ export const CompactShortTextEqualsText: Story = {
 
 export const CompactLongText: Story = {
   decorators: [SidebarRow],
-  parameters: { rowWidth: 160 },
+  parameters: { rowWidth: 100 },
   args: {
     context: 'sidebar',
     compact: true,
@@ -247,6 +274,8 @@ export const CompactLongText: Story = {
       row.getBoundingClientRect().left - 0.5,
     )
     await expect(floating.scrollWidth).toBeLessThanOrEqual(floating.clientWidth)
+    await expect(getComputedStyle(floating).textOverflow).toBe('clip')
+    await expect(getComputedStyle(floating).webkitLineClamp).toBe('none')
     await userEvent.unhover(pill)
   },
 }
@@ -264,7 +293,7 @@ export const CompactCustomStyle: Story = {
     },
   },
   play: async ({ canvasElement }) => {
-    await expect(getPill(canvasElement).getBoundingClientRect().width).toBe(48)
+    await expect(getPill(canvasElement).getBoundingClientRect().width).toBe(40)
   },
 }
 
@@ -355,6 +384,37 @@ export const CompactAtViewportEdge: Story = {
           centre(pill.getBoundingClientRect()),
       ),
     ).toBeLessThanOrEqual(1)
+    await userEvent.unhover(pill)
+  },
+}
+
+export const CompactUnrollsFromPill: Story = {
+  decorators: [SidebarRow],
+  args: {
+    context: 'sidebar',
+    compact: true,
+    text: 'Multi-word Badge',
+    style: 'pink',
+  },
+  play: async ({ canvasElement }) => {
+    const pill = getPill(canvasElement)
+    await userEvent.hover(pill)
+    const floating = await waitForFloating()
+    const animations = floating.getAnimations({ subtree: true })
+    await expect(animations.length).toBeGreaterThan(0)
+    for (const animation of animations) {
+      animation.pause()
+      animation.currentTime = 0
+    }
+    // On its first frame, the floating badge shows what the pill shows.
+    const text = floating.firstElementChild!.getBoundingClientRect()
+    const pillPadding = parseFloat(getComputedStyle(pill).paddingLeft)
+    await expect(
+      Math.abs(text.left - (pill.getBoundingClientRect().left + pillPadding)),
+    ).toBeLessThanOrEqual(1)
+    for (const animation of animations) {
+      animation.finish()
+    }
     await userEvent.unhover(pill)
   },
 }
