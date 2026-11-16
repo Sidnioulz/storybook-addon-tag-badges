@@ -114,6 +114,8 @@ Besides, the addon is limited to one badge per entry in the sidebar. Badges plac
 > [!WARNING]
 > This means that when you customise this addon's configuration, you should include your customisations **before** spreading the default config object, so that they have a higher priority.
 
+In the sidebar, the label and badge of an entry share a single line, and badges are aligned at the end of the rows, next to Storybook's status icons and context menu button. When a row is too narrow for both, they split its space evenly, unless one of them needs less, and their text is truncated with an ellipsis. Screen readers announce the badge's full text along with the entry's name.
+
 ## 👀 Usage
 
 To display preconfigured badges, add the relevant tags to your components, stories, or docs entries.
@@ -429,19 +431,23 @@ You may pass a string for a simple text tooltip, shown when hovering or focusing
 
 ## Sidebar Config
 
-This addon uses the [sidebar `renderLabel` feature](https://storybook.js.org/docs/configure/user-interface/sidebar-and-urls) to display badges in the sidebar. If you define it for other purposes in your Storybook instance, it will conflict with this addon and sidebar badges won't show.
+This addon uses the [sidebar `renderLabel` and `renderAriaLabel` options](https://storybook.js.org/docs/configure/user-interface/sidebar-and-urls) to display badges in the sidebar. `renderLabel` shows the badge next to the entry's name, and `renderAriaLabel` adds the badge's text to the entry's accessible name, e.g. "Button. Deprecated", so that screen readers announce it.
 
-To show badges for items that aren't customised by your own `renderLabel` logic, you may import the addon's own `renderLabel` function and call it at the end of your function.
+The addon keeps the other `sidebar` options you set, like `showRoots` or `filters`. If you set your own `renderLabel`, the addon sets neither option, and badges won't show in the sidebar. To show badges for items that aren't customised by your own logic, call the addon's `renderLabel` and `renderAriaLabel` functions at the end of your own, passing all arguments through. To customise an item and keep its badge, wrap your label in the `Sidebar` component, and pass the matching name to `renderAriaLabel`.
 
 ```tsx
-// .storybook/manager.ts
+// .storybook/manager.tsx
+import React from 'react'
 import { addons } from 'storybook/manager-api'
-import type { API_HashEntry } from '@storybook/types'
-import { renderLabel, Sidebar } from 'storybook-addon-tag-badges/manager-helpers'
+import {
+  renderAriaLabel,
+  renderLabel,
+  Sidebar,
+} from 'storybook-addon-tag-badges/manager-helpers'
 
 addons.setConfig({
   sidebar: {
-    renderLabel: (item: API_HashEntry) => {
+    renderLabel: (item, api, context) => {
       // Customise your own items, with no badge support.
       if (item.name === 'Support') {
         return '🛟 Get Support'
@@ -453,26 +459,32 @@ addons.setConfig({
       }
 
       // Badges for every item not customised by you.
-      return renderLabel(item)
+      return renderLabel(item, api, context)
     },
-  }
+    renderAriaLabel: (item, api, context) => {
+      // Describe your own items the way renderLabel shows them.
+      if (item.name === 'Support') {
+        return 'Get Support'
+      }
+
+      // Pass the name shown in Sidebar to keep the badge in the label.
+      if (item.type === 'docs') {
+        return renderAriaLabel(
+          { ...item, name: `${item.name} [doc]` },
+          api,
+          context,
+        )
+      }
+
+      return renderAriaLabel(item, api, context)
+    },
+  },
 })
 ```
 
-Likewise, if you define configuration for the `sidebar` option without including `renderLabel`, the render function defined by this addon will be overwritten, and badges won't show in the sidebar. Import and add the `renderLabel` function like so:
+`renderLabel` returns `undefined` for entries that never show a badge, such as roots, so that Storybook renders their default label. Storybook's mobile bottom bar only shows plain text, so neither function adds a badge there.
 
-```tsx
-// .storybook/manager.ts
-import { addons } from 'storybook/manager-api'
-import { renderLabel } from 'storybook-addon-tag-badges/manager-helpers'
-
-addons.setConfig({
-  sidebar: {
-    /* your own changes here... */
-    renderLabel,
-  }
-})
-```
+The `Sidebar` component truncates its children with an ellipsis when the row is too narrow, so pass it text or inline content.
 
 ## Using Badges in MDX
 
@@ -546,6 +558,10 @@ In Storybook, your MDX and CSF files are converted to `docs`, `component`, `grou
 For `component` entries, tags are computed indirectly: they are the intersection of tags present on all of the component's stories. For example, for a component that defines the tag `version:1.2.0` in its `meta`, and has one story that defines an additional tag `deprecated`, the component entry will only have the `version:1.2.0` tag defined.
 
 In particular, if a component `meta` defines two tags `outdated` and `version:1.1.0`, but one story explicitly removes the tag `outdated` (by adding `!outdated`), then the component entry will only have tag `version:1.1.0`.
+
+### Sidebar Space
+
+Storybook only renders the sidebar rows that are in view, and relies on every row having the same height to do so. Sidebar labels and badges therefore can't wrap onto several lines, and are truncated when a row is too narrow, e.g. for deeply nested entries. Keep the text of sidebar badges short, and use the toolbar or MDX badges, which show full text, for longer descriptions. Use the [`display` option](#display-advanced-usage) to show a badge in the toolbar but not in the sidebar.
 
 ## 👩🏽‍💻 Contributing
 
