@@ -20,4 +20,5 @@ export type {
   ToolbarDisplayOptions,
 } from './types/DisplayOptions'
 export type { TagBadgeParameters } from './types/TagBadgeParameters'
+export type { TagBadgesOptions } from './types/TagBadgesOptions'
 export type { TagPattern, TagPatterns } from './types/TagPattern'

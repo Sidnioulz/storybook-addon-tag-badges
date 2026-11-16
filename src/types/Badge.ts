@@ -40,6 +40,12 @@ export interface Badge {
   /** The text content of the badge. */
   text: string
 
+  /**
+   * A shorter text shown instead of `text` by compact sidebar badges, when
+   * the `compactSidebar` option is on. Ignored everywhere else.
+   */
+  shortText?: string
+
   /** Either a style preset provided by the addon, or a custom emotion object. */
   style?:
     | 'grey'
