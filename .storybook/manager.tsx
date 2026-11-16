@@ -18,7 +18,7 @@ addons.setConfig({
     },
     renderAriaLabel: (item, api, context) => {
       if (item.name.startsWith('Addon')) {
-        return 'Addon'
+        return renderAriaLabel({ ...item, name: 'Addon' }, api, context)
       }
 
       return renderAriaLabel(item, api, context)

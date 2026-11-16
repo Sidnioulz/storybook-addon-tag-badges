@@ -13,11 +13,9 @@ describe('getBadgeBorder', () => {
     expect(getBadgeBorder(convert(themes.dark), {})).toBe('none')
   })
 
-  it('can be combined with other shadows when there is no border', () => {
-    expect(
-      [getBadgeBorder(convert(themes.dark), {}), '0 0 0 2px white']
-        .filter((shadow) => shadow !== 'none')
-        .join(', '),
-    ).toBe('0 0 0 2px white')
+  it('derives a faint border from the text colour of a light badge', () => {
+    expect(getBadgeBorder(convert(themes.light), { color: 'red' })).toBe(
+      'inset 0 0 0 1px color-mix(in oklab, red 10%, transparent 90%)',
+    )
   })
 })

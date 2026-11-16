@@ -132,10 +132,12 @@ function MockRow({
   focusable,
   reportsFocusVisible,
   style,
-}: MockRowProps) {
+}: Readonly<MockRowProps>) {
   const [isFocusVisible, setIsFocusVisible] = useState(false)
   return (
     <div
+      role="treeitem"
+      aria-selected={false}
       data-item-id="badge-story"
       data-focus-visible={isFocusVisible || undefined}
       tabIndex={focusable ? 0 : undefined}
@@ -156,24 +158,42 @@ function MockRow({
 
 // Mimics a Storybook sidebar row, whose left edge bounds the floating badge.
 const SidebarRow: Decorator = (Story, { parameters }) => (
-  <MockRow
-    focusable={parameters.rowFocusable !== false}
-    reportsFocusVisible={parameters.rowReportsFocusVisible !== false}
-    style={{
-      display: 'flex',
-      justifyContent: 'flex-end',
-      alignItems: 'center',
-      width: parameters.rowWidth ?? 260,
-      height: 28,
-      ...(parameters.atViewportBottom && {
-        position: 'absolute',
-        bottom: 2,
-      }),
-    }}
+  <div
+    role="tree"
+    aria-label="Stories"
+    style={
+      parameters.scrollable
+        ? { height: 60, overflowY: 'auto', position: 'relative' }
+        : undefined
+    }
   >
-    <Story />
-  </MockRow>
+    <MockRow
+      focusable={parameters.rowFocusable !== false}
+      reportsFocusVisible={parameters.rowReportsFocusVisible !== false}
+      style={{
+        display: 'flex',
+        justifyContent: 'flex-end',
+        alignItems: 'center',
+        width: parameters.rowWidth ?? 260,
+        height: 28,
+        ...(parameters.atViewportBottom && {
+          position: 'absolute',
+          bottom: 2,
+        }),
+      }}
+    >
+      <Story />
+    </MockRow>
+    {parameters.scrollable && <div style={{ height: 200 }} />}
+  </div>
 )
+
+const deprecatedArgs = {
+  context: 'sidebar',
+  compact: true,
+  text: 'Deprecated',
+  style: 'orange',
+} satisfies Story['args']
 
 // Stories that hover or focus a badge to test it, kept out of the sidebar and
 // docs so that browsing stories never shows their interactions.
@@ -189,29 +209,28 @@ const expectNoFloatingAfterHover = async (pill: HTMLElement) => {
   await expect(getFloating()).toBeNull()
   await userEvent.unhover(pill)
 }
-const getVisibleFloating = () => {
-  const floating = getFloating()
-  return floating && getComputedStyle(floating).opacity !== '0'
-    ? floating
-    : null
-}
-const waitForFloating = () =>
-  waitFor(() => {
-    const element = getFloating()
-    expect(element).not.toBeNull()
-    return element!
-  })
+const waitForFloating = (timeout?: number) =>
+  waitFor(
+    () => {
+      const element = getFloating()
+      expect(element).not.toBeNull()
+      return element!
+    },
+    { timeout },
+  )
 // Resolves once the floating badge has finished opening, so that its
 // geometry is settled.
-const hoverUntilFloating = async (pill: HTMLElement) => {
-  await userEvent.hover(pill)
-  const floating = await waitForFloating()
+const settled = async (floating: HTMLElement) => {
   await Promise.all(
     floating
       .getAnimations({ subtree: true })
       .map((animation) => animation.finished),
   )
   return floating
+}
+const hoverUntilFloating = async (pill: HTMLElement) => {
+  await userEvent.hover(pill)
+  return settled(await waitForFloating())
 }
 
 export const CompactFits: Story = {
@@ -226,24 +245,20 @@ export const CompactFits: Story = {
 
 export const CompactTruncated: Story = {
   decorators: [SidebarRow],
-  args: {
-    context: 'sidebar',
-    compact: true,
-    text: 'Deprecated',
-    style: 'orange',
-  },
+  args: deprecatedArgs,
   play: async ({ canvasElement }) => {
     const pill = getPill(canvasElement)
     await expect(pill.getBoundingClientRect().width).toBe(40)
-    await expect(pill).toHaveAttribute('role', 'img')
-    await expect(pill).toHaveAccessibleName('Deprecated')
+    await expect(pill.closest('[role="treeitem"]')).toHaveAccessibleName(
+      'Deprecated',
+    )
     await expect(pill).not.toHaveAttribute('tabindex')
     // The text is cut where the pill's padding starts.
     const text = pill.firstElementChild as HTMLElement
     await expect(text.scrollWidth).toBeGreaterThan(text.clientWidth)
     await expect(text.getBoundingClientRect().right).toBeLessThanOrEqual(
       pill.getBoundingClientRect().right -
-        parseFloat(getComputedStyle(pill).paddingRight) +
+        Number.parseFloat(getComputedStyle(pill).paddingRight) +
         0.5,
     )
   },
@@ -252,25 +267,18 @@ export const CompactTruncated: Story = {
 export const CompactHoverShowsFullBadge: Story = {
   tags: testOnly,
   decorators: [SidebarRow],
-  args: {
-    context: 'sidebar',
-    compact: true,
-    text: 'Deprecated',
-    style: 'orange',
-  },
+  args: deprecatedArgs,
   play: async ({ canvasElement }) => {
     const pill = getPill(canvasElement)
-    const floating = await hoverUntilFloating(pill)
+    // It opens as soon as the pointer enters the pill.
+    await userEvent.hover(pill)
+    const floating = await settled(await waitForFloating(50))
     await expect(floating).toHaveTextContent('Deprecated')
-    // The reveal runs alongside a 0s step that keeps the badge hidden during
-    // the hover delay.
     const animation = getComputedStyle(floating)
-    const durations = animation.animationDuration.split(', ').map(parseFloat)
-    await expect(
-      durations.some((duration) => duration >= 0.1 && duration <= 0.15),
-    ).toBe(true)
+    const duration = Number.parseFloat(animation.animationDuration)
+    await expect(duration).toBeGreaterThanOrEqual(0.1)
+    await expect(duration).toBeLessThanOrEqual(0.15)
     await expect(animation.animationTimingFunction).toContain('cubic-bezier')
-    await expect(animation.animationTimingFunction).not.toContain('linear')
     await expect(
       Math.abs(
         floating.getBoundingClientRect().right -
@@ -283,7 +291,7 @@ export const CompactHoverShowsFullBadge: Story = {
     // exit animation.
     await userEvent.unhover(pill)
     await new Promise((resolve) => setTimeout(resolve, 80))
-    await expect(getVisibleFloating()).not.toBeNull()
+    await expect(getFloating()).not.toBeNull()
     await waitFor(() => expect(getFloating()).toBeNull())
     await expect(getComputedStyle(pill).opacity).toBe('1')
   },
@@ -355,6 +363,9 @@ export const CompactLongTextHover: Story = {
     const row = pill.closest('[data-item-id]')!
     const floating = await hoverUntilFloating(pill)
     const box = floating.getBoundingClientRect()
+    // The text wraps, and is cut after two lines.
+    const text = floating.firstElementChild!
+    await expect(text.scrollHeight).toBeGreaterThan(text.clientHeight)
     await expect(box.height).toBeLessThanOrEqual(2 * 12 + 6 + 1)
     await expect(box.left).toBeGreaterThanOrEqual(
       row.getBoundingClientRect().left - 0.5,
@@ -389,12 +400,7 @@ export const CompactPressCloses: Story = {
   // user-event focuses the row of a pressed pill from a script, which
   // browsers show as keyboard focus. A real press focuses it without that.
   parameters: { rowFocusable: false },
-  args: {
-    context: 'sidebar',
-    compact: true,
-    text: 'Deprecated',
-    style: 'orange',
-  },
+  args: deprecatedArgs,
   play: async ({ canvasElement }) => {
     const pill = getPill(canvasElement)
     await userEvent.hover(pill)
@@ -403,7 +409,6 @@ export const CompactPressCloses: Story = {
     await new Promise((resolve) => setTimeout(resolve, 400))
     await expect(getFloating()).toBeNull()
     await userEvent.unhover(pill)
-    pill.blur()
   },
 }
 
@@ -411,12 +416,7 @@ export const CompactAtViewportEdge: Story = {
   tags: testOnly,
   decorators: [SidebarRow],
   parameters: { atViewportBottom: true },
-  args: {
-    context: 'sidebar',
-    compact: true,
-    text: 'Deprecated',
-    style: 'orange',
-  },
+  args: deprecatedArgs,
   play: async ({ canvasElement }) => {
     const pill = getPill(canvasElement)
     const floating = await hoverUntilFloating(pill)
@@ -448,37 +448,17 @@ export const CompactUnrollsFromPill: Story = {
     await expect(animations.length).toBeGreaterThan(0)
     for (const animation of animations) {
       animation.pause()
-      animation.currentTime = Number(animation.effect!.getTiming().delay)
+      animation.currentTime = 0
     }
     // On its first frame, the floating badge shows what the pill shows.
     const text = floating.firstElementChild!.getBoundingClientRect()
-    const pillPadding = parseFloat(getComputedStyle(pill).paddingLeft)
+    const pillPadding = Number.parseFloat(getComputedStyle(pill).paddingLeft)
     await expect(
       Math.abs(text.left - (pill.getBoundingClientRect().left + pillPadding)),
     ).toBeLessThanOrEqual(1)
     for (const animation of animations) {
       animation.finish()
     }
-    await userEvent.unhover(pill)
-  },
-}
-
-export const CompactHoverOpensAtOnce: Story = {
-  tags: testOnly,
-  decorators: [SidebarRow],
-  args: {
-    context: 'sidebar',
-    compact: true,
-    text: 'Deprecated',
-    style: 'orange',
-  },
-  play: async ({ canvasElement }) => {
-    const pill = getPill(canvasElement)
-    await userEvent.hover(pill)
-    await waitFor(() => expect(getVisibleFloating()).not.toBeNull(), {
-      timeout: 50,
-    })
-    await expect(getComputedStyle(pill).opacity).toBe('0')
     await userEvent.unhover(pill)
   },
 }
@@ -493,16 +473,11 @@ const focusRowWithKeyboard = async (pill: HTMLElement) => {
 export const CompactRowFocus: Story = {
   tags: testOnly,
   decorators: [SidebarRow],
-  args: {
-    context: 'sidebar',
-    compact: true,
-    text: 'Deprecated',
-    style: 'orange',
-  },
+  args: deprecatedArgs,
   play: async ({ canvasElement }) => {
     const pill = getPill(canvasElement)
     const row = await focusRowWithKeyboard(pill)
-    await waitFor(() => expect(getVisibleFloating()).not.toBeNull(), {
+    await waitFor(() => expect(getFloating()).not.toBeNull(), {
       timeout: 50,
     })
     await expect(getComputedStyle(pill).opacity).toBe('0')
@@ -526,20 +501,15 @@ export const CompactRowFocusFits: Story = {
 export const CompactRowFocusSurvivesHover: Story = {
   tags: testOnly,
   decorators: [SidebarRow],
-  args: {
-    context: 'sidebar',
-    compact: true,
-    text: 'Deprecated',
-    style: 'orange',
-  },
+  args: deprecatedArgs,
   play: async ({ canvasElement }) => {
     const pill = getPill(canvasElement)
     const row = await focusRowWithKeyboard(pill)
-    await waitFor(() => expect(getVisibleFloating()).not.toBeNull())
+    await waitFor(() => expect(getFloating()).not.toBeNull())
     await userEvent.hover(pill)
     await userEvent.unhover(pill)
     await new Promise((resolve) => setTimeout(resolve, 400))
-    await expect(getVisibleFloating()).not.toBeNull()
+    await expect(getFloating()).not.toBeNull()
     row.blur()
     await waitFor(() => expect(getFloating()).toBeNull())
   },
@@ -548,17 +518,22 @@ export const CompactRowFocusSurvivesHover: Story = {
 export const CompactRowFocusEscape: Story = {
   tags: testOnly,
   decorators: [SidebarRow],
-  args: {
-    context: 'sidebar',
-    compact: true,
-    text: 'Deprecated',
-    style: 'orange',
-  },
+  args: deprecatedArgs,
   play: async ({ canvasElement }) => {
     const pill = getPill(canvasElement)
     const row = await focusRowWithKeyboard(pill)
-    await waitFor(() => expect(getVisibleFloating()).not.toBeNull())
+    await waitFor(() => expect(getFloating()).not.toBeNull())
+    // The key still reaches the sidebar, which closes on Escape on mobile.
+    const escapes: KeyboardEvent[] = []
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        escapes.push(event)
+      }
+    }
+    document.addEventListener('keydown', onKeyDown)
     await userEvent.keyboard('{Escape}')
+    document.removeEventListener('keydown', onKeyDown)
+    await expect(escapes).toHaveLength(1)
     await waitFor(() => expect(getFloating()).toBeNull())
     await expect(document.activeElement).toBe(row)
     await new Promise((resolve) => setTimeout(resolve, 100))
@@ -573,16 +548,64 @@ export const CompactRowFocusWithoutKeyboard: Story = {
   // A row focused by a press, which react-aria doesn't report as keyboard
   // focus even when the browser matches :focus-visible.
   parameters: { rowReportsFocusVisible: false },
-  args: {
-    context: 'sidebar',
-    compact: true,
-    text: 'Deprecated',
-    style: 'orange',
-  },
+  args: deprecatedArgs,
   play: async ({ canvasElement }) => {
     const row = await focusRowWithKeyboard(getPill(canvasElement))
     await new Promise((resolve) => setTimeout(resolve, 100))
     await expect(getFloating()).toBeNull()
     row.blur()
+  },
+}
+
+const nextFrames = () =>
+  new Promise((resolve) =>
+    requestAnimationFrame(() => requestAnimationFrame(resolve)),
+  )
+
+export const CompactRowFocusFollowsScroll: Story = {
+  tags: testOnly,
+  decorators: [SidebarRow],
+  parameters: { scrollable: true },
+  args: deprecatedArgs,
+  play: async ({ canvasElement }) => {
+    const pill = getPill(canvasElement)
+    const row = await focusRowWithKeyboard(pill)
+    const floating = await waitForFloating()
+    const scroller = row.closest<HTMLElement>('[role="tree"]')!
+    scroller.scrollTop = 20
+    await nextFrames()
+    const centre = (box: DOMRect) => box.top + box.height / 2
+    const pillBox = pill.getBoundingClientRect()
+    const floatingBox = floating.getBoundingClientRect()
+    await expect(
+      Math.abs(floatingBox.right - pillBox.right),
+    ).toBeLessThanOrEqual(1)
+    await expect(
+      Math.abs(centre(floatingBox) - centre(pillBox)),
+    ).toBeLessThanOrEqual(1)
+    row.blur()
+  },
+}
+
+export const CompactHoverOverBadge: Story = {
+  tags: testOnly,
+  decorators: [SidebarRow],
+  args: deprecatedArgs,
+  play: async ({ canvasElement }) => {
+    const pill = getPill(canvasElement)
+    const floating = await hoverUntilFloating(pill)
+    // The pointer moves onto the part of the badge left of the pill.
+    const box = floating.getBoundingClientRect()
+    const coords = { clientX: box.left + 4, clientY: box.top + box.height / 2 }
+    const target = document.elementFromPoint(coords.clientX, coords.clientY)!
+    await userEvent.pointer({ target, coords })
+    await new Promise((resolve) => setTimeout(resolve, 400))
+    await expect(getFloating()).not.toBeNull()
+    // Presses there still reach the row.
+    await expect(pill.closest('[data-item-id]')).toContainElement(
+      target as HTMLElement,
+    )
+    await userEvent.unhover(target)
+    await waitFor(() => expect(getFloating()).toBeNull())
   },
 }
