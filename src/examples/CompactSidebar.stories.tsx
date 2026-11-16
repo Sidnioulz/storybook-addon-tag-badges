@@ -152,6 +152,12 @@ export const Sidebar: Story = {
 
 export const NarrowSidebar: Story = {
   args: { width: 240 },
+}
+
+export const NarrowSidebarHover: Story = {
+  ...NarrowSidebar,
+  // Hovers a badge to test it; kept out of the sidebar and docs.
+  tags: ['!dev', '!autodocs'],
   play: async ({ canvasElement }) => {
     const row = firstSidebar(canvasElement).querySelector(
       '[data-item-id="example-tight-space"]',
