@@ -11,7 +11,7 @@ import { TooltipProvider } from 'storybook/internal/components'
 import { type CSSObject, useTheme } from 'storybook/theming/emotion'
 
 import { ROW_SELECTOR } from '../utils/rowEndAlignment'
-import { BadgeUI } from './BadgeUI'
+import { BadgeUI, getBadgeBorder } from './BadgeUI'
 
 /** Width in px of every compact badge, whatever its text. */
 export const COMPACT_BADGE_WIDTH = 48
@@ -126,9 +126,12 @@ export const CompactBadge: FC<CompactBadgeProps> = ({
     WebkitLineClamp: 2,
     WebkitBoxOrient: 'vertical',
     overflow: 'hidden',
+    // An inner ring in the app's background keeps the focus ring visible on
+    // the selected row, whose background has the focus ring's colour.
     ...(hasFocusRing && {
+      boxShadow: `${getBadgeBorder(theme, extraStyle)}, 0 0 0 2px ${theme.background.app}`,
       outline: `2px solid ${theme.color.secondary}`,
-      outlineOffset: 1,
+      outlineOffset: 2,
     }),
   }
 
@@ -159,7 +162,17 @@ export const CompactBadge: FC<CompactBadgeProps> = ({
         aria-label={text}
         context="sidebar"
         data-tag-badge="pill"
-        extraStyle={{ ...extraStyle, ...PILL_STYLE }}
+        extraStyle={{
+          ...extraStyle,
+          ...PILL_STYLE,
+          // The floating badge replaces the pill while it shows, along with
+          // its focus ring. Opacity keeps the pill focusable underneath.
+          opacity: isOpen ? 0 : 1,
+          '&:focus-visible': {
+            outline: `2px solid ${theme.color.secondary}`,
+            outlineOffset: 1,
+          },
+        }}
         hasLongText={false}
         onPointerEnter={onPointerEnter}
         onPointerLeave={onPointerLeave}
