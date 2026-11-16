@@ -9,7 +9,7 @@ import { type RefObject, useLayoutEffect } from 'react'
 export const ROW_END_INSET = 30
 
 // Tree rows and their sticky copies.
-const ROW_SELECTOR = '[data-item-id], [data-sticky-item-id]'
+export const ROW_SELECTOR = '[data-item-id], [data-sticky-item-id]'
 
 type Measure = () => () => void
 
