@@ -1,5 +1,5 @@
 import type { HashEntry } from 'storybook/manager-api'
-import type { CSSObject } from 'storybook/theming'
+import type { CSSObject } from 'storybook/theming/emotion'
 
 import { getTagParts, getTagPrefix, getTagSuffix } from '../utils/tag'
 

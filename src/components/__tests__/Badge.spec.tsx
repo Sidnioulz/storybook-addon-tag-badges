@@ -1,7 +1,7 @@
 import React from 'react'
 import { render, screen } from '@testing-library/react'
 import '@testing-library/jest-dom/vitest'
-import { ThemeProvider, convert, themes } from 'storybook/theming'
+import { ThemeProvider, convert, themes } from 'storybook/theming/emotion'
 import type { HashEntry } from 'storybook/manager-api'
 
 import { Badge, WithBadge } from '../Badge'
@@ -10,9 +10,11 @@ import { getTagParts } from '../../utils/tag'
 const mockEntry: HashEntry = {
   id: 'example-story',
   type: 'story',
+  subtype: 'story',
   title: 'Example/Story',
   importPath: './example.stories.tsx',
   tags: ['example', 'story'],
+  exportName: 'ExampleStory',
   name: 'Example Story',
   prepared: true,
   args: {},

@@ -1,7 +1,7 @@
 import React, { type FC, type ReactNode } from 'react'
 import { addons } from 'storybook/manager-api'
 import type { API_HashEntry } from 'storybook/internal/types'
-import { styled } from 'storybook/theming'
+import { styled } from 'storybook/theming/emotion'
 
 import { KEY } from '../constants'
 import { TagBadgeParameters } from '../types/TagBadgeParameters'

@@ -6,7 +6,7 @@ import {
   Tooltip,
   TooltipProvider,
 } from 'storybook/internal/components'
-import { CSSObject, styled, useTheme } from 'storybook/theming'
+import { CSSObject, styled, useTheme } from 'storybook/theming/emotion'
 
 import type {
   Badge as BadgeConfigType,
