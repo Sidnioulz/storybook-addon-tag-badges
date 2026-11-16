@@ -1,6 +1,6 @@
 import React, { type FC } from 'react'
 import { addons, type API } from 'storybook/manager-api'
-import { styled } from 'storybook/theming'
+import { styled } from 'storybook/theming/emotion'
 
 import { KEY, TOOL_ID } from '../constants'
 import { type TagBadgeParameters } from '../types/TagBadgeParameters'

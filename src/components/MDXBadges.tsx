@@ -1,6 +1,6 @@
 import React, { type FC, useState, useEffect, useRef } from 'react'
 import { useOf, type Of } from '@storybook/addon-docs/blocks'
-import { styled } from 'storybook/theming'
+import { styled } from 'storybook/theming/emotion'
 import { addons } from 'storybook/internal/preview-api'
 
 import { EVENTS } from '../constants'

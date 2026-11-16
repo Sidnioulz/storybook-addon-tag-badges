@@ -13,7 +13,7 @@ import {
 } from './sampleWorkflows'
 import { mockEntry } from './__fixtures__/HashEntry'
 import { TagBadgeParameters } from '../types/TagBadgeParameters'
-import { styled } from 'storybook/theming'
+import { styled } from 'storybook/theming/emotion'
 import toSource from 'tosource'
 
 const disabledArgType = {
