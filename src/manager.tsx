@@ -4,15 +4,12 @@ import memoizerific from 'memoizerific'
 
 import { Tool } from './components/Tool'
 import { ADDON_ID, EVENTS, KEY, TOOL_ID } from './constants'
-import { defaultConfig } from './defaultConfig'
+import { renderAriaLabel } from './renderAriaLabel'
 import { renderLabel } from './renderLabel'
 import { TagBadgeParameters } from './types/TagBadgeParameters'
 import { getBadgeProps } from './components/Badge'
+import { readConfig } from './utils/config'
 import { matchTags } from './utils/tag'
-
-function readConfig(config = addons.getConfig()): TagBadgeParameters {
-  return config?.tagBadges ?? defaultConfig
-}
 
 // Memoise badge computation based on tags, context, and config.
 const computeBadgeData = memoizerific(100)((
@@ -51,10 +48,16 @@ addons.register(ADDON_ID, (api) => {
     },
   )
 
-  // Initialise manager whilst preserving user config.
+  // Initialise manager whilst preserving user config. The aria label names
+  // the badge shown by the addon's label, so it only applies alongside it: a
+  // custom renderLabel may not show badges at all.
+  const userSidebar = addons.getConfig()?.sidebar
   addons.setConfig({
     [KEY]: readConfig(),
-    sidebar: { renderLabel, ...addons.getConfig()?.sidebar },
+    sidebar: {
+      ...(userSidebar?.renderLabel ? {} : { renderLabel, renderAriaLabel }),
+      ...userSidebar,
+    },
   })
 
   // Register tools.
