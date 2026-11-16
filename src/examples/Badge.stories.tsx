@@ -186,7 +186,9 @@ export const CompactTruncated: Story = {
       ),
     ).toBeLessThanOrEqual(1)
     await expect(pill).not.toHaveAttribute('aria-describedby')
+    await expect(getComputedStyle(pill).opacity).toBe('0')
     await userEvent.unhover(pill)
+    await waitFor(() => expect(getComputedStyle(pill).opacity).toBe('1'))
   },
 }
 
@@ -283,6 +285,11 @@ export const CompactKeyboardFocus: Story = {
       { timeout: 150 },
     )
     await expect(getComputedStyle(floating).outlineStyle).not.toBe('none')
+    // The light theme's app background, which keeps the ring visible on the
+    // selected row, whose background is the ring's colour.
+    await expect(getComputedStyle(floating).boxShadow).toContain(
+      'rgb(246, 249, 252)',
+    )
     pill.blur()
   },
 }

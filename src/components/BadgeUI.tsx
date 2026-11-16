@@ -1,9 +1,18 @@
-import type { CSSObject } from 'storybook/theming/emotion'
+import type { CSSObject, Theme } from 'storybook/theming/emotion'
 import { styled } from 'storybook/theming/emotion'
 
 import type { Badge } from '../types/Badge'
 
 export type BadgeContext = 'mdx' | 'sidebar' | 'toolbar'
+
+/**
+ * Returns the box shadow that draws a badge's border.
+ */
+export function getBadgeBorder(theme: Theme, extraStyle: CSSObject): string {
+  return theme.base === 'light'
+    ? `inset 0 0 0 1px ${extraStyle.borderColor ?? `color-mix(in oklab, ${extraStyle.color ?? theme.color.dark} 10%, transparent 90%)`}`
+    : `inset 0 0 0 1px ${extraStyle.borderColor ?? 'none'}`
+}
 
 export const BadgeUI = styled.div<
   { context: BadgeContext } & { extraStyle: CSSObject; hasLongText: boolean }
@@ -18,10 +27,7 @@ export const BadgeUI = styled.div<
     as === 'button' ? 'help' : context === 'sidebar' ? 'cursor' : 'initial',
   borderRadius: '3em',
   fontWeight: theme.typography.weight.bold,
-  boxShadow:
-    theme.base === 'light'
-      ? `inset 0 0 0 1px ${extraStyle.borderColor ?? `color-mix(in oklab, ${extraStyle.color ?? theme.color.dark} 10%, transparent 90%)`}`
-      : `inset 0 0 0 1px ${extraStyle.borderColor ?? 'none'}`,
+  boxShadow: getBadgeBorder(theme, extraStyle),
   backgroundColor: theme.color.mediumlight,
   color: theme.color.dark,
   wordBreak: 'normal',
