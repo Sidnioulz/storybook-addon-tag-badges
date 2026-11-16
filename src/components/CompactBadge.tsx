@@ -40,13 +40,15 @@ const expand = keyframes({
   to: { clipPath: 'inset(0 round 999px)' },
 })
 
-// The text starts where the pill shows it, and slides into place as the badge
-// opens, so that the badge unrolls from the pill rather than replacing it.
+// The text starts where and as the pill shows it, and slides into place as
+// the badge opens, so that the badge unrolls from the pill rather than
+// replacing it.
 const slideIn = keyframes({
   from: {
     transform: `translateX(calc(100% + ${BADGE_PADDING + PILL_PADDING - COMPACT_BADGE_WIDTH}px))`,
+    clipPath: `inset(0 calc(100% - ${COMPACT_BADGE_WIDTH - 2 * PILL_PADDING}px) 0 0)`,
   },
-  to: { transform: 'none' },
+  to: { transform: 'none', clipPath: 'inset(0)' },
 })
 
 const motion = (keyframesName: string): CSSObject => ({
@@ -70,11 +72,16 @@ const PILL_STYLE: CSSObject = {
   maxWidth: COMPACT_BADGE_WIDTH,
   paddingInline: PILL_PADDING,
   boxSizing: 'border-box',
-  overflow: 'hidden',
-  textOverflow: 'clip',
-  whiteSpace: 'nowrap',
   textAlign: 'center',
 }
+
+// Cuts the pill's text where its padding starts, without an ellipsis.
+const PillText = styled.span({
+  display: 'block',
+  overflow: 'hidden',
+  whiteSpace: 'nowrap',
+  textOverflow: 'clip',
+})
 
 // Props that TooltipProvider forwards to react-aria without declaring them.
 // The floating badge covers the pill: it must let the pointer through to the
@@ -126,6 +133,7 @@ export const CompactBadge: FC<CompactBadgeProps> = ({
 }) => {
   const theme = useTheme()
   const pillRef = useRef<HTMLDivElement>(null)
+  const pillTextRef = useRef<HTMLSpanElement>(null)
   const [isOpen, setIsOpen] = useState(false)
   const [maxWidth, setMaxWidth] = useState<number>()
   const [hasFocusRing, setHasFocusRing] = useState(false)
@@ -140,9 +148,11 @@ export const CompactBadge: FC<CompactBadgeProps> = ({
       return
     }
 
+    const pillText = pillTextRef.current
     const showsFullText =
       (shortText === undefined || shortText === text) &&
-      pill.scrollWidth <= pill.clientWidth
+      pillText !== null &&
+      pillText.scrollWidth <= pillText.clientWidth
     if (isOpen || showsFullText) {
       return
     }
@@ -236,7 +246,7 @@ export const CompactBadge: FC<CompactBadgeProps> = ({
         tabIndex={0}
         theme={theme}
       >
-        {shortText ?? text}
+        <PillText ref={pillTextRef}>{shortText ?? text}</PillText>
       </Pill>
     </TooltipProvider>
   )

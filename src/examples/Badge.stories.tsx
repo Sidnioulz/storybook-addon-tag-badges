@@ -138,6 +138,10 @@ const SidebarRow: Decorator = (Story, { parameters }) => (
   </div>
 )
 
+// Stories that hover or focus a badge to test it, kept out of the sidebar and
+// docs so that browsing stories never shows their interactions.
+const testOnly = ['!dev', '!autodocs']
+
 const getPill = (canvasElement: HTMLElement) =>
   canvasElement.querySelector<HTMLElement>('[data-tag-badge="pill"]')!
 const getFloating = () =>
@@ -195,8 +199,28 @@ export const CompactTruncated: Story = {
     const pill = getPill(canvasElement)
     await expect(pill.getBoundingClientRect().width).toBe(40)
     await expect(pill).toHaveAccessibleName('Deprecated')
-    await expect(getComputedStyle(pill).textOverflow).toBe('clip')
+    // The text is cut where the pill's padding starts.
+    const text = pill.firstElementChild as HTMLElement
+    await expect(text.scrollWidth).toBeGreaterThan(text.clientWidth)
+    await expect(text.getBoundingClientRect().right).toBeLessThanOrEqual(
+      pill.getBoundingClientRect().right -
+        parseFloat(getComputedStyle(pill).paddingRight) +
+        0.5,
+    )
+  },
+}
 
+export const CompactHoverShowsFullBadge: Story = {
+  tags: testOnly,
+  decorators: [SidebarRow],
+  args: {
+    context: 'sidebar',
+    compact: true,
+    text: 'Deprecated',
+    style: 'orange',
+  },
+  play: async ({ canvasElement }) => {
+    const pill = getPill(canvasElement)
     const floating = await hoverUntilFloating(pill)
     await expect(floating).toHaveTextContent('Deprecated')
     // The reveal runs alongside a 0s step that keeps the badge hidden during
@@ -236,8 +260,22 @@ export const CompactShortText: Story = {
     style: 'purple',
   },
   play: async ({ canvasElement }) => {
+    await expect(getPill(canvasElement)).toHaveTextContent('Exp')
+  },
+}
+
+export const CompactShortTextHover: Story = {
+  tags: testOnly,
+  decorators: [SidebarRow],
+  args: {
+    context: 'sidebar',
+    compact: true,
+    text: 'Experimental',
+    shortText: 'Exp',
+    style: 'purple',
+  },
+  play: async ({ canvasElement }) => {
     const pill = getPill(canvasElement)
-    await expect(pill).toHaveTextContent('Exp')
     const floating = await hoverUntilFloating(pill)
     await expect(floating).toHaveTextContent('Experimental')
     await userEvent.unhover(pill)
@@ -245,6 +283,7 @@ export const CompactShortText: Story = {
 }
 
 export const CompactShortTextEqualsText: Story = {
+  tags: testOnly,
   decorators: [SidebarRow],
   args: {
     context: 'sidebar',
@@ -267,6 +306,11 @@ export const CompactLongText: Story = {
     text: 'Multi-word Badge, badgeofmanyletters',
     style: 'pink',
   },
+}
+
+export const CompactLongTextHover: Story = {
+  ...CompactLongText,
+  tags: testOnly,
   play: async ({ canvasElement }) => {
     const pill = getPill(canvasElement)
     const row = pill.closest('[data-item-id]')!
@@ -301,6 +345,7 @@ export const CompactCustomStyle: Story = {
 }
 
 export const CompactKeyboardFocus: Story = {
+  tags: testOnly,
   decorators: [SidebarRow],
   args: {
     context: 'sidebar',
@@ -332,6 +377,7 @@ export const CompactKeyboardFocus: Story = {
 }
 
 export const CompactPressCloses: Story = {
+  tags: testOnly,
   decorators: [SidebarRow],
   args: {
     context: 'sidebar',
@@ -352,6 +398,7 @@ export const CompactPressCloses: Story = {
 }
 
 export const CompactFitsKeyboardFocus: Story = {
+  tags: testOnly,
   decorators: [SidebarRow],
   args: { context: 'sidebar', compact: true, text: 'New', style: 'green' },
   play: async ({ canvasElement }) => {
@@ -370,6 +417,7 @@ export const CompactFitsKeyboardFocus: Story = {
 }
 
 export const CompactAtViewportEdge: Story = {
+  tags: testOnly,
   decorators: [SidebarRow],
   parameters: { atViewportBottom: true },
   args: {
@@ -393,6 +441,7 @@ export const CompactAtViewportEdge: Story = {
 }
 
 export const CompactUnrollsFromPill: Story = {
+  tags: testOnly,
   decorators: [SidebarRow],
   args: {
     context: 'sidebar',
@@ -424,6 +473,7 @@ export const CompactUnrollsFromPill: Story = {
 }
 
 export const CompactHoverOpensAtOnce: Story = {
+  tags: testOnly,
   decorators: [SidebarRow],
   args: {
     context: 'sidebar',
@@ -443,6 +493,7 @@ export const CompactHoverOpensAtOnce: Story = {
 }
 
 export const CompactHoverKeepsFocus: Story = {
+  tags: testOnly,
   decorators: [SidebarRow],
   args: {
     context: 'sidebar',
