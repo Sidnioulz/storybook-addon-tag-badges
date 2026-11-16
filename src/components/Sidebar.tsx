@@ -1,42 +1,21 @@
-import React, { type FC, type ReactNode, useRef } from 'react'
+import React, { type FC, type ReactNode } from 'react'
 import type { API_HashEntry } from 'storybook/internal/types'
-import { styled } from 'storybook/theming/emotion'
 
 import { useBadgesToDisplay } from '../useBadgesToDisplay'
-import { readConfig } from '../utils/config'
-import { useRowEndAlignment } from '../utils/rowEndAlignment'
-import { WithBadge } from './Badge'
+import { readConfig, readOptions } from '../utils/config'
+import { SidebarLabel } from './SidebarLabel'
 
 export interface SidebarProps {
   children: ReactNode
   item: API_HashEntry
 }
 
-// Sidebar rows have a fixed height, so the label and badge share one line.
-// Each column can take up to half of the row, plus whatever the other column
-// leaves unused. Both truncate with an ellipsis when they don't fit.
-const Container = styled.div({
-  display: 'grid',
-  gridTemplateColumns: 'minmax(0, max-content) minmax(0, max-content)',
-  justifyContent: 'space-between',
-  alignItems: 'center',
-  columnGap: 6,
-})
-
-const Label = styled.span({
-  minWidth: 0,
-  overflow: 'hidden',
-  textOverflow: 'ellipsis',
-  whiteSpace: 'nowrap',
-})
-
 /**
  * Renders a sidebar label followed by the badge of the entry's
  * highest-priority tag, if any.
  */
 export const Sidebar: FC<SidebarProps> = ({ children, item }) => {
-  const containerRef = useRef<HTMLDivElement>(null)
-  const badgesToDisplay = useBadgesToDisplay({
+  const [firstBadge] = useBadgesToDisplay({
     context: 'sidebar',
     parameters: readConfig(),
     parent: 'parent' in item ? item.parent : undefined,
@@ -44,22 +23,18 @@ export const Sidebar: FC<SidebarProps> = ({ children, item }) => {
     tags: item.tags,
     type: item.type,
   })
-  const [firstBadge] = badgesToDisplay
-  useRowEndAlignment(containerRef, Boolean(firstBadge))
 
   if (!firstBadge) {
     return children
   }
 
   return (
-    <Container ref={containerRef}>
-      <Label>{children}</Label>
-      <WithBadge
-        config={firstBadge.badge}
-        context="sidebar"
-        entry={item}
-        tag={firstBadge.tag}
-      />
-    </Container>
+    <SidebarLabel
+      badge={{ config: firstBadge.badge, tag: firstBadge.tag }}
+      compact={readOptions().compactSidebar ?? false}
+      entry={item}
+    >
+      {children}
+    </SidebarLabel>
   )
 }
