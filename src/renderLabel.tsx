@@ -10,19 +10,12 @@ export type LabelContext = Parameters<
   NonNullable<API_SidebarOptions['renderLabel']>
 >[2]
 
-const BADGE_TYPES = new Set<API_HashEntry['type']>([
-  'component',
-  'docs',
-  'group',
-  'story',
-])
-
 /**
  * Whether a sidebar label may show a badge for this entry. The mobile bottom
  * bar shows labels as plain text, so it never shows badges.
  */
 export function canShowBadge(item: API_HashEntry, context?: LabelContext) {
-  return context?.location !== 'bottom-bar' && BADGE_TYPES.has(item.type)
+  return context?.location !== 'bottom-bar' && item.type !== 'root'
 }
 
 /**
