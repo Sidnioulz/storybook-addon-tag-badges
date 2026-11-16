@@ -5,6 +5,7 @@ import { getBadgeProps } from './components/Badge'
 import { canShowBadge, type LabelContext } from './renderLabel'
 import { getBadgesToDisplay } from './useBadgesToDisplay'
 import { readConfig } from './utils/config'
+import { getDisplayType } from './utils/display'
 
 /**
  * Returns the accessible name of a sidebar entry: its name, followed by the
@@ -30,7 +31,7 @@ export function renderAriaLabel(
     parent: 'parent' in item ? item.parent : undefined,
     refId: item.refId,
     tags: item.tags,
-    type: item.type,
+    type: getDisplayType(item),
   })
   if (!firstBadge) {
     return item.name

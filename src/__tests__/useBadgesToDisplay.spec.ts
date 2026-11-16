@@ -393,6 +393,34 @@ describe('useBadgesToDisplay', () => {
       expect(result.current).toHaveLength(0)
     })
 
+    it('skips the badges of story tests that their story inherits by default', () => {
+      const { result } = renderHook(() =>
+        useBadgesToDisplay({
+          context: 'sidebar',
+          parameters: [{ tags: ['test2'], badge: { text: 'Test2' } }],
+          parent: 'mock-story',
+          tags: ['test2'],
+          type: 'test',
+        }),
+      )
+
+      expect(result.current).toHaveLength(0)
+    })
+
+    it('shows the badges of tags that story tests add by default', () => {
+      const { result } = renderHook(() =>
+        useBadgesToDisplay({
+          context: 'sidebar',
+          parameters: [{ tags: ['flaky'], badge: { text: 'Flaky' } }],
+          parent: 'mock-story',
+          tags: ['test2', 'flaky'],
+          type: 'test',
+        }),
+      )
+
+      expect(result.current.map(({ tag }) => tag)).toEqual(['flaky'])
+    })
+
     it('uses refId when resolving composed parents', () => {
       const { result } = renderHook(() =>
         useBadgesToDisplay({
