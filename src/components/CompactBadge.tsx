@@ -8,25 +8,93 @@ import React, {
   useState,
 } from 'react'
 import { TooltipProvider } from 'storybook/internal/components'
-import { type CSSObject, useTheme } from 'storybook/theming/emotion'
+import {
+  type CSSObject,
+  keyframes,
+  styled,
+  useTheme,
+} from 'storybook/theming/emotion'
 
 import { ROW_SELECTOR } from '../utils/rowEndAlignment'
 import { BadgeUI, getBadgeBorder } from './BadgeUI'
 
 /** Width in px of every compact badge, whatever its text. */
-export const COMPACT_BADGE_WIDTH = 48
+export const COMPACT_BADGE_WIDTH = 40
 
 const HOVER_DELAY = 200
+const ANIMATION_DURATION = 120
+const EXIT_DELAY = 200
+// The badge decelerates into place as it opens, and accelerates away as it
+// closes.
+const ENTER_EASING = 'cubic-bezier(0.2, 0.8, 0.2, 1)'
+const EXIT_EASING = 'cubic-bezier(0.8, 0, 0.8, 0.2)'
+
+// The floating badge clipped to the pill's area. The pill is 18px tall: a
+// two-line badge also grows vertically.
+const PILL_CLIP = `inset(calc(50% - 9px) 0 calc(50% - 9px) calc(100% - ${COMPACT_BADGE_WIDTH}px) round 999px)`
+const FULL_CLIP = 'inset(0 round 999px)'
+
+// Two keyframes rather than one played in reverse: changing only the
+// direction of a running animation would not restart it.
+const expand = keyframes({
+  from: { clipPath: PILL_CLIP },
+  to: { clipPath: FULL_CLIP },
+})
+const collapse = keyframes({
+  from: { clipPath: FULL_CLIP },
+  to: { clipPath: PILL_CLIP },
+})
+
+const PILL_PADDING = 6
+// The inline padding of sidebar badges, in BadgeUI.
+const BADGE_PADDING = 8
+
+// The text starts where the pill shows it, and slides into place as the badge
+// opens, so that the badge unrolls from the pill rather than replacing it.
+const TEXT_AT_PILL = `translateX(calc(100% + ${BADGE_PADDING + PILL_PADDING - COMPACT_BADGE_WIDTH}px))`
+const slideIn = keyframes({
+  from: { transform: TEXT_AT_PILL },
+  to: { transform: 'none' },
+})
+const slideOut = keyframes({
+  from: { transform: 'none' },
+  to: { transform: TEXT_AT_PILL },
+})
+
+type Animation = 'enter' | 'exit' | 'none'
+
+const animations = (
+  animation: Animation,
+  enterKeyframes: string,
+  exitKeyframes: string,
+): CSSObject => ({
+  '@media (prefers-reduced-motion: no-preference)': {
+    ...(animation === 'enter' && {
+      animation: `${enterKeyframes} ${ANIMATION_DURATION}ms ${ENTER_EASING} backwards`,
+    }),
+    ...(animation === 'exit' && {
+      animation: `${exitKeyframes} ${ANIMATION_DURATION}ms ${EXIT_EASING} ${EXIT_DELAY}ms forwards`,
+    }),
+  },
+})
+
+// Cuts the text after two lines, without an ellipsis.
+const FloatingText = styled.span<{ animation: Animation }>(({ animation }) => ({
+  display: 'block',
+  maxHeight: '1.5rem',
+  overflow: 'hidden',
+  ...animations(animation, slideIn, slideOut),
+}))
 
 // Applied after custom styles, so that every pill keeps the same width.
 const PILL_STYLE: CSSObject = {
   width: COMPACT_BADGE_WIDTH,
   minWidth: COMPACT_BADGE_WIDTH,
   maxWidth: COMPACT_BADGE_WIDTH,
-  paddingInline: 6,
+  paddingInline: PILL_PADDING,
   boxSizing: 'border-box',
   overflow: 'hidden',
-  textOverflow: 'ellipsis',
+  textOverflow: 'clip',
   whiteSpace: 'nowrap',
   textAlign: 'center',
 }
@@ -73,17 +141,45 @@ export const CompactBadge: FC<CompactBadgeProps> = ({
   const theme = useTheme()
   const pillRef = useRef<HTMLDivElement>(null)
   const [isOpen, setIsOpen] = useState(false)
+  const [animation, setAnimation] = useState<Animation>('none')
   const [maxWidth, setMaxWidth] = useState<number>()
   const [hasFocusRing, setHasFocusRing] = useState(false)
 
   const hoverTimer = useRef<ReturnType<typeof setTimeout>>(undefined)
-  useEffect(() => () => clearTimeout(hoverTimer.current), [])
+  const closeTimer = useRef<ReturnType<typeof setTimeout>>(undefined)
+  useEffect(
+    () => () => {
+      clearTimeout(hoverTimer.current)
+      clearTimeout(closeTimer.current)
+    },
+    [],
+  )
+
+  const close = (pill: HTMLElement | null) => {
+    clearTimeout(hoverTimer.current)
+    if (!isOpen || animation === 'exit') {
+      return
+    }
+    // A pill that lost its box can't anchor an animation, and users who ask
+    // for reduced motion get none.
+    const animates =
+      pill?.getBoundingClientRect().width &&
+      window.matchMedia?.('(prefers-reduced-motion: no-preference)').matches
+    if (!animates) {
+      setIsOpen(false)
+      return
+    }
+    setAnimation('exit')
+    closeTimer.current = setTimeout(
+      () => setIsOpen(false),
+      EXIT_DELAY + ANIMATION_DURATION,
+    )
+  }
 
   const onVisibleChange = (visible: boolean) => {
     const pill = pillRef.current
     if (!visible || !pill) {
-      clearTimeout(hoverTimer.current)
-      setIsOpen(false)
+      close(pill)
       return
     }
 
@@ -101,6 +197,9 @@ export const CompactBadge: FC<CompactBadgeProps> = ({
         4,
     )
     setHasFocusRing(pill.matches(':focus-visible'))
+    clearTimeout(closeTimer.current)
+    // A badge that is still closing reopens without growing again.
+    setAnimation(isOpen ? 'none' : 'enter')
     setIsOpen(true)
   }
 
@@ -124,14 +223,15 @@ export const CompactBadge: FC<CompactBadgeProps> = ({
 
   const floatingStyle: CSSObject = {
     ...extraStyle,
+    // A block fills the tooltip's box, which is centred on the pill. An
+    // inline block would sit on a line box taller than itself.
+    display: 'block',
     width: 'max-content',
     maxWidth,
     whiteSpace: 'normal',
     overflowWrap: 'break-word',
-    display: '-webkit-box',
-    WebkitLineClamp: 2,
-    WebkitBoxOrient: 'vertical',
-    overflow: 'hidden',
+    textOverflow: 'clip',
+    ...animations(animation, expand, collapse),
     // An inner ring in the app's background keeps the focus ring visible on
     // the selected row, whose background has the focus ring's colour.
     ...(hasFocusRing && {
@@ -161,7 +261,7 @@ export const CompactBadge: FC<CompactBadgeProps> = ({
           hasLongText={false}
           theme={theme}
         >
-          {text}
+          <FloatingText animation={animation}>{text}</FloatingText>
         </BadgeUI>
       }
       {...TOOLTIP_PASSTHROUGH_PROPS}

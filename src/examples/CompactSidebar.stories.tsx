@@ -145,7 +145,7 @@ export const Sidebar: Story = {
           30,
         ),
       )
-      await expect(box.width).toBe(48)
+      await expect(box.width).toBe(40)
     }
   },
 }
