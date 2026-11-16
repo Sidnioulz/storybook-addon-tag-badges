@@ -8,7 +8,7 @@ Sidebar badges compete with story titles for the width of a sidebar row. Rows ha
 
 - One global switch turns compact mode on for every sidebar badge.
 - In compact mode, every sidebar badge has the same width, so badges form a tidy column and titles get a predictable amount of space.
-- The full badge text stays available on hover and on keyboard focus, without opening a menu or leaving the sidebar.
+- The full badge text stays available on hover and while the row has keyboard focus, without opening a menu or leaving the sidebar.
 - Badge authors can choose what the compact pill shows, with a short text of their own.
 
 ## Non-goals
@@ -27,7 +27,7 @@ Sidebar badges compete with story titles for the width of a sidebar row. Rows ha
 
 - Storybook 11 renders sidebar rows at a fixed height of 28px and clips their content. Anything taller than the row, or outside it, has to render in an overlay.
 - Rows are virtualized. Sticky copies of rows render in an overlay that is hidden from assistive technologies, and are not reachable with the keyboard.
-- The tree follows react-aria's keyboard model. Inside a row, ArrowRight and ArrowLeft move between the row's focusable elements, including elements with `tabIndex={-1}`. On a collapsed branch, ArrowRight expands the branch first.
+- The tree follows react-aria's keyboard model. Inside a row, ArrowRight and ArrowLeft move between the row's focusable elements, such as the context menu button. React-aria reports a row's keyboard focus with a `data-focus-visible` attribute.
 - Storybook 11 targets Chrome 147+, Edge 150+, Firefox 152+ and Safari 26.5+.
 - Badges already align on a fixed distance from the end of the row (`useRowEndAlignment`). Compact pills keep that alignment.
 
@@ -87,7 +87,6 @@ Badges gain an optional `shortText` string, next to `text`. Static badge objects
 - Unless the user prefers reduced motion, it unrolls from the pill towards the left over 120ms with a decelerating curve, its text sliding from where the pill shows it into place. With reduced motion, it shows at once.
 - It does not receive pointer events, so that the pointer stays on the pill underneath and clicks reach the row.
 - It is drawn above the sidebar, including sticky rows and the context menu button's shadow on the selected row.
-- When it opens on keyboard focus, it draws the focus ring, since it covers the focused pill. The ring has an inner ring in the app's background, so that it shows on the selected row, whose background has the focus ring's colour.
 - Touch screens can't hover, and a tap selects the row, so touch users only see the pill. This is a documented limitation.
 
 ### Keyboard and screen readers
@@ -115,7 +114,7 @@ Badges gain an optional `shortText` string, next to `text`. Static badge objects
 ## Testing
 
 - Unit tests: reading the options (absent, `false`, `true`); the sidebar label renders a pill only in compact mode; the pill shows `shortText` when set and `text` otherwise; `renderAriaLabel` returns the full text in both modes.
-- Play functions on the stories above, in the browser: a compact pill has the fixed width whatever its text; keyboard focus opens the floating badge, whose right edge matches the pill's, with the full text on at most two lines; no floating badge opens when the text fits; the pill's accessible name is the full text and it has no description.
+- Play functions on the stories above, in the browser: a compact pill has the fixed width whatever its text; keyboard focus on the row opens the floating badge, whose right edge matches the pill's, with the full text on at most two lines; no floating badge opens when the text fits; the pill's accessible name is the full text and it has no description.
 - A check in the addon's own Storybook: hover in normal, sticky and selected rows, light and dark themes, narrow sidebars.
 
 ## Left to the builder
