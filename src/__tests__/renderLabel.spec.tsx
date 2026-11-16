@@ -15,8 +15,10 @@ const parameters: TagBadgeParameters = [
   },
 ]
 
+const config: Record<string, unknown> = { tagBadges: parameters }
+
 vi.mock('storybook/manager-api', () => ({
-  addons: { getConfig: () => ({ tagBadges: parameters }) },
+  addons: { getConfig: () => config },
   useStorybookApi: () => ({ resolveStory: () => undefined }),
 }))
 
@@ -104,5 +106,36 @@ describe('Sidebar', () => {
 
     expect(screen.getByText('Custom root')).toBeInTheDocument()
     expect(screen.queryByText('New')).not.toBeInTheDocument()
+  })
+})
+
+describe('compact sidebar', () => {
+  afterEach(() => {
+    delete config.tagBadgesOptions
+  })
+
+  it('renders a pill when compactSidebar is on', () => {
+    config.tagBadgesOptions = { compactSidebar: true }
+    render(withTheme(renderLabel(story)))
+
+    expect(
+      document.querySelector('[data-tag-badge="pill"]'),
+    ).toHaveAccessibleName('New')
+  })
+
+  it('renders a full badge when compactSidebar is off', () => {
+    config.tagBadgesOptions = { compactSidebar: false }
+    render(withTheme(renderLabel(story)))
+
+    expect(document.querySelector('[data-tag-badge="pill"]')).toBeNull()
+    expect(screen.getByText('New')).toBeInTheDocument()
+  })
+
+  it('renders the label alone when no badge matches in compact mode', () => {
+    config.tagBadgesOptions = { compactSidebar: true }
+    render(withTheme(renderLabel({ ...story, tags: [] } as API_HashEntry)))
+
+    expect(screen.getByText('Primary')).toBeInTheDocument()
+    expect(document.querySelector('[data-tag-badge]')).toBeNull()
   })
 })

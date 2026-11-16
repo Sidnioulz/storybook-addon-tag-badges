@@ -7,7 +7,7 @@ import type { TagBadgeParameters } from '../types/TagBadgeParameters'
 const parameters: TagBadgeParameters = [
   {
     tags: 'deprecated',
-    badge: { text: 'Deprecated' },
+    badge: { text: 'Deprecated', shortText: 'Dep' },
     display: { sidebar: true },
   },
   {
@@ -27,8 +27,10 @@ const parameters: TagBadgeParameters = [
   },
 ]
 
+const config: Record<string, unknown> = { tagBadges: parameters }
+
 vi.mock('storybook/manager-api', () => ({
-  addons: { getConfig: () => ({ tagBadges: parameters }) },
+  addons: { getConfig: () => config },
 }))
 
 const entry = (tags: string[], extra: Record<string, unknown> = {}) =>
@@ -60,6 +62,17 @@ describe('renderAriaLabel', () => {
     expect(renderAriaLabel(entry(['deprecated']), api, sidebar)).toBe(
       'Primary. Deprecated',
     )
+  })
+
+  it('names the full text of compact badges', () => {
+    config.tagBadgesOptions = { compactSidebar: true }
+    try {
+      expect(renderAriaLabel(entry(['deprecated']), api, sidebar)).toBe(
+        'Primary. Deprecated',
+      )
+    } finally {
+      delete config.tagBadgesOptions
+    }
   })
 
   it('only names the highest-priority badge, like the sidebar', () => {
