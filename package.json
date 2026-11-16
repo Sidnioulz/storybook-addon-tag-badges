@@ -67,8 +67,8 @@
     "test:coverage": "vitest --coverage"
   },
   "devDependencies": {
-    "@chromatic-com/storybook": "5.4.0-next.0",
-    "@commitlint/config-conventional": "^20.5.3",
+    "@chromatic-com/storybook": "5.6.0",
+    "@commitlint/config-conventional": "^21.2.4",
     "@eslint/js": "^9.39.5",
     "@semantic-release/github": "^12.0.11",
     "@semantic-release/npm": "^13.2.0",
@@ -78,19 +78,19 @@
     "@storybook/addon-vitest": "11.0.0-beta.3",
     "@storybook/icons": "^2.2.0",
     "@storybook/react-vite": "11.0.0-beta.3",
-    "@testing-library/jest-dom": "^6.9.1",
+    "@testing-library/jest-dom": "^7.0.1",
     "@testing-library/react": "^16.3.3",
-    "@types/node": "^25.9.9",
+    "@types/node": "^26.6.6",
     "@types/react": "^19.3.0",
     "@types/react-dom": "^19.3.0",
-    "@vitejs/plugin-react": "^5.2.0",
-    "@vitest/browser": "4.1.10",
-    "@vitest/browser-playwright": "4.0.18",
-    "@vitest/coverage-istanbul": "4.0.18",
+    "@vitejs/plugin-react": "^6.3.0",
+    "@vitest/browser": "5.1.0",
+    "@vitest/browser-playwright": "5.1.0",
+    "@vitest/coverage-istanbul": "5.1.0",
     "auto": "^11.3.6",
-    "boxen": "^8.0.1",
-    "chromatic": "^13.3.5",
-    "commitlint": "^20.5.3",
+    "boxen": "^9.0.0",
+    "chromatic": "^18.14.4",
+    "commitlint": "^21.2.4",
     "dedent": "^1.7.2",
     "eslint": "^9.39.5",
     "eslint-config-prettier": "^10.1.8",
@@ -99,9 +99,8 @@
     "eslint-plugin-storybook": "11.0.0-beta.3",
     "globals": "^17.14.0",
     "husky": "^9.1.7",
-    "jsdom": "^27.4.0",
-    "lint-staged": "^16.4.0",
-    "minimatch": "^10.2.6",
+    "jsdom": "^31.0.1",
+    "lint-staged": "^17.6.1",
     "npm-run-all": "^4.1.5",
     "playwright": "^1.65.1",
     "prettier": "^3.10.1",
@@ -109,14 +108,14 @@
     "react": "^19.3.1",
     "react-dom": "^19.3.1",
     "rimraf": "^6.1.4",
-    "semantic-release": "^25.0.9",
+    "semantic-release": "^26.0.1",
     "storybook": "11.0.0-beta.3",
     "tosource": "2.0.0-alpha.3",
-    "tsup": "^8.5.1",
+    "tsup": "^9.0.0",
     "typescript": "^5.9.3",
     "typescript-eslint": "^8.72.2",
-    "vite": "^7.3.8",
-    "vitest": "^4.1.12",
+    "vite": "^8.3.8",
+    "vitest": "^5.1.0",
     "zx": "^8.8.5"
   },
   "peerDependencies": {
@@ -127,7 +126,7 @@
     "provenance": true,
     "registry": "https://registry.npmjs.org/"
   },
-  "packageManager": "pnpm@10.7.0",
+  "packageManager": "pnpm@10.34.9",
   "engines": {
     "node": ">=22.12"
   },
@@ -140,24 +139,5 @@
   },
   "dependencies": {
     "memoizerific": "^1.11.3"
-  },
-  "pnpm": {
-    "onlyBuiltDependencies": [
-      "esbuild",
-      "msw"
-    ],
-    "overrides": {
-      "@octokit/request-error@>=1.0.0 <5.1.1": ">=5.1.1",
-      "@octokit/plugin-paginate-rest@>=1.0.0 <9.2.2": ">=9.2.2",
-      "@octokit/request@>=1.0.0 <8.4.1": ">=8.4.1",
-      "@vitest/browser@>=4.0.17 <4.1.6": ">=4.1.6",
-      "esbuild@>=0.27.3 <0.28.1": ">=0.28.1",
-      "@vitest/browser@>=4.0.0 <4.1.10": ">=4.1.10",
-      "@vitest/browser@>=4.0.0 <=4.1.7": ">=4.1.8",
-      "@vitest/mocker@>=2.1.0 <4.1.11": ">=4.1.11",
-      "@vitest/mocker@>=2.1.0-beta.7 <4.1.12": ">=4.1.12",
-      "glob@>=9.0.0 <=14.0.1": ">=14.0.2",
-      "minimatch@>=7.0.0 <11.0.1": ">=11.0.1"
-    }
   }
 }

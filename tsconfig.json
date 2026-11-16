@@ -10,7 +10,6 @@
     "moduleResolution": "bundler",
     "module": "esnext",
     "noImplicitAny": true,
-    "rootDir": "./src",
     "skipLibCheck": true,
     "strict": true,
     "target": "ES2022",
