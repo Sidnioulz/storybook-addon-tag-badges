@@ -1,4 +1,4 @@
-import React, { Fragment } from 'react'
+import React, { Fragment } from "react";
 import {
   convert,
   createReset,
@@ -6,49 +6,49 @@ import {
   styled,
   ThemeProvider,
   themes,
-} from 'storybook/theming'
+} from "storybook/theming/emotion";
 
-const ThemeBlock = styled.div<{ side: 'left' | 'right'; layout: string }>(
+const ThemeBlock = styled.div<{ side: "left" | "right"; layout: string }>(
   {
-    position: 'absolute',
+    position: "absolute",
     top: 0,
     left: 0,
-    right: '50vw',
-    width: '50vw',
-    height: '100vh',
+    right: "50vw",
+    width: "50vw",
+    height: "100vh",
     bottom: 0,
-    overflow: 'auto',
+    overflow: "auto",
   },
   ({ layout }) => ({
-    padding: layout === 'fullscreen' ? 0 : '1rem',
-    display: layout === 'centered' ? 'flex' : 'block',
-    alignItems: 'center',
-    justifyContent: 'center',
+    padding: layout === "fullscreen" ? 0 : "1rem",
+    display: layout === "centered" ? "flex" : "block",
+    alignItems: "center",
+    justifyContent: "center",
   }),
   ({ theme }) => ({
     background: theme.background.content,
     color: theme.color.defaultText,
   }),
   ({ side }) =>
-    side === 'left'
+    side === "left"
       ? {
           left: 0,
-          right: '50vw',
+          right: "50vw",
         }
       : {
           right: 0,
-          left: '50vw',
+          left: "50vw",
         },
-)
+);
 
 const AddonThemeProvider = (StoryFn, { context: { viewMode }, parameters }) => {
-  if (viewMode === 'docs') {
+  if (viewMode === "docs") {
     return (
       <ThemeProvider theme={convert(themes.dark)}>
         <Global styles={createReset} />
         <StoryFn />
       </ThemeProvider>
-    )
+    );
   }
 
   return (
@@ -67,7 +67,7 @@ const AddonThemeProvider = (StoryFn, { context: { viewMode }, parameters }) => {
         </ThemeBlock>
       </ThemeProvider>
     </Fragment>
-  )
-}
+  );
+};
 
-export default AddonThemeProvider
+export default AddonThemeProvider;

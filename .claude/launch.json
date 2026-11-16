@@ -1,0 +1,20 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "storybook",
+      "runtimeExecutable": "pnpm",
+      "runtimeArgs": ["storybook", "--quiet", "--no-open"],
+      "port": 6006
+    },
+    {
+      "name": "tag-badges-next",
+      "runtimeExecutable": "bash",
+      "runtimeArgs": [
+        "-c",
+        "cd /tmp/claude-1000/-home-steve-Development-storybook-addon-tag-badges/5c89f511-7448-4914-8dc4-db7f7f52066c/scratchpad/tag-badges-next && pnpm exec storybook dev -p 6007 --quiet --no-open"
+      ],
+      "port": 6007
+    }
+  ]
+}

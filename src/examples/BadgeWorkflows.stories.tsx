@@ -1,8 +1,12 @@
-import React from 'react'
-import type { Meta, StoryObj } from '@storybook/react-vite'
-import { Title, Stories } from '@storybook/addon-docs/blocks'
+import { Stories, Title } from "@storybook/addon-docs/blocks";
+import type { Meta, StoryObj } from "@storybook/react-vite";
+import React from "react";
 
-import { Badge, getBadgeProps } from '../components/Badge'
+import { TagBadgeParameters } from "src/types/TagBadgeParameters";
+import { styled } from "storybook/theming/emotion";
+import toSource from "tosource";
+import { Badge, getBadgeProps } from "../components/Badge";
+import { mockEntry } from "./__fixtures__/HashEntry";
 import {
   brandComponents,
   byMarket,
@@ -10,11 +14,7 @@ import {
   composition,
   dependencies,
   smartComponents,
-} from './sampleWorkflows'
-import { mockEntry } from './__fixtures__/HashEntry'
-import { TagBadgeParameters } from 'src/types/TagBadgeParameters'
-import { styled } from 'storybook/theming'
-import toSource from 'tosource'
+} from "./sampleWorkflows";
 
 const disabledArgType = {
   control: {
@@ -23,39 +23,35 @@ const disabledArgType = {
   table: {
     disable: true,
   },
-}
+};
 
 interface SampleBadgeProps {
-  sample: TagBadgeParameters
-  tags: { tag: string; index?: number }[]
+  sample: TagBadgeParameters;
+  tags: { tag: string; index?: number }[];
 }
 
 const List = styled.ul`
   list-style-type: none;
   display: flex;
   gap: 4px;
-`
+`;
 
 const SampleBadgeList = ({ sample, tags }: SampleBadgeProps) => (
   <List>
     {tags.map(({ tag, index = 0 }) => (
       <li key={tag}>
-        <Badge
-          {...getBadgeProps(sample[index].badge, mockEntry, tag)}
-          context="toolbar"
-        />
+        <Badge {...getBadgeProps(sample[index].badge, mockEntry, tag)} context="toolbar" />
       </li>
     ))}
   </List>
-)
+);
 
 const meta: Meta<typeof Badge> = {
-  title: 'Addon/Sample Workflows',
+  title: "Addon/Sample Workflows",
   parameters: {
     docs: {
       description: {
-        component:
-          'This page showcases various workflows that can be implemented with this addon.',
+        component: "This page showcases various workflows that can be implemented with this addon.",
       },
       page: () => (
         <>
@@ -64,30 +60,30 @@ const meta: Meta<typeof Badge> = {
         </>
       ),
     },
-    layout: 'centered',
+    layout: "centered",
   },
 
-  tags: ['autodocs'],
+  tags: ["autodocs"],
   argTypes: {
     text: disabledArgType,
     style: disabledArgType,
     tooltip: disabledArgType,
   },
-}
+};
 
-export default meta
-type Story = StoryObj<typeof Badge>
+export default meta;
+type Story = StoryObj<typeof Badge>;
 
 export const MarketSegmentation: Story = {
   parameters: {
     docs: {
       description: {
         story:
-          'You could highlight components intended for a specific type of product or market, e.g. because of different privacy or accessibility regulatory practices (government), or to account for preferred layout density (B2B vs B2C).',
+          "You could highlight components intended for a specific type of product or market, e.g. because of different privacy or accessibility regulatory practices (government), or to account for preferred layout density (B2B vs B2C).",
       },
       source: {
         code: toSource(byMarket),
-        language: 'js',
+        language: "js",
       },
     },
   },
@@ -95,48 +91,45 @@ export const MarketSegmentation: Story = {
     <SampleBadgeList
       sample={byMarket}
       tags={[
-        { tag: 'market:b2b' },
-        { tag: 'market:b2c' },
-        { tag: 'market:finance' },
-        { tag: 'market:health' },
-        { tag: 'market:government' },
-        { tag: 'market:all' },
+        { tag: "market:b2b" },
+        { tag: "market:b2c" },
+        { tag: "market:finance" },
+        { tag: "market:health" },
+        { tag: "market:government" },
+        { tag: "market:all" },
       ]}
     />
   ),
-}
+};
 
 export const BrandExpressiveness: Story = {
   parameters: {
     docs: {
       description: {
         story:
-          'In some Design Systems, some components are made purely for brand expression, to help create highly-recognisable interfaces for e.g. acquisition or onboarding. Tagging those components (or variants) can help designers balance the amount of brand expression in a page more purposefully.',
+          "In some Design Systems, some components are made purely for brand expression, to help create highly-recognisable interfaces for e.g. acquisition or onboarding. Tagging those components (or variants) can help designers balance the amount of brand expression in a page more purposefully.",
       },
       source: {
         code: toSource(brandComponents),
-        language: 'js',
+        language: "js",
       },
     },
   },
   render: () => (
-    <SampleBadgeList
-      sample={brandComponents}
-      tags={[{ tag: 'brand' }, { tag: 'ui', index: 1 }]}
-    />
+    <SampleBadgeList sample={brandComponents} tags={[{ tag: "brand" }, { tag: "ui", index: 1 }]} />
   ),
-}
+};
 
 export const Compliance: Story = {
   parameters: {
     docs: {
       description: {
         story:
-          'You may track the status of various checks using badges, ideally with a script that keeps this content up-to-date automatically. Checks from external teams can include accessibility compliance (WCAG), brand or content reviews, QA or SEO reviews.',
+          "You may track the status of various checks using badges, ideally with a script that keeps this content up-to-date automatically. Checks from external teams can include accessibility compliance (WCAG), brand or content reviews, QA or SEO reviews.",
       },
       source: {
         code: toSource(composition),
-        language: 'js',
+        language: "js",
       },
     },
   },
@@ -144,20 +137,20 @@ export const Compliance: Story = {
     <SampleBadgeList
       sample={compliance}
       tags={[
-        { tag: 'a11y:fail', index: 0 },
-        { tag: 'brand:fail', index: 0 },
-        { tag: 'content:fail', index: 0 },
-        { tag: 'qa:fail', index: 0 },
-        { tag: 'seo:fail', index: 0 },
-        { tag: 'a11y:success', index: 1 },
-        { tag: 'brand:success', index: 1 },
-        { tag: 'content:success', index: 1 },
-        { tag: 'qa:success', index: 1 },
-        { tag: 'seo:success', index: 1 },
+        { tag: "a11y:fail", index: 0 },
+        { tag: "brand:fail", index: 0 },
+        { tag: "content:fail", index: 0 },
+        { tag: "qa:fail", index: 0 },
+        { tag: "seo:fail", index: 0 },
+        { tag: "a11y:success", index: 1 },
+        { tag: "brand:success", index: 1 },
+        { tag: "content:success", index: 1 },
+        { tag: "qa:success", index: 1 },
+        { tag: "seo:success", index: 1 },
       ]}
     />
   ),
-}
+};
 
 export const Composition: Story = {
   parameters: {
@@ -168,7 +161,7 @@ export const Composition: Story = {
       },
       source: {
         code: toSource(composition),
-        language: 'js',
+        language: "js",
       },
     },
   },
@@ -176,14 +169,14 @@ export const Composition: Story = {
     <SampleBadgeList
       sample={composition}
       tags={[
-        { tag: 'compose:card' },
-        { tag: 'compose:dialog' },
-        { tag: 'compose:form' },
-        { tag: 'compose:all' },
+        { tag: "compose:card" },
+        { tag: "compose:dialog" },
+        { tag: "compose:form" },
+        { tag: "compose:all" },
       ]}
     />
   ),
-}
+};
 
 export const ExternalDependencies: Story = {
   parameters: {
@@ -194,7 +187,7 @@ export const ExternalDependencies: Story = {
       },
       source: {
         code: toSource(composition),
-        language: 'js',
+        language: "js",
       },
     },
   },
@@ -202,39 +195,35 @@ export const ExternalDependencies: Story = {
     <SampleBadgeList
       sample={dependencies}
       tags={[
-        { tag: 'uses:cache' },
-        { tag: 'uses:i18n' },
-        { tag: 'uses:theme' },
-        { tag: 'uses:localStorage' },
-        { tag: 'uses:database' },
-        { tag: 'uses:auth' },
-        { tag: 'uses:store' },
+        { tag: "uses:cache" },
+        { tag: "uses:i18n" },
+        { tag: "uses:theme" },
+        { tag: "uses:localStorage" },
+        { tag: "uses:database" },
+        { tag: "uses:auth" },
+        { tag: "uses:store" },
       ]}
     />
   ),
-}
+};
 
 export const SmartComponents: Story = {
   parameters: {
     docs: {
       description: {
         story:
-          'If your team provides specialised versions of components optimised for use with a third-party service, aka. [smart components](https://bradfrost.com/blog/post/the-design-system-ecosystem/), you may highlight the different available flavours with a badge.\n\nFor instance, a Form component could be published to integrate with Zod schemas, and another to integrate with a Redux store. Another one could be a pure HTML form for contexts without frontend frameworks.',
+          "If your team provides specialised versions of components optimised for use with a third-party service, aka. [smart components](https://bradfrost.com/blog/post/the-design-system-ecosystem/), you may highlight the different available flavours with a badge.\n\nFor instance, a Form component could be published to integrate with Zod schemas, and another to integrate with a Redux store. Another one could be a pure HTML form for contexts without frontend frameworks.",
       },
       source: {
         code: toSource(smartComponents),
-        language: 'js',
+        language: "js",
       },
     },
   },
   render: () => (
     <SampleBadgeList
       sample={smartComponents}
-      tags={[
-        { tag: 'smart:redux' },
-        { tag: 'smart:html' },
-        { tag: 'smart:zod' },
-      ]}
+      tags={[{ tag: "smart:redux" }, { tag: "smart:html" }, { tag: "smart:zod" }]}
     />
   ),
-}
+};

@@ -1,31 +1,30 @@
-import type { TooltipMessage } from 'storybook/internal/components'
-import type { HashEntry } from 'storybook/manager-api'
-import type { CSSObject } from 'storybook/theming'
+import type { HashEntry } from "storybook/manager-api";
+import type { CSSObject } from "storybook/theming/emotion";
 
-import { getTagParts, getTagPrefix, getTagSuffix } from '../utils/tag'
+import { getTagParts, getTagPrefix, getTagSuffix } from "../utils/tag";
 
 /**
  * Properties of a badge to be displayed.
  */
 export interface Badge {
   /** The text content of the badge. */
-  text: string
+  text: string;
 
   /** Either a style preset provided by the addon, or a custom emotion object. */
   style?:
-    | 'grey'
-    | 'green'
-    | 'turquoise'
-    | 'blue'
-    | 'purple'
-    | 'pink'
-    | 'red'
-    | 'orange'
-    | 'yellow'
-    | CSSObject
+    | "grey"
+    | "green"
+    | "turquoise"
+    | "blue"
+    | "purple"
+    | "pink"
+    | "red"
+    | "orange"
+    | "yellow"
+    | CSSObject;
 
   /** The tooltip text to display when hovering over the badge (optional). */
-  tooltip?: string | React.ComponentProps<typeof TooltipMessage>
+  tooltip?: string;
 }
 
 /**
@@ -36,11 +35,11 @@ export interface Badge {
  */
 export type BadgeOrBadgeFn =
   | ((params: {
-      context: 'mdx' | 'sidebar' | 'toolbar'
-      entry: HashEntry | undefined
-      getTagParts: typeof getTagParts
-      getTagPrefix: typeof getTagPrefix
-      getTagSuffix: typeof getTagSuffix
-      tag: string
+      context: "mdx" | "sidebar" | "toolbar";
+      entry: HashEntry | undefined;
+      getTagParts: typeof getTagParts;
+      getTagPrefix: typeof getTagPrefix;
+      getTagSuffix: typeof getTagSuffix;
+      tag: string;
     }) => Badge)
-  | Badge
+  | Badge;

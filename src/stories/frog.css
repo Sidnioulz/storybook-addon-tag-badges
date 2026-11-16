@@ -9,6 +9,9 @@
 .frog--size_big .frog__frog {
   font-size: 6rem;
 }
+.frog--size_ginormous .frog__frog {
+  font-size: 12rem;
+}
 
 .frog:has(.frog__diet:hover) .frog__frog {
   animation: shake 0.82s cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
@@ -26,6 +29,9 @@
 
 .frog--size_big .frog__diet {
   margin-top: 1rem;
+}
+.frog--size_ginormous .frog__diet {
+  margin-top: 2rem;
 }
 
 .frog__diet-menu {

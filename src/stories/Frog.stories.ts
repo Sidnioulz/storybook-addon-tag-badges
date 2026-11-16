@@ -1,35 +1,47 @@
-import type { Meta, StoryObj } from '@storybook/react-vite'
+import type { Meta, StoryObj } from "@storybook/react-vite";
 
-import { Frog } from './Frog'
+import { Frog } from "./Frog";
 
 const meta: Meta<typeof Frog> = {
-  title: 'Example/Frog',
+  title: "Example/Frog",
   component: Frog,
   argTypes: {},
   parameters: {
-    layout: 'fullscreen',
+    layout: "fullscreen",
   },
-  tags: ['frog'],
-}
+  tags: ["frog"],
+};
 
-export default meta
-type Story = StoryObj<typeof Frog>
+export default meta;
+type Story = StoryObj<typeof Frog>;
 
 export const Big: Story = {
   args: {
-    size: 'big',
+    size: "big",
   },
-  tags: ['big-if-true', 'frog'],
-}
+  globals: {
+    vision: "blurred",
+  },
+  tags: ["big-if-true", "frog"],
+};
+
+export const Ginormous: Story = {
+  args: {
+    size: "ginormous",
+  },
+  globals: {
+    vision: "tritanomaly",
+  },
+};
 
 export const Small: Story = {
   args: {
-    size: 'small',
+    size: "small",
   },
-}
+};
 
 export const AntEater: Story = {
   args: {
-    preferredInsects: ['ants', 'termites'],
+    preferredInsects: ["ants", "termites"],
   },
-}
+};

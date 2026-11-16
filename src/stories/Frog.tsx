@@ -5,7 +5,7 @@ interface FrogProps {
   /**
    * How big is your frog!?
    */
-  size?: 'small' | 'big'
+  size?: 'small' | 'big' | 'ginormous'
 
   /**
    * What does your frog prefer to eat?

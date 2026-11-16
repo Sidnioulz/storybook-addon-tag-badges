@@ -1,22 +1,22 @@
-import React, { type FC, type ReactNode } from 'react'
-import { addons } from 'storybook/manager-api'
-import type { API_HashEntry } from 'storybook/internal/types'
-import { styled } from 'storybook/theming'
+import React, { type FC, type ReactNode } from "react";
+import type { API_HashEntry } from "storybook/internal/types";
+import { addons } from "storybook/manager-api";
+import { styled } from "storybook/theming/emotion";
 
-import { KEY } from '../constants'
-import { TagBadgeParameters } from '../types/TagBadgeParameters'
-import { useBadgesToDisplay } from '../useBadgesToDisplay'
-import { WithBadge } from './Badge'
+import { KEY } from "../constants";
+import { TagBadgeParameters } from "../types/TagBadgeParameters";
+import { useBadgesToDisplay } from "../useBadgesToDisplay";
+import { WithBadge } from "./Badge";
 
 export interface SidebarProps {
-  children: ReactNode
-  item: API_HashEntry
-  hasStatusWithUI?: boolean
+  children: ReactNode;
+  item: API_HashEntry;
+  hasStatusWithUI?: boolean;
 }
 
 const Container = styled.div<{
-  hasParentPadding: boolean
-  hasStatusWithUI: boolean
+  hasParentPadding: boolean;
+  hasStatusWithUI: boolean;
 }>(
   ({ hasParentPadding, hasStatusWithUI }) => `
   display: flex;
@@ -25,50 +25,46 @@ const Container = styled.div<{
   flex-wrap: wrap;
   text-wrap-style: balance;
   gap: 4px;
-  margin-right: ${hasStatusWithUI ? '6px' : hasParentPadding ? '28px' : '34px'};
+  margin-right: ${hasStatusWithUI ? "6px" : hasParentPadding ? "28px" : "34px"};
 `,
-)
+);
 
 const FirstLineAlignedLabel = styled.div`
   display: flex;
   align-items: center;
   min-height: 19px;
-`
+`;
 
 const Spacer = styled.div`
   flex: 1;
-`
+`;
 
-export const Sidebar: FC<SidebarProps> = ({
-  children,
-  item,
-  hasStatusWithUI,
-}) => {
+export const Sidebar: FC<SidebarProps> = ({ children, item, hasStatusWithUI }) => {
   const { [KEY]: parameters } = addons.getConfig() as {
-    [KEY]: TagBadgeParameters
-  }
+    [KEY]: TagBadgeParameters;
+  };
 
   if (
-    item.type !== 'component' &&
-    item.type !== 'group' &&
-    item.type !== 'docs' &&
-    item.type !== 'story'
+    item.type !== "component" &&
+    item.type !== "group" &&
+    item.type !== "docs" &&
+    item.type !== "story"
   ) {
-    return children
+    return children;
   }
 
   const badgesToDisplay = useBadgesToDisplay({
-    context: 'sidebar',
+    context: "sidebar",
     parameters,
     parent: item.parent,
     refId: item.refId,
     tags: item.tags,
     type: item.type,
-  })
+  });
 
   return (
     <Container
-      hasParentPadding={item.type === 'component' || item.type === 'group'}
+      hasParentPadding={item.type === "component" || item.type === "group"}
       hasStatusWithUI={hasStatusWithUI ?? false}
     >
       <FirstLineAlignedLabel>{children}</FirstLineAlignedLabel>
@@ -81,8 +77,8 @@ export const Sidebar: FC<SidebarProps> = ({
           tag={badgesToDisplay[0].tag}
         />
       ) : (
-        ''
+        ""
       )}
     </Container>
-  )
-}
+  );
+};

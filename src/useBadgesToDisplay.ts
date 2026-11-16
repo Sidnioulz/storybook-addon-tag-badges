@@ -19,9 +19,7 @@ interface UseBadgesToDisplayOptions {
   refId?: string
   tags: string[]
   type:
-    | API_ComponentEntry['type']
-    | API_GroupEntry['type']
-    | API_LeafEntry['type']
+    API_ComponentEntry['type'] | API_GroupEntry['type'] | API_LeafEntry['type']
 }
 
 type BadgesToDisplay = { badge: BadgeOrBadgeFn; tag: string }[]
