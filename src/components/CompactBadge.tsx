@@ -1,7 +1,9 @@
 import React, {
   type ComponentProps,
   type FC,
+  type PointerEvent,
   forwardRef,
+  useEffect,
   useRef,
   useState,
 } from 'react'
@@ -13,6 +15,8 @@ import { BadgeUI } from './BadgeUI'
 
 /** Width in px of every compact badge, whatever its text. */
 export const COMPACT_BADGE_WIDTH = 48
+
+const HOVER_DELAY = 200
 
 // Applied after custom styles, so that every pill keeps the same width.
 const PILL_STYLE: CSSObject = {
@@ -67,6 +71,9 @@ export const CompactBadge: FC<CompactBadgeProps> = ({
   const [maxWidth, setMaxWidth] = useState<number>()
   const [hasFocusRing, setHasFocusRing] = useState(false)
 
+  const hoverTimer = useRef<ReturnType<typeof setTimeout>>(undefined)
+  useEffect(() => () => clearTimeout(hoverTimer.current), [])
+
   const onVisibleChange = (visible: boolean) => {
     const pill = pillRef.current
     if (!visible || !pill) {
@@ -91,6 +98,24 @@ export const CompactBadge: FC<CompactBadgeProps> = ({
     setIsOpen(true)
   }
 
+  // react-aria only opens tooltips on hover once a pointer has moved in a
+  // document where its input modality listeners run, which a page without
+  // other react-aria components never sets up. The pill handles mouse hover
+  // itself, and leaves focus and dismissal to react-aria.
+  const onPointerEnter = (event: PointerEvent) => {
+    if (event.pointerType !== 'mouse') {
+      return
+    }
+    clearTimeout(hoverTimer.current)
+    hoverTimer.current = setTimeout(() => onVisibleChange(true), HOVER_DELAY)
+  }
+  const onPointerLeave = () => {
+    clearTimeout(hoverTimer.current)
+    if (document.activeElement !== pillRef.current) {
+      onVisibleChange(false)
+    }
+  }
+
   const floatingStyle: CSSObject = {
     ...extraStyle,
     width: 'max-content',
@@ -111,7 +136,7 @@ export const CompactBadge: FC<CompactBadgeProps> = ({
     <TooltipProvider
       placement="left"
       offset={-COMPACT_BADGE_WIDTH}
-      delayShow={200}
+      delayShow={HOVER_DELAY}
       delayHide={0}
       visible={isOpen}
       onVisibleChange={onVisibleChange}
@@ -136,6 +161,8 @@ export const CompactBadge: FC<CompactBadgeProps> = ({
         data-tag-badge="pill"
         extraStyle={{ ...extraStyle, ...PILL_STYLE }}
         hasLongText={false}
+        onPointerEnter={onPointerEnter}
+        onPointerLeave={onPointerLeave}
         role="img"
         tabIndex={-1}
         theme={theme}
