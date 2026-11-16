@@ -6,9 +6,9 @@ import { ROW_END_INSET, useRowEndAlignment } from '../utils/rowEndAlignment'
 
 // Mimics a Storybook sidebar row: a label box that shrinks when trailing
 // content (like the context menu button) appears next to it.
-function AlignedLabel({ children }: { children: ReactNode }) {
+function AlignedLabel({ children }: Readonly<{ children: ReactNode }>) {
   const ref = useRef<HTMLDivElement>(null)
-  useRowEndAlignment(ref, true)
+  useRowEndAlignment(ref)
 
   return (
     <div ref={ref} style={{ display: 'flex', justifyContent: 'flex-end' }}>
