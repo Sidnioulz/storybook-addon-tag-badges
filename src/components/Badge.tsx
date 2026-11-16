@@ -50,6 +50,20 @@ const BadgeUI = styled.div<
   flexShrink: 0,
   textWrapStyle: 'pretty',
   textAlign: 'center',
+  // Sidebar rows have a fixed height: the badge stays on one line and
+  // truncates when the row is too narrow. It paints above the shadow that
+  // Storybook spreads around the context menu button of the selected row.
+  ...(context === 'sidebar' && {
+    position: 'relative',
+    zIndex: 1,
+    width: 'auto',
+    maxWidth: '100%',
+    minWidth: 0,
+    justifySelf: 'end',
+    overflow: 'hidden',
+    textOverflow: 'ellipsis',
+    whiteSpace: 'nowrap',
+  }),
   ...extraStyle,
   borderColor: undefined,
 }))

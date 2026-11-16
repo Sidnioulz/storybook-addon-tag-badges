@@ -1,88 +1,70 @@
-import React, { type FC, type ReactNode } from 'react'
-import { addons } from 'storybook/manager-api'
+import React, { type FC, type ReactNode, useRef } from 'react'
 import type { API_HashEntry } from 'storybook/internal/types'
 import { styled } from 'storybook/theming/emotion'
 
-import { KEY } from '../constants'
-import { TagBadgeParameters } from '../types/TagBadgeParameters'
 import { useBadgesToDisplay } from '../useBadgesToDisplay'
+import { readConfig } from '../utils/config'
+import { useRowEndAlignment } from '../utils/rowEndAlignment'
 import { WithBadge } from './Badge'
 
 export interface SidebarProps {
   children: ReactNode
   item: API_HashEntry
+  /**
+   * @deprecated Has no effect. Badges are aligned with the row's status icons
+   * and context menu button automatically.
+   */
   hasStatusWithUI?: boolean
 }
 
-const Container = styled.div<{
-  hasParentPadding: boolean
-  hasStatusWithUI: boolean
-}>(
-  ({ hasParentPadding, hasStatusWithUI }) => `
-  display: flex;
-  flex: 1;
-  align-items: flex-start;
-  flex-wrap: wrap;
-  text-wrap-style: balance;
-  gap: 4px;
-  margin-right: ${hasStatusWithUI ? '6px' : hasParentPadding ? '28px' : '34px'};
-`,
-)
+// Sidebar rows have a fixed height, so the label and badge share one line.
+// Each column can take up to half of the row, plus whatever the other column
+// leaves unused. Both truncate with an ellipsis when they don't fit.
+const Container = styled.div({
+  display: 'grid',
+  gridTemplateColumns: 'minmax(0, max-content) minmax(0, max-content)',
+  justifyContent: 'space-between',
+  alignItems: 'center',
+  columnGap: 6,
+})
 
-const FirstLineAlignedLabel = styled.div`
-  display: flex;
-  align-items: center;
-  min-height: 19px;
-`
+const Label = styled.span({
+  minWidth: 0,
+  overflow: 'hidden',
+  textOverflow: 'ellipsis',
+  whiteSpace: 'nowrap',
+})
 
-const Spacer = styled.div`
-  flex: 1;
-`
-
-export const Sidebar: FC<SidebarProps> = ({
-  children,
-  item,
-  hasStatusWithUI,
-}) => {
-  const { [KEY]: parameters } = addons.getConfig() as {
-    [KEY]: TagBadgeParameters
-  }
-
-  if (
-    item.type !== 'component' &&
-    item.type !== 'group' &&
-    item.type !== 'docs' &&
-    item.type !== 'story'
-  ) {
-    return children
-  }
-
+/**
+ * Renders a sidebar label followed by the badge of the entry's
+ * highest-priority tag, if any.
+ */
+export const Sidebar: FC<SidebarProps> = ({ children, item }) => {
+  const containerRef = useRef<HTMLDivElement>(null)
   const badgesToDisplay = useBadgesToDisplay({
     context: 'sidebar',
-    parameters,
-    parent: item.parent,
+    parameters: readConfig(),
+    parent: 'parent' in item ? item.parent : undefined,
     refId: item.refId,
     tags: item.tags,
     type: item.type,
   })
+  const [firstBadge] = badgesToDisplay
+  useRowEndAlignment(containerRef, Boolean(firstBadge))
+
+  if (!firstBadge) {
+    return children
+  }
 
   return (
-    <Container
-      hasParentPadding={item.type === 'component' || item.type === 'group'}
-      hasStatusWithUI={hasStatusWithUI ?? false}
-    >
-      <FirstLineAlignedLabel>{children}</FirstLineAlignedLabel>
-      <Spacer />
-      {badgesToDisplay.length ? (
-        <WithBadge
-          config={badgesToDisplay[0].badge}
-          context="sidebar"
-          entry={item}
-          tag={badgesToDisplay[0].tag}
-        />
-      ) : (
-        ''
-      )}
+    <Container ref={containerRef}>
+      <Label>{children}</Label>
+      <WithBadge
+        config={firstBadge.badge}
+        context="sidebar"
+        entry={item}
+        tag={firstBadge.tag}
+      />
     </Container>
   )
 }
