@@ -22,7 +22,7 @@ const LONG_BADGE = {
   badge: { text: 'Multi-word Badge, badgeofmanyletters', style: 'pink' },
 } as const
 
-const rows: MockRow[] = [
+const ROWS: MockRow[] = [
   { id: 'example', name: 'Example', depth: 0, tags: [] },
   { id: 'example-button', name: 'Button', depth: 1, tags: ['version:1.0.0'] },
   { id: 'example-button--primary', name: 'Primary', depth: 2, tags: [] },
@@ -104,7 +104,10 @@ function Row({ row }: Readonly<{ row: MockRow }>) {
   )
 }
 
-function MockSidebar({ width }: Readonly<{ width: number }>) {
+function MockSidebar({
+  rows = ROWS,
+  width,
+}: Readonly<{ rows?: MockRow[]; width: number }>) {
   const theme = useTheme()
   return (
     <nav
@@ -184,5 +187,47 @@ export const NarrowSidebarHover: Story = {
       row.getBoundingClientRect().left - 0.5,
     )
     await userEvent.unhover(pill)
+  },
+}
+
+// One story per tag of the default config.
+const DEFAULT_TAGS = [
+  'new',
+  'alpha',
+  'beta',
+  'rc',
+  'experimental',
+  'deprecated',
+  'outdated',
+  'danger',
+  'code-only',
+  'version:1.0.0',
+  'v:0.12.3',
+  'version:12.4.0-beta.1',
+]
+
+export const DefaultBadges: Story = {
+  args: {
+    width: 280,
+    rows: DEFAULT_TAGS.map((tag) => ({
+      id: `example-${tag}`,
+      name: tag,
+      depth: 1,
+      tags: [tag],
+    })),
+  },
+  play: async ({ canvasElement }) => {
+    const pills = Array.from(
+      firstSidebar(canvasElement).querySelectorAll<HTMLElement>(
+        '[data-tag-badge="pill"]',
+      ),
+    )
+    await expect(pills).toHaveLength(DEFAULT_TAGS.length)
+    // Every default badge has a text that its pill shows whole.
+    const cutTexts = pills
+      .map((pill) => pill.firstElementChild!)
+      .filter((text) => text.scrollWidth > text.clientWidth)
+      .map((text) => text.textContent)
+    await expect(cutTexts).toEqual([])
   },
 }

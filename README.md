@@ -96,15 +96,15 @@ This addon comes with a default config, allowing you to get started immediately 
 
 ### Preconfigured Badges
 
-|                            Preview | Tag patterns                          | Suggested use                                                                                                      |
-| ---------------------------------: | ------------------------------------- | ------------------------------------------------------------------------------------------------------------------ |
-|        ![](./static/badge-new.png) | `new`                                 | Recently added components or props/features                                                                        |
-|       ![](./static/badge-beta.png) | `alpha`, `beta`, `rc`, `experimental` | Warn that a component or prop is not stable yet                                                                    |
-| ![](./static/badge-deprecated.png) | `deprecated`                          | Components or props that should be avoided in new code                                                             |
-|   ![](./static/badge-outdated.png) | `outdated`                            | Components with design changes that weren't yet implemented, which can incur extra development costs to your users |
-|     ![](./static/badge-danger.png) | `danger`                              | Components that require particular attention when configuring them (e.g. for with security concerns)               |
-|  ![](./static/badge-code-only.png) | `code-only`                           | Components that only exist in code, and not in design                                                              |
-|    ![](./static/badge-version.png) | `version:*`, `v:*`                    | Per-component versioning                                                                                           |
+|                            Preview | Tag patterns                          | Short text                          | Suggested use                                                                                                      |
+| ---------------------------------: | ------------------------------------- | ----------------------------------- | ------------------------------------------------------------------------------------------------------------------ |
+|        ![](./static/badge-new.png) | `new`                                 |                                     | Recently added components or props/features                                                                        |
+|       ![](./static/badge-beta.png) | `alpha`, `beta`, `rc`, `experimental` | `α`, `β`, `RC`, `Exp`               | Warn that a component or prop is not stable yet                                                                    |
+| ![](./static/badge-deprecated.png) | `deprecated`                          | `Depr`                              | Components or props that should be avoided in new code                                                             |
+|   ![](./static/badge-outdated.png) | `outdated`                            | `Old`                               | Components with design changes that weren't yet implemented, which can incur extra development costs to your users |
+|     ![](./static/badge-danger.png) | `danger`                              | `⚠︎`                                | Components that require particular attention when configuring them (e.g. for with security concerns)               |
+|  ![](./static/badge-code-only.png) | `code-only`                           | `Code`                              | Components that only exist in code, and not in design                                                              |
+|    ![](./static/badge-version.png) | `version:*`, `v:*`                    | Major and minor version, e.g. `1.2` | Per-component versioning                                                                                           |
 
 ### Display Logic
 
