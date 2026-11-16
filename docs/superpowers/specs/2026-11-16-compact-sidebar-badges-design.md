@@ -70,7 +70,7 @@ Badges gain an optional `shortText` string, next to `text`. Static badge objects
 
 ### The compact pill
 
-- Every pill has the same fixed width, 40px, whatever its text. Its text is centred, on one line, and cut at the pill's edge, without an ellipsis.
+- Every pill has the same fixed width, 40px, whatever its text. Its text is centred, on one line, and cut where the pill's padding starts, without an ellipsis.
 - Pills keep the badge's colours and style, including custom styles, except for the fixed width, which custom styles can't override.
 - Compact pills also apply in Storybook's mobile drawer, which renders the same tree.
 - The label takes all the remaining space of the row, and is truncated with an ellipsis when it doesn't fit. The label and badge no longer split the row evenly.
@@ -109,6 +109,7 @@ Badges gain an optional `shortText` string, next to `text`. Static badge objects
 ## Stories
 
 - The badge CSF file (`src/examples/Badge.stories.ts`) gains compact badge stories: a short text that fits, a truncated text, a `shortText`, a long text that wraps onto two lines when expanded, and a custom style.
+- Stories that hover or focus a badge to test it are tagged `!dev` and `!autodocs`, so that browsing stories never shows their interactions.
 - A new story file shows compact badges in a sidebar: fixed-height rows with labels of different lengths and depths, a selected row, rows without badges, and a narrow sidebar. It reuses the addon's `Sidebar` layout where the preview allows it, or mimics a Storybook sidebar row otherwise.
 
 ## Testing
