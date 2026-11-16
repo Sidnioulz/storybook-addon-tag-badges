@@ -6,12 +6,16 @@ import type { Badge } from '../types/Badge'
 export type BadgeContext = 'mdx' | 'sidebar' | 'toolbar'
 
 /**
- * Returns the box shadow that draws a badge's border.
+ * Returns the box shadow that draws a badge's border, or `none` for dark
+ * badges without a border colour.
  */
 export function getBadgeBorder(theme: Theme, extraStyle: CSSObject): string {
-  return theme.base === 'light'
-    ? `inset 0 0 0 1px ${extraStyle.borderColor ?? `color-mix(in oklab, ${extraStyle.color ?? theme.color.dark} 10%, transparent 90%)`}`
-    : `inset 0 0 0 1px ${extraStyle.borderColor ?? 'none'}`
+  if (theme.base === 'light') {
+    return `inset 0 0 0 1px ${extraStyle.borderColor ?? `color-mix(in oklab, ${extraStyle.color ?? theme.color.dark} 10%, transparent 90%)`}`
+  }
+  return extraStyle.borderColor
+    ? `inset 0 0 0 1px ${extraStyle.borderColor}`
+    : 'none'
 }
 
 export const BadgeUI = styled.div<

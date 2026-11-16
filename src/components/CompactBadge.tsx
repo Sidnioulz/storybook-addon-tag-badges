@@ -33,9 +33,10 @@ const PILL_STYLE: CSSObject = {
 
 // Props that TooltipProvider forwards to react-aria without declaring them.
 // The floating badge covers the pill: it must let the pointer through to the
-// pill, or the pointer would leave the pill and close it. It must never flip
-// to the right of the pill either.
+// pill, or the pointer would leave the pill and close it. It must stay on the
+// pill near the viewport's edges, and never flip to the right of the pill.
 const TOOLTIP_PASSTHROUGH_PROPS = {
+  containerPadding: 0,
   shouldFlip: false,
   style: { outline: 'none', pointerEvents: 'none' },
 } as object
@@ -49,6 +50,10 @@ const Pill = forwardRef<HTMLDivElement, ComponentProps<typeof BadgeUI>>(
     return <BadgeUI ref={ref} {...(pillProps as typeof props)} />
   },
 )
+
+function joinShadows(...shadows: string[]) {
+  return shadows.filter((shadow) => shadow !== 'none').join(', ')
+}
 
 interface CompactBadgeProps {
   extraStyle: CSSObject
@@ -77,6 +82,7 @@ export const CompactBadge: FC<CompactBadgeProps> = ({
   const onVisibleChange = (visible: boolean) => {
     const pill = pillRef.current
     if (!visible || !pill) {
+      clearTimeout(hoverTimer.current)
       setIsOpen(false)
       return
     }
@@ -129,7 +135,10 @@ export const CompactBadge: FC<CompactBadgeProps> = ({
     // An inner ring in the app's background keeps the focus ring visible on
     // the selected row, whose background has the focus ring's colour.
     ...(hasFocusRing && {
-      boxShadow: `${getBadgeBorder(theme, extraStyle)}, 0 0 0 2px ${theme.background.app}`,
+      boxShadow: joinShadows(
+        getBadgeBorder(theme, extraStyle),
+        `0 0 0 2px ${theme.background.app}`,
+      ),
       outline: `2px solid ${theme.color.secondary}`,
       outlineOffset: 2,
     }),
@@ -168,12 +177,19 @@ export const CompactBadge: FC<CompactBadgeProps> = ({
           // The floating badge replaces the pill while it shows, along with
           // its focus ring. Opacity keeps the pill focusable underneath.
           opacity: isOpen ? 0 : 1,
+          // Drawn inside the pill, which sidebar rows clip, and over the
+          // badge's own colour rather than the row's.
           '&:focus-visible': {
-            outline: `2px solid ${theme.color.secondary}`,
-            outlineOffset: 1,
+            outline: 'none',
+            boxShadow: joinShadows(
+              `inset 0 0 0 2px ${theme.color.secondary}`,
+              `inset 0 0 0 3px ${theme.background.app}`,
+              getBadgeBorder(theme, extraStyle),
+            ),
           },
         }}
         hasLongText={false}
+        onPointerDown={() => clearTimeout(hoverTimer.current)}
         onPointerEnter={onPointerEnter}
         onPointerLeave={onPointerLeave}
         role="img"
