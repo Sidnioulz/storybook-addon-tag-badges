@@ -30,4 +30,5 @@ addons.setConfig({
     },
   },
   tagBadges,
+  tagBadgesOptions: { compactSidebar: true },
 })
