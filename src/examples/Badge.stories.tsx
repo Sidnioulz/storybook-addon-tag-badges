@@ -194,15 +194,15 @@ export const CompactTruncated: Story = {
 
     const floating = await hoverUntilFloating(pill)
     await expect(floating).toHaveTextContent('Deprecated')
+    // The reveal runs alongside a 0s step that keeps the badge hidden during
+    // the hover delay.
     const animation = getComputedStyle(floating)
-    await expect(animation.animationName).not.toBe('none')
+    const durations = animation.animationDuration.split(', ').map(parseFloat)
     await expect(
-      parseFloat(animation.animationDuration),
-    ).toBeGreaterThanOrEqual(0.1)
-    await expect(parseFloat(animation.animationDuration)).toBeLessThanOrEqual(
-      0.15,
-    )
-    await expect(animation.animationTimingFunction).not.toBe('linear')
+      durations.some((duration) => duration >= 0.1 && duration <= 0.15),
+    ).toBe(true)
+    await expect(animation.animationTimingFunction).toContain('cubic-bezier')
+    await expect(animation.animationTimingFunction).not.toContain('linear')
     await expect(
       Math.abs(
         floating.getBoundingClientRect().right -
@@ -211,14 +211,9 @@ export const CompactTruncated: Story = {
     ).toBeLessThanOrEqual(1)
     await expect(pill).not.toHaveAttribute('aria-describedby')
     await expect(getComputedStyle(pill).opacity).toBe('0')
-    // Reading the badge takes longer than its opening animation.
-    await new Promise((resolve) => setTimeout(resolve, 300))
+    // It closes at once, without an exit animation.
     await userEvent.unhover(pill)
-    // The exit animation starts at least 200ms after the pointer leaves.
-    await new Promise((resolve) => setTimeout(resolve, 150))
-    await expect(getFloating()).not.toBeNull()
-    await expect(getComputedStyle(getFloating()!).clipPath).toBe('none')
-    await waitFor(() => expect(getFloating()).toBeNull())
+    await waitFor(() => expect(getFloating()).toBeNull(), { timeout: 50 })
     await expect(getComputedStyle(pill).opacity).toBe('1')
   },
 }
@@ -317,6 +312,7 @@ export const CompactKeyboardFocus: Story = {
       },
       { timeout: 150 },
     )
+    await expect(getComputedStyle(floating).opacity).toBe('1')
     await expect(getComputedStyle(floating).outlineStyle).not.toBe('none')
     // The light theme's app background, which keeps the ring visible on the
     // selected row, whose background is the ring's colour.
@@ -404,7 +400,7 @@ export const CompactUnrollsFromPill: Story = {
     await expect(animations.length).toBeGreaterThan(0)
     for (const animation of animations) {
       animation.pause()
-      animation.currentTime = 0
+      animation.currentTime = Number(animation.effect!.getTiming().delay)
     }
     // On its first frame, the floating badge shows what the pill shows.
     const text = floating.firstElementChild!.getBoundingClientRect()
@@ -416,5 +412,54 @@ export const CompactUnrollsFromPill: Story = {
       animation.finish()
     }
     await userEvent.unhover(pill)
+  },
+}
+
+const getVisibleFloating = () => {
+  const floating = getFloating()
+  return floating && getComputedStyle(floating).opacity !== '0'
+    ? floating
+    : null
+}
+
+export const CompactHoverDelay: Story = {
+  decorators: [SidebarRow],
+  args: {
+    context: 'sidebar',
+    compact: true,
+    text: 'Deprecated',
+    style: 'orange',
+  },
+  play: async ({ canvasElement }) => {
+    const pill = getPill(canvasElement)
+    await userEvent.hover(pill)
+    await new Promise((resolve) => setTimeout(resolve, 100))
+    await expect(getVisibleFloating()).toBeNull()
+    await expect(getComputedStyle(pill).opacity).toBe('1')
+    await waitFor(() => expect(getVisibleFloating()).not.toBeNull())
+    await expect(getComputedStyle(pill).opacity).toBe('0')
+    await userEvent.unhover(pill)
+  },
+}
+
+export const CompactHoverKeepsFocus: Story = {
+  decorators: [SidebarRow],
+  args: {
+    context: 'sidebar',
+    compact: true,
+    text: 'Deprecated',
+    style: 'orange',
+  },
+  play: async ({ canvasElement }) => {
+    const pill = getPill(canvasElement)
+    await userEvent.keyboard('{Escape}')
+    pill.focus()
+    await waitFor(() => expect(getVisibleFloating()).not.toBeNull())
+    await userEvent.hover(pill)
+    await userEvent.unhover(pill)
+    await new Promise((resolve) => setTimeout(resolve, 400))
+    await expect(getVisibleFloating()).not.toBeNull()
+    pill.blur()
+    await waitFor(() => expect(getFloating()).toBeNull())
   },
 }
