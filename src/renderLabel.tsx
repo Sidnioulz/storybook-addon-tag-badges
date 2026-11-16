@@ -1,42 +1,50 @@
 import React from 'react'
-import { API_HashEntry, type StatusByTypeId } from 'storybook/internal/types'
-import { experimental_useStatusStore } from 'storybook/manager-api'
+import type {
+  API_HashEntry,
+  API_SidebarOptions,
+} from 'storybook/internal/types'
 
 import { Sidebar } from './components/Sidebar'
 
-function hasStatusWithUI(itemStatuses: StatusByTypeId): boolean {
-  if (!itemStatuses) {
-    return false
-  }
+export type LabelContext = Parameters<
+  NonNullable<API_SidebarOptions['renderLabel']>
+>[2]
 
-  if (itemStatuses['storybook/component-test']) {
-    return true
-  }
+const BADGE_TYPES = new Set<API_HashEntry['type']>([
+  'component',
+  'docs',
+  'group',
+  'story',
+])
 
-  // Add future statuses with a UI element here.
-
-  return false
+/**
+ * Whether a sidebar label may show a badge for this entry. The mobile bottom
+ * bar shows labels as plain text, so it never shows badges.
+ */
+export function canShowBadge(item: API_HashEntry, context?: LabelContext) {
+  return context?.location !== 'bottom-bar' && BADGE_TYPES.has(item.type)
 }
 
-function RenderLabelContent({ item }: { item: API_HashEntry }) {
-  const itemStatuses = experimental_useStatusStore((all) => all[item.id])
+/**
+ * Renders the sidebar label of an entry with its badge. Use as Storybook's
+ * `sidebar.renderLabel` option, along with `renderAriaLabel`.
+ *
+ * It calls no hooks, so Storybook may call it from any of its components.
+ * Returns `undefined` when the entry can't show a badge, so that Storybook
+ * renders its default label.
+ */
+export function renderLabel(
+  item: API_HashEntry,
+  api?: unknown,
+  context?: LabelContext,
+) {
+  if (!canShowBadge(item, context)) {
+    return undefined
+  }
 
   return (
-    <Sidebar item={item} hasStatusWithUI={hasStatusWithUI(itemStatuses)}>
+    <Sidebar key={item.id} item={item}>
       {item.name}
     </Sidebar>
   )
-}
-
-export function renderLabel(item: API_HashEntry) {
-  if (
-    item.type !== 'story' &&
-    item.type !== 'group' &&
-    item.type !== 'docs' &&
-    item.type !== 'component'
-  ) {
-    return
-  }
-
-  return <RenderLabelContent item={item} />
 }

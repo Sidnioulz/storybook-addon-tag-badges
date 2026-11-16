@@ -3,12 +3,7 @@ import { type API, useStorybookApi } from 'storybook/manager-api'
 
 import { DisplayOutcome, shouldDisplay } from './utils/display'
 import { matchTags } from './utils/tag'
-import type {
-  API_ComponentEntry,
-  API_GroupEntry,
-  API_HashEntry,
-  API_LeafEntry,
-} from 'storybook/internal/types'
+import type { API_HashEntry } from 'storybook/internal/types'
 import { TagBadgeParameters } from './types/TagBadgeParameters'
 import { BadgeOrBadgeFn } from './types/Badge'
 
@@ -18,13 +13,20 @@ interface UseBadgesToDisplayOptions {
   parent?: string
   refId?: string
   tags: string[]
-  type:
-    API_ComponentEntry['type'] | API_GroupEntry['type'] | API_LeafEntry['type']
+  type: API_HashEntry['type']
 }
 
 type BadgesToDisplay = { badge: BadgeOrBadgeFn; tag: string }[]
 
-function _useBadgesToDisplay({
+/**
+ * Computes the badges to display for an entry, in order of priority. Unlike
+ * `useBadgesToDisplay`, it calls no hooks, so it may run outside of a React
+ * render, e.g. in Storybook's `renderAriaLabel` callback.
+ *
+ * @param options.api The manager API, used to resolve parent entries for
+ * `skipInherited`. Without it, inherited badges are not skipped.
+ */
+export function getBadgesToDisplay({
   api,
   context,
   parameters,
@@ -72,7 +74,7 @@ function _useBadgesToDisplay({
         resolvedParent.type !== 'root' &&
         parentTags?.includes(current.tag)
       ) {
-        const displayParent = _useBadgesToDisplay({
+        const displayParent = getBadgesToDisplay({
           api,
           context,
           parameters,
@@ -106,7 +108,7 @@ export function useBadgesToDisplay({
 
   return useMemo(
     () =>
-      _useBadgesToDisplay({
+      getBadgesToDisplay({
         api,
         context,
         parameters,
