@@ -332,7 +332,7 @@ The following preset colors are defined:
 
 #### Custom Style
 
-To customise the look of your badges, you may pass an object of CSS properties to the `style` prop. The object is consumed by [`@storybook/theming`](https://storybook.js.org/docs/configure/user-interface/theming#using-the-theme-for-addon-authors) and ultimately by [emotion](https://emotion.sh/docs/introduction).
+To customise the look of your badges, you may pass an object of CSS properties to the `style` prop. The object is consumed by [`storybook/theming`](https://storybook.js.org/docs/configure/user-interface/theming#using-the-theme-for-addon-authors) and ultimately by [emotion](https://emotion.sh/docs/introduction).
 
 > [!NOTE]
 > The `borderColor` property, if set, will be passed to an inner box-shadow and then deleted.
