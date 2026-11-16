@@ -1,6 +1,9 @@
+import type { API_HashEntry } from 'storybook/internal/types'
+
 import {
   DISPLAY_DEFAULTS,
   DisplayOutcome,
+  getDisplayType,
   normaliseDisplay,
   shouldDisplay,
   type ShouldDisplayOptions,
@@ -49,7 +52,51 @@ describe('display', () => {
     })
   })
 
+  describe('getDisplayType', () => {
+    it('names story tests after their subtype', () => {
+      expect(
+        getDisplayType({ type: 'story', subtype: 'test' } as API_HashEntry),
+      ).toBe('test')
+    })
+
+    it('names other entries after their type', () => {
+      expect(
+        getDisplayType({ type: 'story', subtype: 'story' } as API_HashEntry),
+      ).toBe('story')
+      expect(getDisplayType({ type: 'component' } as API_HashEntry)).toBe(
+        'component',
+      )
+    })
+  })
+
   describe('shouldDisplay', () => {
+    it('should display tests like stories by default', () => {
+      for (const context of ['sidebar', 'toolbar'] as const) {
+        expect(shouldDisplay({ config: {}, type: 'test', context })).toBe(
+          shouldDisplay({ config: {}, type: 'story', context }),
+        )
+      }
+    })
+
+    it('should not display tests for conditions that only name stories', () => {
+      expect(
+        shouldDisplay({
+          config: {
+            display: { sidebar: [{ type: 'story', skipInherited: false }] },
+          },
+          type: 'test',
+          context: 'sidebar',
+        }),
+      ).toBe(DisplayOutcome.NEVER)
+      expect(
+        shouldDisplay({
+          config: { display: { toolbar: 'story' } },
+          type: 'test',
+          context: 'toolbar',
+        }),
+      ).toBe(DisplayOutcome.NEVER)
+    })
+
     it('should only display non-inherited tags for stories in the sidebar by default', () => {
       expect(
         shouldDisplay({
@@ -144,7 +191,7 @@ describe('display', () => {
 
     it.each(
       ['sidebar', 'toolbar'].flatMap((context) =>
-        ['component', 'docs', 'story', 'group'].map((type) => ({
+        ['component', 'docs', 'story', 'test', 'group'].map((type) => ({
           context,
           type,
         })),
@@ -164,7 +211,7 @@ describe('display', () => {
 
     it.each(
       ['sidebar', 'toolbar'].flatMap((context) =>
-        ['component', 'docs', 'story', 'group'].map((type) => ({
+        ['component', 'docs', 'story', 'test', 'group'].map((type) => ({
           context,
           type,
         })),
@@ -183,7 +230,7 @@ describe('display', () => {
     )
 
     it.each(
-      ['component', 'docs', 'story', 'group'].map((type) => ({
+      ['component', 'docs', 'story', 'test', 'group'].map((type) => ({
         type,
       })),
     )(
@@ -200,7 +247,7 @@ describe('display', () => {
     )
 
     it.each(
-      ['component', 'docs', 'story', 'group'].map((type) => ({
+      ['component', 'docs', 'story', 'test', 'group'].map((type) => ({
         type,
       })),
     )(
@@ -217,7 +264,7 @@ describe('display', () => {
     )
 
     it.each(
-      ['component', 'docs', 'story', 'group'].map((type) => ({
+      ['component', 'docs', 'story', 'test', 'group'].map((type) => ({
         type,
       })),
     )(

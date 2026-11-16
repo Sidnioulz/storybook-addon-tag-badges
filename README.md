@@ -108,7 +108,7 @@ This addon comes with a default config, allowing you to get started immediately 
 
 ### Display Logic
 
-By default, all tags are always displayed on the toolbar, but they're only displayed in the sidebar for component entries, and for docs or story entries that appear at the top-level. They are not displayed in docs or story entries inside a component or group entry.
+By default, all tags are always displayed on the toolbar, but they're only displayed in the sidebar for component entries, and for docs, story or test entries that appear at the top-level. They are not displayed in docs, story or test entries inside an entry that already displays them.
 
 Besides, the addon is limited to one badge per entry in the sidebar. Badges placed first in the configuration will be displayed in priority. For example, the `new` badge will be displayed before the `code-only` badge.
 
@@ -256,16 +256,17 @@ const tags = ['v:1.0.0', 'private']
 
 ### Display (advanced usage)
 
-The `display` property controls where and for what type of content the badges are rendered. It has three sub-properties: `sidebar`, `toolbar` and `mdx`. In the sidebar, tags may be displayed for component, group, docs or story entries. In the toolbar, they may be set for docs or story entries (as other entry types aren't displayable outside the sidebar). The `mdx` property controls the badges displayed by `MDXBadges` in a MDX file; in MDX, tags may be displayed for component or story entries (when importing CSF stories and using the `of` prop).
+The `display` property controls where and for what type of content the badges are rendered. It has three sub-properties: `sidebar`, `toolbar` and `mdx`. In the sidebar, tags may be displayed for component, group, docs, story or test entries. In the toolbar, they may be set for docs, story or test entries (as other entry types aren't displayable outside the sidebar). The `mdx` property controls the badges displayed by `MDXBadges` in a MDX file; in MDX, tags may be displayed for component or story entries (when importing CSF stories and using the `of` prop).
 
 The following entry types are rendered by Storybook:
 
-| Icon                              | Name      | Description                                                                |
-| --------------------------------- | --------- | -------------------------------------------------------------------------- |
-| ![](./static/entry-story.svg)     | story     | One of the component stories written in your CSF files.                    |
-| ![](./static/entry-docs.svg)      | docs      | A documentation page generated through MDX files or autodocs.              |
-| ![](./static/entry-component.svg) | component | The grouping of a component's stories and autodocs page.                   |
-| ![](./static/entry-group.svg)     | group     | A generic group containing unattached MDX docs, stories and/or components. |
+| Icon                              | Name      | Description                                                                     |
+| --------------------------------- | --------- | ------------------------------------------------------------------------------- |
+| ![](./static/entry-story.svg)     | story     | One of the component stories written in your CSF files.                         |
+| ![](./static/entry-test.svg)      | test      | A test of a story, shown under its story. It has its story's tags, and its own. |
+| ![](./static/entry-docs.svg)      | docs      | A documentation page generated through MDX files or autodocs.                   |
+| ![](./static/entry-component.svg) | component | The grouping of a component's stories and autodocs page.                        |
+| ![](./static/entry-group.svg)     | group     | A generic group containing unattached MDX docs, stories and/or components.      |
 
 To control where badges are shown, you pass conditions to the `sidebar`, `toolbar` and `mdx` keys. You can either specify a single condition, or an array of conditions (in which case matching any condition for a given tag causes it to be used).
 
@@ -274,12 +275,12 @@ For `mdx` and `toolbar` display properties, the conditions can either be a boole
 * `true`: the badge should always be displayed
 * `string`: the badge should be displayed
 
-| Type            | Description                         | Example  | MDX outcome              | Toolbar outcome     |
-| --------------- | ----------------------------------- | -------- | ------------------------ | ------------------- |
-| `ø` _(not set)_ | Use default behaviour               |          | `['component', 'story']` | `['docs', 'story']` |
-| `false`         | Never display badge                 | `false`  | `[]`                     | `[]`                |
-| `true`          | Always display badge                | `true`   | `['component', 'story']` | `['docs', 'story']` |
-| `string`        | Display only for that type of entry | `'docs'` | `[]`                     | `['docs']`          |
+| Type            | Description                         | Example  | MDX outcome              | Toolbar outcome             |
+| --------------- | ----------------------------------- | -------- | ------------------------ | --------------------------- |
+| `ø` _(not set)_ | Use default behaviour               |          | `['component', 'story']` | `['docs', 'story', 'test']` |
+| `false`         | Never display badge                 | `false`  | `[]`                     | `[]`                        |
+| `true`          | Always display badge                | `true`   | `['component', 'story']` | `['docs', 'story', 'test']` |
+| `string`        | Display only for that type of entry | `'docs'` | `[]`                     | `['docs']`                  |
 
 For the `sidebar` property, things are more complicated. You must choose for which entries to display badges and whether a badge should be displayed for an entry when its parent entry already displays the same badge.
 
@@ -298,11 +299,12 @@ const DISPLAY_DEFAULTS = {
   mdx: ['story', 'component'],
   sidebar: [
     { type: 'story', skipInherited: true },
+    { type: 'test', skipInherited: true },
     { type: 'docs', skipInherited: true },
     { type: 'component', skipInherited: false },
     { type: 'group', skipInherited: false },
   ],
-  toolbar: ['docs', 'story'],
+  toolbar: ['docs', 'story', 'test'],
 }
 ```
 

@@ -1,11 +1,12 @@
 import { useMemo } from 'react'
 import { type API, useStorybookApi } from 'storybook/manager-api'
 
-import { DisplayOutcome, shouldDisplay } from './utils/display'
+import { DisplayOutcome, getDisplayType, shouldDisplay } from './utils/display'
 import { matchTags } from './utils/tag'
 import type { API_HashEntry } from 'storybook/internal/types'
 import { TagBadgeParameters } from './types/TagBadgeParameters'
 import { BadgeOrBadgeFn } from './types/Badge'
+import type { DisplayEntryType } from './types/DisplayOptions'
 
 interface UseBadgesToDisplayOptions {
   context: 'mdx' | 'sidebar' | 'toolbar'
@@ -13,7 +14,7 @@ interface UseBadgesToDisplayOptions {
   parent?: string
   refId?: string
   tags: string[]
-  type: API_HashEntry['type']
+  type: DisplayEntryType
 }
 
 type BadgesToDisplay = { badge: BadgeOrBadgeFn; tag: string }[]
@@ -86,7 +87,7 @@ export function getBadgesToDisplay({
           parent: resolvedParent.parent,
           refId,
           tags: parentTags,
-          type: resolvedParent.type,
+          type: getDisplayType(resolvedParent),
         })
 
         if (
