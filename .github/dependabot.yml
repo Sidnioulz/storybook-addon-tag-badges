@@ -7,9 +7,9 @@ updates:
       interval: 'weekly'
     versioning-strategy: increase
     assignees:
-      - 'sidnioulz'
+      - 'Sidnioulz'
     reviewers:
-      - 'sidnioulz'
+      - 'Sidnioulz'
     groups:
       all:
         patterns:
