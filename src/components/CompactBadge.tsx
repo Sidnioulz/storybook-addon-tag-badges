@@ -21,9 +21,8 @@ import { BadgeUI, getBadgeBorder } from './BadgeUI'
 /** Width in px of every compact badge, whatever its text. */
 export const COMPACT_BADGE_WIDTH = 40
 
-const HOVER_DELAY = 200
-const ANIMATION_DURATION = 120
-const EXIT_DELAY = 200
+const ANIMATION_DURATION = 150
+const EXIT_DELAY = 150
 // The badge decelerates into place as it opens, and accelerates away as it
 // closes.
 const ENTER_EASING = 'cubic-bezier(0.2, 0.8, 0.2, 1)'
@@ -212,7 +211,7 @@ export const CompactBadge: FC<CompactBadgeProps> = ({
       return
     }
     clearTimeout(hoverTimer.current)
-    hoverTimer.current = setTimeout(() => onVisibleChange(true), HOVER_DELAY)
+    hoverTimer.current = setTimeout(() => onVisibleChange(true), EXIT_DELAY)
   }
   const onPointerLeave = () => {
     clearTimeout(hoverTimer.current)
@@ -248,8 +247,8 @@ export const CompactBadge: FC<CompactBadgeProps> = ({
     <TooltipProvider
       placement="left"
       offset={-COMPACT_BADGE_WIDTH}
-      delayShow={HOVER_DELAY}
-      delayHide={0}
+      delayShow={0}
+      delayHide={EXIT_DELAY}
       visible={isOpen}
       onVisibleChange={onVisibleChange}
       tooltip={
@@ -292,8 +291,7 @@ export const CompactBadge: FC<CompactBadgeProps> = ({
         onPointerDown={() => clearTimeout(hoverTimer.current)}
         onPointerEnter={onPointerEnter}
         onPointerLeave={onPointerLeave}
-        role="img"
-        tabIndex={-1}
+        tabIndex={0}
         theme={theme}
       >
         {shortText ?? text}
