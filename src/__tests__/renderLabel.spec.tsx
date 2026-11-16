@@ -116,11 +116,16 @@ describe('compact sidebar', () => {
 
   it('renders a pill when compactSidebar is on', () => {
     config.tagBadgesOptions = { compactSidebar: true }
-    render(withTheme(renderLabel(story)))
+    render(
+      withTheme(
+        <div role="treeitem" aria-selected={false}>
+          {renderLabel(story)}
+        </div>,
+      ),
+    )
 
-    expect(
-      document.querySelector('[data-tag-badge="pill"]'),
-    ).toHaveAccessibleName('New')
+    expect(document.querySelector('[data-tag-badge="pill"]')).not.toBeNull()
+    expect(screen.getByRole('treeitem')).toHaveAccessibleName('Primary New')
   })
 
   it('renders a full badge when compactSidebar is off', () => {

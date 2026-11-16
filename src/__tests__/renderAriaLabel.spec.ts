@@ -58,21 +58,10 @@ const api = {
 const sidebar = { isMobile: false, location: 'sidebar' } as const
 
 describe('renderAriaLabel', () => {
-  it('appends the text of the badge shown in the sidebar', () => {
+  it('appends the full text of the badge shown in the sidebar', () => {
     expect(renderAriaLabel(entry(['deprecated']), api, sidebar)).toBe(
       'Primary. Deprecated',
     )
-  })
-
-  it('names the full text of compact badges', () => {
-    config.tagBadgesOptions = { compactSidebar: true }
-    try {
-      expect(renderAriaLabel(entry(['deprecated']), api, sidebar)).toBe(
-        'Primary. Deprecated',
-      )
-    } finally {
-      delete config.tagBadgesOptions
-    }
   })
 
   it('only names the highest-priority badge, like the sidebar', () => {

@@ -11,15 +11,25 @@ export type BadgeContext = 'mdx' | 'sidebar' | 'toolbar'
  */
 export function getBadgeBorder(theme: Theme, extraStyle: CSSObject): string {
   if (theme.base === 'light') {
-    return `inset 0 0 0 1px ${extraStyle.borderColor ?? `color-mix(in oklab, ${extraStyle.color ?? theme.color.dark} 10%, transparent 90%)`}`
+    const fallbackColor = `color-mix(in oklab, ${extraStyle.color ?? theme.color.dark} 10%, transparent 90%)`
+    return `inset 0 0 0 1px ${extraStyle.borderColor ?? fallbackColor}`
   }
   return extraStyle.borderColor
     ? `inset 0 0 0 1px ${extraStyle.borderColor}`
     : 'none'
 }
 
+// Badges with a tooltip are buttons. Sidebar badges keep the cursor of their
+// row, which selects the story when pressed.
+function getCursor(as: unknown, context: BadgeContext) {
+  if (as === 'button') {
+    return 'help'
+  }
+  return context === 'sidebar' ? 'inherit' : 'initial'
+}
+
 export const BadgeUI = styled.div<
-  { context: BadgeContext } & { extraStyle: CSSObject; hasLongText: boolean }
+  { context: BadgeContext } & { extraStyle: CSSObject; hasLongText?: boolean }
 >(({ as, context, extraStyle, hasLongText, theme }) => ({
   display: 'inline-block',
   fontSize: 11,
@@ -27,8 +37,7 @@ export const BadgeUI = styled.div<
   alignSelf: 'center',
   padding: context === 'sidebar' ? '3px 8px' : '4px 12px',
   border: 'none',
-  cursor:
-    as === 'button' ? 'help' : context === 'sidebar' ? 'cursor' : 'initial',
+  cursor: getCursor(as, context),
   borderRadius: '3em',
   fontWeight: theme.typography.weight.bold,
   boxShadow: getBadgeBorder(theme, extraStyle),

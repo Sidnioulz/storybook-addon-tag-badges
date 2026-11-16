@@ -115,7 +115,7 @@ Besides, the addon is limited to one badge per entry in the sidebar. Badges plac
 > [!WARNING]
 > This means that when you customise this addon's configuration, you should include your customisations **before** spreading the default config object, so that they have a higher priority.
 
-In the sidebar, the label and badge of an entry share a single line, and badges are aligned at the end of the rows, next to Storybook's status icons and context menu button. When a row is too narrow for both, they split its space evenly, unless one of them needs less, and their text is truncated with an ellipsis. Screen readers announce the badge's full text along with the entry's name.
+In the sidebar, the label and badge of an entry share a single line, and badges are aligned at the end of the rows, next to Storybook's status icons and context menu button. Rows that show two status icons place their badge further left, and it may shift when they're hovered. When a row is too narrow for both, they split its space evenly, unless one of them needs less, and their text is truncated with an ellipsis. Screen readers announce the badge's full text along with the entry's name.
 
 ## 👀 Usage
 
@@ -439,7 +439,7 @@ Global options apply to your whole Storybook. Set them with `tagBadgesOptions` i
 
 ### Compact Sidebar
 
-With `compactSidebar`, every sidebar badge renders as a 40px wide pill, so that badges line up and labels keep most of the row. The pill shows the badge's [`shortText`](#static-badge-object), or the start of its `text`. Hovering the pill shows the full badge over it, and so does focusing its row with the keyboard. Toolbar and MDX badges are not affected.
+With `compactSidebar`, every sidebar badge renders as a 40px wide pill, so that badges line up and labels keep most of the row. The pill shows the badge's [`shortText`](#static-badge-object), or the start of its `text`. Hovering the pill shows the whole badge over it, on up to two lines, and so does focusing its row with the keyboard. Toolbar and MDX badges are not affected.
 
 ```ts
 // .storybook/manager.ts
@@ -452,13 +452,13 @@ addons.setConfig({
 })
 ```
 
-Touch screens can't hover, so they only show the pill.
+Touch screens only show the pill, and so does keyboard focus in browsers without CSS anchor positioning.
 
 ## Sidebar Config
 
 This addon uses the [sidebar `renderLabel` and `renderAriaLabel` options](https://storybook.js.org/docs/configure/user-interface/sidebar-and-urls) to display badges in the sidebar. `renderLabel` shows the badge next to the entry's name, and `renderAriaLabel` adds the badge's text to the entry's accessible name, e.g. "Button. Deprecated", so that screen readers announce it.
 
-The addon keeps the other `sidebar` options you set, like `showRoots` or `filters`. If you set your own `renderLabel`, the addon sets neither option, and badges won't show in the sidebar. To show badges for items that aren't customised by your own logic, call the addon's `renderLabel` and `renderAriaLabel` functions at the end of your own, passing all arguments through. To customise an item and keep its badge, wrap your label in the `Sidebar` component, and pass the matching name to `renderAriaLabel`.
+The addon keeps the other `sidebar` options you set, like `showRoots` or `filters`. If you set a `renderLabel` other than the addon's, the addon sets neither option, and badges won't show in the sidebar. To show badges for items that aren't customised by your own logic, call the addon's `renderLabel` and `renderAriaLabel` functions at the end of your own, passing all arguments through. To customise an item and keep its badge, wrap your label in the `Sidebar` component, and pass the matching name to `renderAriaLabel`.
 
 ```tsx
 // .storybook/manager.tsx
