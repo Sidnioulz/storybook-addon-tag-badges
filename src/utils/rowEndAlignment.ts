@@ -16,22 +16,16 @@ type Measure = () => () => void
 const measuresByElement = new Map<Element, Set<Measure>>()
 let observer: ResizeObserver | undefined
 
-/**
- * Runs every measurement before any write, so that rows don't force one
- * layout each when the sidebar resizes.
- */
-function runMeasures(measures: Iterable<Measure>) {
-  const writes = Array.from(measures, (measure) => measure())
-  writes.forEach((write) => write())
-}
-
+// Runs every measurement before any write, so that rows don't force one
+// layout each.
 function getObserver() {
   observer ??= new ResizeObserver((entries) => {
     const measures = new Set<Measure>()
     for (const { target } of entries) {
       measuresByElement.get(target)?.forEach((measure) => measures.add(measure))
     }
-    runMeasures(measures)
+    const writes = Array.from(measures, (measure) => measure())
+    writes.forEach((write) => write())
   })
   return observer
 }
@@ -65,24 +59,17 @@ function unobserve(element: Element, measure: Measure) {
  * badges line up in one column across rows and stay put on hover.
  *
  * The label must be a block that fills its parent. Only the parent is
- * observed: its size does not depend on the label's margin, so writing the
- * margin cannot trigger the observer again.
+ * observed: it resizes along with the row, and its size does not depend on
+ * the label's margin, so writing the margin cannot trigger the observer
+ * again. The observer reports every new parent before the next paint, and
+ * measures all of them before writing any margin.
  */
-export function useRowEndAlignment(
-  ref: RefObject<HTMLElement | null>,
-  enabled: boolean,
-) {
+export function useRowEndAlignment(ref: RefObject<HTMLElement | null>) {
   useLayoutEffect(() => {
     const label = ref.current
     const box = label?.parentElement
     const row = label?.closest(ROW_SELECTOR)
-    if (
-      !enabled ||
-      !label ||
-      !box ||
-      !row ||
-      typeof ResizeObserver === 'undefined'
-    ) {
+    if (!label || !box || !row || typeof ResizeObserver === 'undefined') {
       return
     }
 
@@ -95,13 +82,10 @@ export function useRowEndAlignment(
       }
     }
 
-    runMeasures([measure])
     observe(box, measure)
-    observe(row, measure)
     return () => {
       unobserve(box, measure)
-      unobserve(row, measure)
       label.style.marginInlineEnd = ''
     }
-  }, [ref, enabled])
+  }, [ref])
 }
