@@ -4,6 +4,7 @@ import type { API_HashEntry } from 'storybook/internal/types'
 import { useTheme } from 'storybook/theming/emotion'
 import { expect, userEvent, waitFor, within } from 'storybook/test'
 
+import { getBadgeProps } from '../components/Badge'
 import { SidebarLabel } from '../components/SidebarLabel'
 import { defaultConfig } from '../defaultConfig'
 import type { BadgeOrBadgeFn } from '../types/Badge'
@@ -190,7 +191,7 @@ export const NarrowSidebarHover: Story = {
   },
 }
 
-// One story per tag of the default config.
+// One row per tag of the default config.
 const DEFAULT_TAGS = [
   'new',
   'alpha',
@@ -217,17 +218,26 @@ export const DefaultBadges: Story = {
     })),
   },
   play: async ({ canvasElement }) => {
-    const pills = Array.from(
-      firstSidebar(canvasElement).querySelectorAll<HTMLElement>(
-        '[data-tag-badge="pill"]',
-      ),
-    )
-    await expect(pills).toHaveLength(DEFAULT_TAGS.length)
-    // Every default badge has a text that its pill shows whole.
-    const cutTexts = pills
-      .map((pill) => pill.firstElementChild!)
+    const sidebar = firstSidebar(canvasElement)
+    await expect(
+      sidebar.querySelectorAll('[data-tag-badge="pill"]'),
+    ).toHaveLength(DEFAULT_TAGS.length)
+    // Every short text of the default badges shows whole in its pill. Badges
+    // without one, like versions, show the start of their text.
+    const shortTextTags = DEFAULT_TAGS.filter((tag) => {
+      const { config } = findBadge([tag])!
+      return getBadgeProps(config, undefined, tag, 'sidebar').shortText
+    })
+    await expect(shortTextTags.length).toBeGreaterThan(0)
+    const cutShortTexts = shortTextTags
+      .map(
+        (tag) =>
+          sidebar.querySelector(
+            `[data-item-id="example-${tag}"] [data-tag-badge="pill"]`,
+          )!.firstElementChild!,
+      )
       .filter((text) => text.scrollWidth > text.clientWidth)
       .map((text) => text.textContent)
-    await expect(cutTexts).toEqual([])
+    await expect(cutShortTexts).toEqual([])
   },
 }
