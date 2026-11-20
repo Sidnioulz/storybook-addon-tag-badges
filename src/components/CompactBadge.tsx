@@ -1,18 +1,15 @@
 import React, {
   type FC,
+  type RefObject,
   useCallback,
   useEffect,
   useId,
+  useLayoutEffect,
   useRef,
   useState,
 } from 'react'
 import { createPortal } from 'react-dom'
-import {
-  type CSSObject,
-  keyframes,
-  srOnlyStyles,
-  styled,
-} from 'storybook/theming/emotion'
+import { type CSSObject, srOnlyStyles, styled } from 'storybook/theming/emotion'
 
 import { ROW_SELECTOR } from '../utils/rowEndAlignment'
 import { BadgeUI } from './BadgeUI'
@@ -21,7 +18,8 @@ import { BadgeUI } from './BadgeUI'
 const COMPACT_BADGE_WIDTH = 40
 
 const ANIMATION_DURATION = 150
-// Decelerates into place.
+// Decelerates as the badge opens. Closing plays it backwards, so that the
+// badge speeds up into the pill.
 const EASING = 'cubic-bezier(0.2, 0.8, 0.2, 1)'
 
 const PILL_PADDING = 6
@@ -33,30 +31,42 @@ const BADGE_PADDING = 8
 const supportsAnchorPositioning =
   typeof CSS !== 'undefined' && !!CSS.supports?.('anchor-name: --tag-badge')
 
-// The floating badge clipped to the pill's area.
-const expand = keyframes({
-  from: {
+// The floating badge unrolls from the pill's area. Closing plays it backwards.
+const UNROLL: Keyframe[] = [
+  {
     clipPath: `inset(0 0 0 calc(100% - ${COMPACT_BADGE_WIDTH}px) round 999px)`,
   },
-  to: { clipPath: 'inset(0 round 999px)' },
-})
+  { clipPath: 'inset(0 round 999px)' },
+]
 
 // The text starts where and as the pill shows it, and slides into place as
 // the badge opens, so that the badge unrolls from the pill rather than
 // replacing it.
-const slideIn = keyframes({
-  from: {
+const SLIDE_IN: Keyframe[] = [
+  {
     transform: `translateX(calc(100% + ${BADGE_PADDING + PILL_PADDING - COMPACT_BADGE_WIDTH}px))`,
     clipPath: `inset(0 calc(100% - ${COMPACT_BADGE_WIDTH - 2 * PILL_PADDING}px) 0 0)`,
   },
-  to: { transform: 'none', clipPath: 'inset(0)' },
-})
+  { transform: 'none', clipPath: 'inset(0)' },
+]
 
-const motion = (keyframesName: string): CSSObject => ({
-  '@media (prefers-reduced-motion: no-preference)': {
-    animation: `${keyframesName} ${ANIMATION_DURATION}ms ${EASING}`,
-  },
-})
+const TIMING: KeyframeAnimationOptions = {
+  duration: ANIMATION_DURATION,
+  easing: EASING,
+  fill: 'both',
+}
+
+// Plays animations forwards (1) or backwards (-1) from where they are.
+// Unlike reverse(), setting the playback rate applies at once.
+const playTowards = (animations: Animation[], playbackRate: 1 | -1) => {
+  for (const animation of animations) {
+    animation.playbackRate = playbackRate
+    animation.play()
+  }
+}
+
+const prefersReducedMotion = () =>
+  window.matchMedia?.('(prefers-reduced-motion: reduce)').matches ?? false
 
 // One line, like the pill, so that the badge never covers other rows. Text
 // that doesn't fit before the row's start ends with an ellipsis.
@@ -65,26 +75,30 @@ const FloatingText = styled.span({
   overflow: 'hidden',
   whiteSpace: 'nowrap',
   textOverflow: 'ellipsis',
-  ...motion(slideIn),
 })
 
 interface FloatingBadgeProps {
   anchorName: string
+  badgeRef: RefObject<HTMLDivElement | null>
   extraStyle: CSSObject
   maxWidth?: number
   text: string
+  textRef: RefObject<HTMLSpanElement | null>
 }
 
 // The full badge, drawn over its pill and expanding to the left of it. Pills
 // carry the text for assistive technologies.
 const FloatingBadge: FC<FloatingBadgeProps> = ({
   anchorName,
+  badgeRef,
   extraStyle,
   maxWidth,
   text,
+  textRef,
 }) =>
   createPortal(
     <BadgeUI
+      ref={badgeRef}
       aria-hidden
       context="sidebar"
       data-tag-badge="floating"
@@ -103,10 +117,9 @@ const FloatingBadge: FC<FloatingBadgeProps> = ({
         // The pointer stays on the pill and its row, which keep their hover
         // styles and receive presses.
         pointerEvents: 'none',
-        ...motion(expand),
       }}
     >
-      <FloatingText>{text}</FloatingText>
+      <FloatingText ref={textRef}>{text}</FloatingText>
     </BadgeUI>,
     document.body,
   )
@@ -148,11 +161,20 @@ export const CompactBadge: FC<CompactBadgeProps> = ({
 }) => {
   const pillRef = useRef<HTMLDivElement>(null)
   const pillTextRef = useRef<HTMLSpanElement>(null)
+  const floatingRef = useRef<HTMLDivElement>(null)
+  const floatingTextRef = useRef<HTMLSpanElement>(null)
+  const animationsRef = useRef<Animation[]>([])
   const anchorName = `--tag-badge-${useId().replace(/[^\w-]/g, '')}`
   const [isHovered, setIsHovered] = useState(false)
   const [isRowFocused, setIsRowFocused] = useState(false)
   const [maxWidth, setMaxWidth] = useState<number>()
+  // The floating badge stays after it closes, until it has rolled back into
+  // the pill.
+  const [isShown, setIsShown] = useState(false)
   const isOpen = isHovered || isRowFocused
+  if (isOpen && !isShown) {
+    setIsShown(true)
+  }
 
   // Whether the pill hides part of its text. If so, measures the room the
   // floating badge has to the left of the pill.
@@ -206,6 +228,44 @@ export const CompactBadge: FC<CompactBadgeProps> = ({
     }
   }, [prepareToOpen])
 
+  // Plays the animations forwards to open the badge, and backwards to close
+  // it, from wherever they are, so that the pointer may come back to the pill
+  // while the badge closes.
+  useLayoutEffect(() => {
+    const badge = floatingRef.current
+    const badgeText = floatingTextRef.current
+    if (!isShown || !badge || !badgeText) {
+      return
+    }
+    const animations = animationsRef.current
+    if (isOpen) {
+      if (!animations.length && !prefersReducedMotion()) {
+        animationsRef.current = [
+          badge.animate(UNROLL, TIMING),
+          badgeText.animate(SLIDE_IN, TIMING),
+        ]
+      } else {
+        playTowards(animations, 1)
+      }
+      return
+    }
+    if (!animations.length) {
+      setIsShown(false)
+      return
+    }
+    playTowards(animations, -1)
+    Promise.all(animations.map((animation) => animation.finished)).then(
+      () => {
+        if (animations.every((animation) => animation.playbackRate < 0)) {
+          animationsRef.current = []
+          setIsShown(false)
+        }
+      },
+      // Ignores animations cancelled before they finish.
+      () => {},
+    )
+  }, [isOpen, isShown])
+
   return (
     <BadgeUI
       ref={pillRef}
@@ -215,8 +275,8 @@ export const CompactBadge: FC<CompactBadgeProps> = ({
         ...extraStyle,
         ...PILL_STYLE,
         // The floating badge replaces the pill while it shows.
-        opacity: isOpen ? 0 : 1,
-        anchorName: isOpen ? anchorName : undefined,
+        opacity: isShown ? 0 : 1,
+        anchorName: isShown ? anchorName : undefined,
       }}
       onPointerEnter={(event) => {
         if (event.pointerType === 'mouse') {
@@ -229,12 +289,14 @@ export const CompactBadge: FC<CompactBadgeProps> = ({
         {shortText ?? text}
       </PillText>
       <HiddenText>{text}</HiddenText>
-      {isOpen && (
+      {isShown && (
         <FloatingBadge
           anchorName={anchorName}
+          badgeRef={floatingRef}
           extraStyle={extraStyle}
           maxWidth={maxWidth}
           text={text}
+          textRef={floatingTextRef}
         />
       )}
     </BadgeUI>

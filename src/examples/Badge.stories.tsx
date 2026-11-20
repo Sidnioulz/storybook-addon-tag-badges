@@ -272,13 +272,13 @@ export const CompactHoverShowsFullBadge: Story = {
     const pill = getPill(canvasElement)
     // It opens as soon as the pointer enters the pill.
     await userEvent.hover(pill)
-    const floating = await settled(await waitForFloating(50))
+    const floating = await waitForFloating(50)
+    const timing = floating.getAnimations()[0].effect!.getTiming()
+    await expect(timing.duration).toBeGreaterThanOrEqual(100)
+    await expect(timing.duration).toBeLessThanOrEqual(150)
+    await expect(timing.easing).toContain('cubic-bezier')
+    await settled(floating)
     await expect(floating).toHaveTextContent('Deprecated')
-    const animation = getComputedStyle(floating)
-    const duration = Number.parseFloat(animation.animationDuration)
-    await expect(duration).toBeGreaterThanOrEqual(0.1)
-    await expect(duration).toBeLessThanOrEqual(0.15)
-    await expect(animation.animationTimingFunction).toContain('cubic-bezier')
     await expect(
       Math.abs(
         floating.getBoundingClientRect().right -
@@ -286,9 +286,14 @@ export const CompactHoverShowsFullBadge: Story = {
       ),
     ).toBeLessThanOrEqual(1)
     await expect(getComputedStyle(pill).opacity).toBe('0')
-    // It closes as soon as the pointer leaves, without an exit animation.
+    // As soon as the pointer leaves, it rolls back into the pill, which shows
+    // again once it has.
     await userEvent.unhover(pill)
-    await waitFor(() => expect(getFloating()).toBeNull(), { timeout: 50 })
+    await waitFor(
+      () => expect(floating.getAnimations()[0].playbackRate).toBeLessThan(0),
+      { timeout: 50 },
+    )
+    await waitFor(() => expect(getFloating()).toBeNull())
     await expect(getComputedStyle(pill).opacity).toBe('1')
   },
 }
@@ -458,7 +463,7 @@ export const CompactRowFocus: Story = {
     })
     await expect(getComputedStyle(pill).opacity).toBe('0')
     row.blur()
-    await waitFor(() => expect(getFloating()).toBeNull(), { timeout: 50 })
+    await waitFor(() => expect(getFloating()).toBeNull())
   },
 }
 
@@ -580,5 +585,31 @@ export const CompactLetsPointerThrough: Story = {
     await expect(floating).not.toContainElement(target)
     await expect(pill.closest('[data-item-id]')).toContainElement(target)
     await userEvent.unhover(pill)
+  },
+}
+
+export const CompactReopensWhileClosing: Story = {
+  tags: testOnly,
+  decorators: [SidebarRow],
+  args: deprecatedArgs,
+  play: async ({ canvasElement }) => {
+    const pill = getPill(canvasElement)
+    const floating = await hoverUntilFloating(pill)
+    await userEvent.unhover(pill)
+    await waitFor(
+      () => expect(floating.getAnimations()[0].playbackRate).toBeLessThan(0),
+      { timeout: 50 },
+    )
+    // The pointer comes back before the badge has closed: it unrolls again
+    // from where it was, and stays open.
+    await userEvent.hover(pill)
+    await waitFor(
+      () => expect(floating.getAnimations()[0].playbackRate).toBeGreaterThan(0),
+      { timeout: 50 },
+    )
+    await new Promise((resolve) => setTimeout(resolve, 300))
+    await expect(getFloating()).toBe(floating)
+    await userEvent.unhover(pill)
+    await waitFor(() => expect(getFloating()).toBeNull())
   },
 }
