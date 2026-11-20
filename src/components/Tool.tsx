@@ -6,6 +6,7 @@ import { KEY, TOOL_ID } from '../constants'
 import { type TagBadgeParameters } from '../types/TagBadgeParameters'
 import { WithBadge } from './Badge'
 import { useBadgesToDisplay } from '../useBadgesToDisplay'
+import { getDisplayType } from '../utils/display'
 interface ToolProps {
   api: API
 }
@@ -35,13 +36,11 @@ export const Tool: FC<ToolProps> = function Tool({ api }) {
     [KEY]: TagBadgeParameters
   }
   const storyData = api.getCurrentStoryData()
-  const { tags, type } = storyData ?? {}
-
   const badgesToDisplay = useBadgesToDisplay({
     context: 'toolbar',
     parameters,
-    tags,
-    type,
+    tags: storyData?.tags,
+    type: storyData && getDisplayType(storyData),
   })
 
   return badgesToDisplay.length ? (

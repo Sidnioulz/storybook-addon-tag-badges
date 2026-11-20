@@ -6,7 +6,7 @@ import {
   Tooltip,
   TooltipProvider,
 } from 'storybook/internal/components'
-import { CSSObject, styled, useTheme } from 'storybook/theming/emotion'
+import { styled, useTheme } from 'storybook/theming/emotion'
 
 import type {
   Badge as BadgeConfigType,
@@ -14,45 +14,22 @@ import type {
   BadgeTooltipMessage,
 } from '../types/Badge'
 import { getTagParts, getTagPrefix, getTagSuffix } from '../utils/tag'
+import { type BadgeContext, BadgeUI, getBadgeStyle } from './BadgeUI'
+import { CompactBadge } from './CompactBadge'
 
 interface BadgeProps extends BadgeConfigType {
-  context: 'mdx' | 'sidebar' | 'toolbar'
+  context: BadgeContext
+  /** Renders a compact pill in the sidebar. */
+  compact?: boolean
 }
 
 interface WithBadgeProps {
   config: BadgeOrBadgeFn
   entry: HashEntry | undefined
   tag: string
-  context: 'mdx' | 'sidebar' | 'toolbar'
+  context: BadgeContext
+  compact?: boolean
 }
-
-const BadgeUI = styled.div<
-  Pick<BadgeProps, 'context'> & { extraStyle: CSSObject; hasLongText: boolean }
->(({ as, context, extraStyle, hasLongText, theme }) => ({
-  display: 'inline-block',
-  fontSize: 11,
-  lineHeight: '.75rem',
-  alignSelf: 'center',
-  padding: context === 'sidebar' ? '3px 8px' : '4px 12px',
-  border: 'none',
-  cursor:
-    as === 'button' ? 'help' : context === 'sidebar' ? 'cursor' : 'initial',
-  borderRadius: '3em',
-  fontWeight: theme.typography.weight.bold,
-  boxShadow:
-    theme.base === 'light'
-      ? `inset 0 0 0 1px ${extraStyle.borderColor ?? `color-mix(in oklab, ${extraStyle.color ?? theme.color.dark} 10%, transparent 90%)`}`
-      : `inset 0 0 0 1px ${extraStyle.borderColor ?? 'none'}`,
-  backgroundColor: theme.color.mediumlight,
-  color: theme.color.dark,
-  wordBreak: 'normal',
-  width: hasLongText ? 'min-content' : 'fit-content',
-  flexShrink: 0,
-  textWrapStyle: 'pretty',
-  textAlign: 'center',
-  ...extraStyle,
-  borderColor: undefined,
-}))
 
 const TooltipUI = styled.div(({ theme }) => ({
   padding: '8px 12px',
@@ -100,77 +77,26 @@ const TooltipMessageContent: React.FC<BadgeTooltipMessage> = ({
 )
 
 export const Badge: React.FC<BadgeProps> = ({
+  compact,
   context,
+  shortText,
   style,
   text,
   tooltip,
 }) => {
   const theme = useTheme()
 
-  let extraStyle
-  if (style === 'green') {
-    extraStyle = {
-      backgroundColor: 'hsl(130, 100%, 74%)',
-      borderColor: 'hsl(130, 100%, 34%)',
-      color: 'hsl(130, 100%, 6%)',
-    }
-  } else if (style === 'purple') {
-    extraStyle = {
-      backgroundColor: 'hsl(257, 100%, 84%)',
-      borderColor: 'hsl(257, 100%, 64%)',
-      color: 'hsl(257, 100%, 12%)',
-    }
-  } else if (style === 'blue') {
-    extraStyle = {
-      backgroundColor: 'hsl(194, 100%, 74%)',
-      borderColor: 'hsl(194, 100%, 34%)',
-      color: 'hsl(194, 100%, 12%)',
-    }
-  } else if (style === 'grey') {
-    extraStyle = {
-      backgroundColor: 'hsl(0, 0%, 84%)',
-      borderColor: 'hsl(0, 0%, 34%)',
-      color: 'hsl(0, 0%, 12%)',
-    }
-  } else if (style === 'orange') {
-    extraStyle = {
-      backgroundColor: 'hsl(16, 100%, 74%)',
-      borderColor: 'hsl(16, 100%, 34%)',
-      color: 'hsl(16, 100%, 12%)',
-    }
-  } else if (style === 'red') {
-    extraStyle = {
-      backgroundColor: 'hsl(0, 100%, 44%)',
-      borderColor: 'hsl(0, 100%, 64%)',
-      color: 'hsl(0, 100%, 94%)',
-    }
-  } else if (style === 'yellow') {
-    extraStyle = {
-      backgroundColor: 'hsl(36, 100%, 74%)',
-      borderColor: 'hsl(36, 100%, 34%)',
-      color: 'hsl(36, 100%, 12%)',
-    }
-  } else if (style === 'pink') {
-    extraStyle = {
-      backgroundColor: 'hsl(330, 100%, 74%)',
-      borderColor: 'hsl(330, 100%, 34%)',
-      color: 'hsl(330, 100%, 12%)',
-    }
-  } else if (style === 'turquoise') {
-    extraStyle = {
-      backgroundColor: 'hsl(157, 100%, 74%)',
-      borderColor: 'hsl(157, 100%, 34%)',
-      color: 'hsl(157, 100%, 12%)',
-    }
-  } else if (typeof style === 'object') {
-    extraStyle = {
-      ...style,
-    }
-  }
+  const extraStyle = getBadgeStyle(style)
 
   if (typeof text !== 'string') {
     throw new Error(
       'Badge: the text prop must be defined and must be a string.',
+    )
+  }
+
+  if (context === 'sidebar' && compact) {
+    return (
+      <CompactBadge extraStyle={extraStyle} shortText={shortText} text={text} />
     )
   }
 
@@ -180,7 +106,7 @@ export const Badge: React.FC<BadgeProps> = ({
     return (
       <BadgeUI
         context={context}
-        extraStyle={extraStyle ?? {}}
+        extraStyle={extraStyle}
         hasLongText={hasLongText}
         theme={theme}
       >
@@ -193,7 +119,7 @@ export const Badge: React.FC<BadgeProps> = ({
     <BadgeUI
       as="button"
       context={context}
-      extraStyle={extraStyle ?? {}}
+      extraStyle={extraStyle}
       hasLongText={hasLongText}
       theme={theme}
     >

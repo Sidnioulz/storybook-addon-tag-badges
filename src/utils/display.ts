@@ -1,8 +1,9 @@
-import { HashEntry } from 'storybook/manager-api'
+import type { API_HashEntry } from 'storybook/internal/types'
 import type { ArrayElement } from '../types/ArrayElement'
 import type { TagBadgeParameters } from '../types/TagBadgeParameters'
 import type {
   Display,
+  DisplayEntryType,
   NormalisedDisplay,
   MDXDisplayOptionItem,
   SidebarDisplayOptionItem,
@@ -12,19 +13,29 @@ import type {
 export interface ShouldDisplayOptions {
   config: Partial<ArrayElement<TagBadgeParameters>>
   context: 'mdx' | 'sidebar' | 'toolbar'
-  type: HashEntry['type']
+  type: DisplayEntryType
 }
 
 export const DISPLAY_DEFAULTS = {
   mdx: ['story', 'component'],
   sidebar: [
     { type: 'story', skipInherited: true },
+    { type: 'test', skipInherited: true },
     { type: 'docs', skipInherited: true },
     { type: 'component', skipInherited: false },
     { type: 'group', skipInherited: false },
   ],
-  toolbar: ['docs', 'story'],
+  toolbar: ['docs', 'story', 'test'],
 } satisfies NormalisedDisplay
+
+/**
+ * Returns the type that display conditions match an entry against.
+ */
+export function getDisplayType(entry: API_HashEntry): DisplayEntryType {
+  return entry.type === 'story' && entry.subtype === 'test'
+    ? 'test'
+    : entry.type
+}
 
 function toArray<T>(value: T | T[]): T[] {
   return Array.isArray(value) ? value : [value]

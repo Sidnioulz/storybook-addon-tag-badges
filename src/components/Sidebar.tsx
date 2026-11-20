@@ -1,88 +1,41 @@
 import React, { type FC, type ReactNode } from 'react'
-import { addons } from 'storybook/manager-api'
 import type { API_HashEntry } from 'storybook/internal/types'
-import { styled } from 'storybook/theming/emotion'
 
-import { KEY } from '../constants'
-import { TagBadgeParameters } from '../types/TagBadgeParameters'
 import { useBadgesToDisplay } from '../useBadgesToDisplay'
-import { WithBadge } from './Badge'
+import { readConfig, readOptions } from '../utils/config'
+import { getDisplayType } from '../utils/display'
+import { SidebarLabel } from './SidebarLabel'
 
 export interface SidebarProps {
   children: ReactNode
   item: API_HashEntry
-  hasStatusWithUI?: boolean
 }
 
-const Container = styled.div<{
-  hasParentPadding: boolean
-  hasStatusWithUI: boolean
-}>(
-  ({ hasParentPadding, hasStatusWithUI }) => `
-  display: flex;
-  flex: 1;
-  align-items: flex-start;
-  flex-wrap: wrap;
-  text-wrap-style: balance;
-  gap: 4px;
-  margin-right: ${hasStatusWithUI ? '6px' : hasParentPadding ? '28px' : '34px'};
-`,
-)
+/**
+ * Renders a sidebar label followed by the badge of the entry's
+ * highest-priority tag, if any.
+ */
+export const Sidebar: FC<SidebarProps> = ({ children, item }) => {
+  const [firstBadge] = useBadgesToDisplay({
+    context: 'sidebar',
+    parameters: readConfig(),
+    parent: 'parent' in item ? item.parent : undefined,
+    refId: item.refId,
+    tags: item.tags,
+    type: getDisplayType(item),
+  })
 
-const FirstLineAlignedLabel = styled.div`
-  display: flex;
-  align-items: center;
-  min-height: 19px;
-`
-
-const Spacer = styled.div`
-  flex: 1;
-`
-
-export const Sidebar: FC<SidebarProps> = ({
-  children,
-  item,
-  hasStatusWithUI,
-}) => {
-  const { [KEY]: parameters } = addons.getConfig() as {
-    [KEY]: TagBadgeParameters
-  }
-
-  if (
-    item.type !== 'component' &&
-    item.type !== 'group' &&
-    item.type !== 'docs' &&
-    item.type !== 'story'
-  ) {
+  if (!firstBadge) {
     return children
   }
 
-  const badgesToDisplay = useBadgesToDisplay({
-    context: 'sidebar',
-    parameters,
-    parent: item.parent,
-    refId: item.refId,
-    tags: item.tags,
-    type: item.type,
-  })
-
   return (
-    <Container
-      hasParentPadding={item.type === 'component' || item.type === 'group'}
-      hasStatusWithUI={hasStatusWithUI ?? false}
+    <SidebarLabel
+      badge={{ config: firstBadge.badge, tag: firstBadge.tag }}
+      compact={readOptions().compactSidebar ?? false}
+      entry={item}
     >
-      <FirstLineAlignedLabel>{children}</FirstLineAlignedLabel>
-      <Spacer />
-      {badgesToDisplay.length ? (
-        <WithBadge
-          config={badgesToDisplay[0].badge}
-          context="sidebar"
-          entry={item}
-          tag={badgesToDisplay[0].tag}
-        />
-      ) : (
-        ''
-      )}
-    </Container>
+      {children}
+    </SidebarLabel>
   )
 }

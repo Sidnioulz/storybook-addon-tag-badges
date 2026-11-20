@@ -2,6 +2,7 @@ export * from './utils/tag'
 export * from './defaultConfig'
 export { DISPLAY_DEFAULTS as defaultDisplay } from './utils/display'
 export { renderLabel } from './renderLabel'
+export { renderAriaLabel } from './renderAriaLabel'
 export { Sidebar } from './components/Sidebar'
 export { CustomBadge } from './components/CustomBadge'
 export { MDXBadges } from './components/MDXBadges'
@@ -19,4 +20,5 @@ export type {
   ToolbarDisplayOptions,
 } from './types/DisplayOptions'
 export type { TagBadgeParameters } from './types/TagBadgeParameters'
+export type { TagBadgesOptions } from './types/TagBadgesOptions'
 export type { TagPattern, TagPatterns } from './types/TagPattern'

@@ -43,6 +43,7 @@
 - [Default Config](#-default-config)
 - [Usage](#-usage)
 - [Customise Badge Config](#-customise-badge-config)
+- [Global Options](#global-options)
 - [Sidebar Config](#-sidebar-config)
 - [Workflow Examples](#-workflow-examples)
 - [Limitations](#-limitations)
@@ -95,24 +96,28 @@ This addon comes with a default config, allowing you to get started immediately 
 
 ### Preconfigured Badges
 
-|                            Preview | Tag patterns                          | Suggested use                                                                                                      |
-| ---------------------------------: | ------------------------------------- | ------------------------------------------------------------------------------------------------------------------ |
-|        ![](./static/badge-new.png) | `new`                                 | Recently added components or props/features                                                                        |
-|       ![](./static/badge-beta.png) | `alpha`, `beta`, `rc`, `experimental` | Warn that a component or prop is not stable yet                                                                    |
-| ![](./static/badge-deprecated.png) | `deprecated`                          | Components or props that should be avoided in new code                                                             |
-|   ![](./static/badge-outdated.png) | `outdated`                            | Components with design changes that weren't yet implemented, which can incur extra development costs to your users |
-|     ![](./static/badge-danger.png) | `danger`                              | Components that require particular attention when configuring them (e.g. for with security concerns)               |
-|  ![](./static/badge-code-only.png) | `code-only`                           | Components that only exist in code, and not in design                                                              |
-|    ![](./static/badge-version.png) | `version:*`, `v:*`                    | Per-component versioning                                                                                           |
+|                            Preview | Tag patterns                          | Short text            | Suggested use                                                                                                      |
+| ---------------------------------: | ------------------------------------- | --------------------- | ------------------------------------------------------------------------------------------------------------------ |
+|        ![](./static/badge-new.png) | `new`                                 |                       | Recently added components or props/features                                                                        |
+|       ![](./static/badge-beta.png) | `alpha`, `beta`, `rc`, `experimental` | `α`, `β`, `rc`, `exp` | Warn that a component or prop is not stable yet                                                                    |
+| ![](./static/badge-deprecated.png) | `deprecated`                          | `depr`                | Components or props that should be avoided in new code                                                             |
+|   ![](./static/badge-outdated.png) | `outdated`                            | `old`                 | Components with design changes that weren't yet implemented, which can incur extra development costs to your users |
+|     ![](./static/badge-danger.png) | `danger`                              | `⚠︎`                   | Components that require particular attention when configuring them (e.g. for with security concerns)               |
+|  ![](./static/badge-code-only.png) | `code-only`                           | `code`                | Components that only exist in code, and not in design                                                              |
+|    ![](./static/badge-version.png) | `version:*`, `v:*`                    |                       | Per-component versioning                                                                                           |
 
 ### Display Logic
 
-By default, all tags are always displayed on the toolbar, but they're only displayed in the sidebar for component entries, and for docs or story entries that appear at the top-level. They are not displayed in docs or story entries inside a component or group entry.
+By default, all tags are always displayed on the toolbar, but they're only displayed in the sidebar for component entries, and for docs, story or test entries that appear at the top-level. They are not displayed in docs, story or test entries inside an entry that already displays them.
 
 Besides, the addon is limited to one badge per entry in the sidebar. Badges placed first in the configuration will be displayed in priority. For example, the `new` badge will be displayed before the `code-only` badge.
 
 > [!WARNING]
 > This means that when you customise this addon's configuration, you should include your customisations **before** spreading the default config object, so that they have a higher priority.
+
+In the sidebar, the label and badge of an entry share a single line, and badges are aligned at the end of the rows, next to Storybook's status icons and context menu button. Rows that show two status icons place their badge further left.
+
+When a row is too narrow for the label and badge, space is split evenly and text truncated. If that happens a lot in your Storybook instance, consider using the `compactSidebar` option described below.
 
 ## 👀 Usage
 
@@ -253,13 +258,14 @@ const tags = ['v:1.0.0', 'private']
 
 ### Display (advanced usage)
 
-The `display` property controls where and for what type of content the badges are rendered. It has three sub-properties: `sidebar`, `toolbar` and `mdx`. In the sidebar, tags may be displayed for component, group, docs or story entries. In the toolbar, they may be set for docs or story entries (as other entry types aren't displayable outside the sidebar). The `mdx` property controls the badges displayed by `MDXBadges` in a MDX file; in MDX, tags may be displayed for component or story entries (when importing CSF stories and using the `of` prop).
+The `display` property controls where and for what type of content the badges are rendered. It has three sub-properties: `sidebar`, `toolbar` and `mdx`. In the sidebar, tags may be displayed for component, group, docs, story or test entries. In the toolbar, they may be set for docs, story or test entries (as other entry types aren't displayable outside the sidebar). The `mdx` property controls the badges displayed by `MDXBadges` in a MDX file; in MDX, tags may be displayed for component or story entries (when importing CSF stories and using the `of` prop).
 
 The following entry types are rendered by Storybook:
 
 | Icon                              | Name      | Description                                                                |
 | --------------------------------- | --------- | -------------------------------------------------------------------------- |
 | ![](./static/entry-story.svg)     | story     | One of the component stories written in your CSF files.                    |
+| ![](./static/entry-test.svg)      | test      | A test story                                                               |
 | ![](./static/entry-docs.svg)      | docs      | A documentation page generated through MDX files or autodocs.              |
 | ![](./static/entry-component.svg) | component | The grouping of a component's stories and autodocs page.                   |
 | ![](./static/entry-group.svg)     | group     | A generic group containing unattached MDX docs, stories and/or components. |
@@ -271,12 +277,12 @@ For `mdx` and `toolbar` display properties, the conditions can either be a boole
 * `true`: the badge should always be displayed
 * `string`: the badge should be displayed
 
-| Type            | Description                         | Example  | MDX outcome              | Toolbar outcome     |
-| --------------- | ----------------------------------- | -------- | ------------------------ | ------------------- |
-| `ø` _(not set)_ | Use default behaviour               |          | `['component', 'story']` | `['docs', 'story']` |
-| `false`         | Never display badge                 | `false`  | `[]`                     | `[]`                |
-| `true`          | Always display badge                | `true`   | `['component', 'story']` | `['docs', 'story']` |
-| `string`        | Display only for that type of entry | `'docs'` | `[]`                     | `['docs']`          |
+| Type            | Description                         | Example  | MDX outcome              | Toolbar outcome             |
+| --------------- | ----------------------------------- | -------- | ------------------------ | --------------------------- |
+| `ø` _(not set)_ | Use default behaviour               |          | `['component', 'story']` | `['docs', 'story', 'test']` |
+| `false`         | Never display badge                 | `false`  | `[]`                     | `[]`                        |
+| `true`          | Always display badge                | `true`   | `['component', 'story']` | `['docs', 'story', 'test']` |
+| `string`        | Display only for that type of entry | `'docs'` | `[]`                     | `['docs']`                  |
 
 For the `sidebar` property, things are more complicated. You must choose for which entries to display badges and whether a badge should be displayed for an entry when its parent entry already displays the same badge.
 
@@ -284,10 +290,10 @@ For instance, of a component entry has a `new` badge, you must decide if you als
 
 A condition for the sidebar takes two properties:
 
-| Property        | Description                                                                                          | Type      | Example value |
-| --------------- | ---------------------------------------------------------------------------------------------------- | --------- | ------------- |
-| `type`          | The type of entry to match                                                                           | `string`  | `'docs'`      |
-| `skipInherited` | Whether to skip showing the badge if a parent entry in the UI already shows a badge for the same tag | `boolean` | `true`        |
+| Property        | Description                                                                                             | Type      | Example value |
+| --------------- | ------------------------------------------------------------------------------------------------------- | --------- | ------------- |
+| `type`          | The type of entry to match                                                                              | `string`  | `'docs'`      |
+| `skipInherited` | Whether to skip showing the badge if an ancestor entry in the UI already shows a badge for the same tag | `boolean` | `true`        |
 
 Using the default config for `display` is heavily recommended. It is defined as follows:
 ```ts
@@ -295,11 +301,12 @@ const DISPLAY_DEFAULTS = {
   mdx: ['story', 'component'],
   sidebar: [
     { type: 'story', skipInherited: true },
+    { type: 'test', skipInherited: true },
     { type: 'docs', skipInherited: true },
     { type: 'component', skipInherited: false },
     { type: 'group', skipInherited: false },
   ],
-  toolbar: ['docs', 'story'],
+  toolbar: ['docs', 'story', 'test'],
 }
 ```
 
@@ -311,11 +318,12 @@ The `badge` property defines the appearance and content of the badge to display.
 
 The object has the following properties:
 
-| Name        | Type                             | Description                                   | Example                                                             |
-| ----------- | -------------------------------- | --------------------------------------------- | ------------------------------------------------------------------- |
-| **text**    | `string`                         | The text displayed in the badge (required).   | 'New'                                                               |
-| **style**   | `string \| object`               | Preset color, or a CSS properties object.     | `'turquoise'` \| `{ color: 'red', fontSize: '1rem' }`               |
-| **tooltip** | `string \| BadgeTooltipMessage?` | A tooltip shown in the toolbar only.          | `{ title: 'New Component', desc: 'Recently added to the library' }` |
+| Name          | Type                             | Description                                                                                    | Example                                                             |
+| ------------- | -------------------------------- | ---------------------------------------------------------------------------------------------- | ------------------------------------------------------------------- |
+| **text**      | `string`                         | The text displayed in the badge (required).                                                    | 'New Story'                                                         |
+| **shortText** | `string?`                        | Text shown by [compact sidebar](#compact-sidebar) badges instead of `text`. Ignored elsewhere. | 'new'                                                               |
+| **style**     | `string \| object`               | Preset color, or a CSS properties object.                                                      | `'turquoise'` \| `{ color: 'red', fontSize: '1rem' }`               |
+| **tooltip**   | `string \| BadgeTooltipMessage?` | A tooltip shown in the toolbar only.                                                           | `{ title: 'New Component', desc: 'Recently added to the library' }` |
 
 #### Style presets
 
@@ -427,21 +435,46 @@ You may pass a string for a simple text tooltip, shown when hovering or focusing
   * `href`: The URL to which the link points (navigates in-place)
   * `onClick`: A callback when the link is clicked (can be used to navigate in a new browser tab)
 
-## Sidebar Config
+## Global Options
 
-This addon uses the [sidebar `renderLabel` feature](https://storybook.js.org/docs/configure/user-interface/sidebar-and-urls) to display badges in the sidebar. If you define it for other purposes in your Storybook instance, it will conflict with this addon and sidebar badges won't show.
+Global options apply to your whole Storybook. Set them with `tagBadgesOptions` in your manager config.
 
-To show badges for items that aren't customised by your own `renderLabel` logic, you may import the addon's own `renderLabel` function and call it at the end of your function.
+### Compact Sidebar
 
-```tsx
+With `compactSidebar`, every sidebar badge renders as a 40px wide pill, so that badges line up and labels keep most of the row. The pill shows the badge's [`shortText`](#static-badge-object), or the start of its `text`. Hovering a row, or focusing it with the keyboard, shows its whole badge over the pill, on one line that ends with an ellipsis if the row is too narrow. Toolbar and MDX badges are not affected.
+
+```ts
 // .storybook/manager.ts
 import { addons } from 'storybook/manager-api'
-import type { API_HashEntry } from '@storybook/types'
-import { renderLabel, Sidebar } from 'storybook-addon-tag-badges/manager-helpers'
+
+addons.setConfig({
+  tagBadgesOptions: {
+    compactSidebar: true,
+  },
+})
+```
+
+Touch screens only show the pill.
+
+## Sidebar Config
+
+This addon uses the [sidebar `renderLabel` and `renderAriaLabel` options](https://storybook.js.org/docs/configure/user-interface/sidebar-and-urls) to display badges in the sidebar. `renderLabel` shows the badge next to the entry's name, and `renderAriaLabel` adds the badge's text to the entry's accessible name, e.g. "Button. Deprecated", so that screen readers announce it.
+
+The addon keeps the other `sidebar` options you set, like `showRoots` or `filters`. If you set a `renderLabel` other than the addon's, the addon does not modify it and skips `renderAriaLabel` too. You can choose to call the addon's `renderLabel` and `renderAriaLabel` functions inside your own, passing all arguments through. 
+
+```tsx
+// .storybook/manager.tsx
+import React from 'react'
+import { addons } from 'storybook/manager-api'
+import {
+  renderAriaLabel,
+  renderLabel,
+  Sidebar,
+} from 'storybook-addon-tag-badges/manager-helpers'
 
 addons.setConfig({
   sidebar: {
-    renderLabel: (item: API_HashEntry) => {
+    renderLabel: (item, api, context) => {
       // Customise your own items, with no badge support.
       if (item.name === 'Support') {
         return '🛟 Get Support'
@@ -453,26 +486,30 @@ addons.setConfig({
       }
 
       // Badges for every item not customised by you.
-      return renderLabel(item)
+      return renderLabel(item, api, context)
     },
-  }
+    renderAriaLabel: (item, api, context) => {
+      // Describe your own items the way renderLabel shows them.
+      if (item.name === 'Support') {
+        return 'Get Support'
+      }
+
+      // Pass the name shown in Sidebar to keep the badge in the label.
+      if (item.type === 'docs') {
+        return renderAriaLabel(
+          { ...item, name: `${item.name} [doc]` },
+          api,
+          context,
+        )
+      }
+
+      return renderAriaLabel(item, api, context)
+    },
+  },
 })
 ```
 
-Likewise, if you define configuration for the `sidebar` option without including `renderLabel`, the render function defined by this addon will be overwritten, and badges won't show in the sidebar. Import and add the `renderLabel` function like so:
-
-```tsx
-// .storybook/manager.ts
-import { addons } from 'storybook/manager-api'
-import { renderLabel } from 'storybook-addon-tag-badges/manager-helpers'
-
-addons.setConfig({
-  sidebar: {
-    /* your own changes here... */
-    renderLabel,
-  }
-})
-```
+`renderLabel` returns `undefined` for entries that never show a badge, such as roots, so that Storybook renders their default label.
 
 ## Using Badges in MDX
 
@@ -546,6 +583,10 @@ In Storybook, your MDX and CSF files are converted to `docs`, `component`, `grou
 For `component` entries, tags are computed indirectly: they are the intersection of tags present on all of the component's stories. For example, for a component that defines the tag `version:1.2.0` in its `meta`, and has one story that defines an additional tag `deprecated`, the component entry will only have the `version:1.2.0` tag defined.
 
 In particular, if a component `meta` defines two tags `outdated` and `version:1.1.0`, but one story explicitly removes the tag `outdated` (by adding `!outdated`), then the component entry will only have tag `version:1.1.0`.
+
+### Sidebar Space
+
+Storybook only renders the sidebar rows that are in view, and relies on every row having the same height to do so. Sidebar labels and badges therefore can't wrap onto several lines, and are truncated when a row is too narrow, e.g. for deeply nested entries. Keep the text of sidebar badges short, and use the toolbar or MDX badges, which show full text, for longer descriptions. Use the [`display` option](#display-advanced-usage) to show a badge in the toolbar but not in the sidebar, or turn on the [compact sidebar](#compact-sidebar) to give labels most of the row.
 
 ## 👩🏽‍💻 Contributing
 

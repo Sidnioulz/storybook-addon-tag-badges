@@ -1,16 +1,12 @@
 import { useMemo } from 'react'
 import { type API, useStorybookApi } from 'storybook/manager-api'
 
-import { DisplayOutcome, shouldDisplay } from './utils/display'
+import { DisplayOutcome, getDisplayType, shouldDisplay } from './utils/display'
 import { matchTags } from './utils/tag'
-import type {
-  API_ComponentEntry,
-  API_GroupEntry,
-  API_HashEntry,
-  API_LeafEntry,
-} from 'storybook/internal/types'
+import type { API_HashEntry } from 'storybook/internal/types'
 import { TagBadgeParameters } from './types/TagBadgeParameters'
 import { BadgeOrBadgeFn } from './types/Badge'
+import type { DisplayEntryType } from './types/DisplayOptions'
 
 interface UseBadgesToDisplayOptions {
   context: 'mdx' | 'sidebar' | 'toolbar'
@@ -18,15 +14,25 @@ interface UseBadgesToDisplayOptions {
   parent?: string
   refId?: string
   tags: string[]
-  type:
-    API_ComponentEntry['type'] | API_GroupEntry['type'] | API_LeafEntry['type']
+  type: DisplayEntryType
 }
 
 type BadgesToDisplay = { badge: BadgeOrBadgeFn; tag: string }[]
 
-function _useBadgesToDisplay({
+/**
+ * Computes the badges to display for an entry, in order of priority. Unlike
+ * `useBadgesToDisplay`, it calls no hooks, so it may run outside of a React
+ * render, e.g. in Storybook's `renderAriaLabel` callback.
+ *
+ * @param options.api The manager API, used to resolve parent entries for
+ * `skipInherited`. Without it, inherited badges are not skipped.
+ * @param options.includeInherited Also returns the badges skipped because an
+ * ancestor shows them, so that descendants skip them too.
+ */
+export function getBadgesToDisplay({
   api,
   context,
+  includeInherited = false,
   parameters,
   parent,
   refId,
@@ -34,6 +40,7 @@ function _useBadgesToDisplay({
   type,
 }: UseBadgesToDisplayOptions & {
   api?: API
+  includeInherited?: boolean
 }): BadgesToDisplay {
   /* Handle potentially missing data from callees. */
   if (!tags || !type) {
@@ -72,17 +79,21 @@ function _useBadgesToDisplay({
         resolvedParent.type !== 'root' &&
         parentTags?.includes(current.tag)
       ) {
-        const displayParent = _useBadgesToDisplay({
+        const shownAbove = getBadgesToDisplay({
           api,
           context,
+          includeInherited: true,
           parameters,
           parent: resolvedParent.parent,
           refId,
           tags: parentTags,
-          type: resolvedParent.type,
+          type: getDisplayType(resolvedParent),
         })
 
-        if (displayParent.find(({ tag }) => tag === current.tag)) {
+        if (
+          !includeInherited &&
+          shownAbove.some(({ tag }) => tag === current.tag)
+        ) {
           return acc
         }
       }
@@ -106,7 +117,7 @@ export function useBadgesToDisplay({
 
   return useMemo(
     () =>
-      _useBadgesToDisplay({
+      getBadgesToDisplay({
         api,
         context,
         parameters,

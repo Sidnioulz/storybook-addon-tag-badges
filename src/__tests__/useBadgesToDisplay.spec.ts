@@ -11,6 +11,13 @@ vi.mock('storybook/manager-api', () => ({
       if (id === 'mock-component') {
         return { type: 'component', tags: ['test1', 'test2', 'test3'] }
       }
+      if (id === 'mock-story') {
+        return {
+          type: 'story',
+          parent: 'mock-component',
+          tags: ['test1', 'test2', 'test3'],
+        }
+      }
       if (id === 'mock-composed-component' && refId === 'child-ref') {
         return { type: 'component', tags: ['test2'] }
       }
@@ -369,6 +376,49 @@ describe('useBadgesToDisplay', () => {
       )
 
       expect(result.current).toHaveLength(0)
+    })
+
+    it('does not display tags that an ancestor further up displays', () => {
+      // The parent story skips the tag, as its own parent displays it.
+      const { result } = renderHook(() =>
+        useBadgesToDisplay({
+          context: 'sidebar',
+          parameters,
+          parent: 'mock-story',
+          tags: ['test2'],
+          type: 'story',
+        }),
+      )
+
+      expect(result.current).toHaveLength(0)
+    })
+
+    it('skips the badges of story tests that their story inherits by default', () => {
+      const { result } = renderHook(() =>
+        useBadgesToDisplay({
+          context: 'sidebar',
+          parameters: [{ tags: ['test2'], badge: { text: 'Test2' } }],
+          parent: 'mock-story',
+          tags: ['test2'],
+          type: 'test',
+        }),
+      )
+
+      expect(result.current).toHaveLength(0)
+    })
+
+    it('shows the badges of tags that story tests add by default', () => {
+      const { result } = renderHook(() =>
+        useBadgesToDisplay({
+          context: 'sidebar',
+          parameters: [{ tags: ['flaky'], badge: { text: 'Flaky' } }],
+          parent: 'mock-story',
+          tags: ['test2', 'flaky'],
+          type: 'test',
+        }),
+      )
+
+      expect(result.current.map(({ tag }) => tag)).toEqual(['flaky'])
     })
 
     it('uses refId when resolving composed parents', () => {
