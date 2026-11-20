@@ -100,6 +100,9 @@ const FloatingBadge: FC<FloatingBadgeProps> = ({
         right: 'anchor(right)',
         top: 'anchor(center)',
         translate: '0 -50%',
+        // The pointer stays on the pill and its row, which keep their hover
+        // styles and receive presses.
+        pointerEvents: 'none',
         ...motion(expand),
       }}
     >
@@ -215,9 +218,6 @@ export const CompactBadge: FC<CompactBadgeProps> = ({
         opacity: isOpen ? 0 : 1,
         anchorName: isOpen ? anchorName : undefined,
       }}
-      // The floating badge is a child of the pill in React, which reports
-      // pointer events from it to the pill: the pill stays hovered while the
-      // pointer is over the badge.
       onPointerEnter={(event) => {
         if (event.pointerType === 'mouse') {
           setIsHovered(prepareToOpen())
