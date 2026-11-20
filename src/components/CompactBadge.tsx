@@ -57,11 +57,19 @@ const TIMING: KeyframeAnimationOptions = {
 }
 
 // Plays animations forwards (1) or backwards (-1) from where they are.
-// Unlike reverse(), setting the playback rate applies at once.
+// Unlike reverse(), setting the playback rate applies at once. play() would
+// restart an animation that already is at the end it plays towards, so it
+// finishes there instead.
 const playTowards = (animations: Animation[], playbackRate: 1 | -1) => {
   for (const animation of animations) {
     animation.playbackRate = playbackRate
-    animation.play()
+    const time = Number(animation.currentTime)
+    const isAtEnd = playbackRate > 0 ? time >= ANIMATION_DURATION : time <= 0
+    if (isAtEnd) {
+      animation.finish()
+    } else {
+      animation.play()
+    }
   }
 }
 
