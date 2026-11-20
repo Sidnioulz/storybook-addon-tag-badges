@@ -39,18 +39,24 @@ const UNROLL: Keyframe[] = [
   { clipPath: 'inset(0 round 999px)' },
 ]
 
-// The text starts where the pill's text does, and slides into place as the
-// badge opens, so that the badge unrolls from the pill rather than replacing
-// it. It shows early, while the pill's text fades out late, so that one of
-// them always shows in full, also as the badge closes.
+// The text starts where and as the pill shows it, cut where the pill's
+// padding starts, and slides into place as the badge opens, so that the badge
+// unrolls from the pill rather than replacing it.
 const SLIDE_IN: Keyframe[] = [
   {
     transform: `translateX(calc(100% + ${BADGE_PADDING + PILL_PADDING - COMPACT_BADGE_WIDTH}px))`,
     clipPath: `inset(0 calc(100% - ${COMPACT_BADGE_WIDTH - 2 * PILL_PADDING}px) 0 0)`,
-    opacity: 0,
   },
+  { transform: 'none', clipPath: 'inset(0)' },
+]
+
+// A pill showing a short text blends it into the text: the text shows early,
+// while the short text fades out late, so that one of them always shows in
+// full, also as the badge closes.
+const FADE_IN: Keyframe[] = [
+  { opacity: 0 },
   { opacity: 1, offset: 0.4 },
-  { transform: 'none', clipPath: 'inset(0)', opacity: 1 },
+  { opacity: 1 },
 ]
 const FADE_OUT: Keyframe[] = [
   { opacity: 1 },
@@ -100,8 +106,7 @@ const PillText = styled.span({
   whiteSpace: 'nowrap',
 })
 
-// The pill's text, over the pill's area of the floating badge, which the
-// badge fades from as it opens and back to as it closes.
+// The pill's short text, over the pill's area of the floating badge.
 const FloatingPillText = styled(PillText)({
   position: 'absolute',
   top: '50%',
@@ -119,8 +124,8 @@ interface FloatingBadgeProps {
   badgeRef: RefObject<HTMLDivElement | null>
   extraStyle: CSSObject
   maxWidth?: number
-  pillText: string
-  pillTextRef: RefObject<HTMLSpanElement | null>
+  shortText?: string
+  shortTextRef: RefObject<HTMLSpanElement | null>
   text: string
   textRef: RefObject<HTMLSpanElement | null>
 }
@@ -132,8 +137,8 @@ const FloatingBadge: FC<FloatingBadgeProps> = ({
   badgeRef,
   extraStyle,
   maxWidth,
-  pillText,
-  pillTextRef,
+  shortText,
+  shortTextRef,
   text,
   textRef,
 }) =>
@@ -161,7 +166,9 @@ const FloatingBadge: FC<FloatingBadgeProps> = ({
       }}
     >
       <FloatingText ref={textRef}>{text}</FloatingText>
-      <FloatingPillText ref={pillTextRef}>{pillText}</FloatingPillText>
+      {shortText !== undefined && (
+        <FloatingPillText ref={shortTextRef}>{shortText}</FloatingPillText>
+      )}
     </BadgeUI>,
     document.body,
   )
@@ -198,7 +205,7 @@ export const CompactBadge: FC<CompactBadgeProps> = ({
   const pillTextRef = useRef<HTMLSpanElement>(null)
   const floatingRef = useRef<HTMLDivElement>(null)
   const floatingTextRef = useRef<HTMLSpanElement>(null)
-  const floatingPillTextRef = useRef<HTMLSpanElement>(null)
+  const floatingShortTextRef = useRef<HTMLSpanElement>(null)
   const animationsRef = useRef<Animation[]>([])
   const anchorName = `--tag-badge-${useId().replace(/[^\w-]/g, '')}`
   const [isHovered, setIsHovered] = useState(false)
@@ -285,8 +292,8 @@ export const CompactBadge: FC<CompactBadgeProps> = ({
   useLayoutEffect(() => {
     const badge = floatingRef.current
     const badgeText = floatingTextRef.current
-    const badgePillText = floatingPillTextRef.current
-    if (!isShown || !badge || !badgeText || !badgePillText) {
+    const badgeShortText = floatingShortTextRef.current
+    if (!isShown || !badge || !badgeText) {
       return
     }
     const animations = animationsRef.current
@@ -295,7 +302,12 @@ export const CompactBadge: FC<CompactBadgeProps> = ({
         animationsRef.current = [
           badge.animate(UNROLL, TIMING),
           badgeText.animate(SLIDE_IN, TIMING),
-          badgePillText.animate(FADE_OUT, TIMING),
+          ...(badgeShortText
+            ? [
+                badgeText.animate(FADE_IN, TIMING),
+                badgeShortText.animate(FADE_OUT, TIMING),
+              ]
+            : []),
         ]
       } else {
         playTowards(animations, 1)
@@ -342,8 +354,10 @@ export const CompactBadge: FC<CompactBadgeProps> = ({
           badgeRef={floatingRef}
           extraStyle={extraStyle}
           maxWidth={maxWidth}
-          pillText={shortText ?? text}
-          pillTextRef={floatingPillTextRef}
+          // A pill without its own short text shows the start of the text,
+          // which unrolls from there.
+          shortText={shortText === text ? undefined : shortText}
+          shortTextRef={floatingShortTextRef}
           text={text}
           textRef={floatingTextRef}
         />

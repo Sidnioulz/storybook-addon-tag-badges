@@ -468,6 +468,38 @@ export const CompactUnrollsFromPill: Story = {
   },
 }
 
+export const CompactUnrollsTruncatedText: Story = {
+  tags: testOnly,
+  decorators: [SidebarRow],
+  args: {
+    context: 'sidebar',
+    compact: true,
+    text: 'Multi-word Badge',
+    style: 'pink',
+  },
+  play: async ({ canvasElement }) => {
+    const pill = getPill(canvasElement)
+    await userEvent.hover(rowOf(pill))
+    const floating = await waitForFloating()
+    // The pill shows the start of the text: the text itself unrolls from the
+    // pill, and stays opaque, with no second text blending in.
+    await expect(floating.children).toHaveLength(1)
+    const text = floating.firstElementChild as HTMLElement
+    const animations = floating.getAnimations({ subtree: true })
+    for (const time of [0, 25, 50, 100, 150]) {
+      for (const animation of animations) {
+        animation.pause()
+        animation.currentTime = time
+      }
+      await expect(getComputedStyle(text).opacity).toBe('1')
+    }
+    for (const animation of animations) {
+      animation.finish()
+    }
+    await userEvent.unhover(rowOf(pill))
+  },
+}
+
 // Records the largest change of an animation's time between two frames of
 // the floating badge.
 const watchAnimationSteps = () => {
