@@ -172,7 +172,7 @@ export const NarrowSidebarHover: Story = {
       '[data-item-id="example-tight-space"]',
     )!
     const pill = row.querySelector<HTMLElement>('[data-tag-badge="pill"]')!
-    await userEvent.hover(pill)
+    await userEvent.hover(row)
     const floating = await waitFor(() => {
       const element = document.querySelector<HTMLElement>(
         '[data-tag-badge="floating"]',
@@ -187,7 +187,7 @@ export const NarrowSidebarHover: Story = {
     await expect(box.left).toBeGreaterThanOrEqual(
       row.getBoundingClientRect().left - 0.5,
     )
-    await userEvent.unhover(pill)
+    await userEvent.unhover(row)
   },
 }
 
