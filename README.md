@@ -115,7 +115,9 @@ Besides, the addon is limited to one badge per entry in the sidebar. Badges plac
 > [!WARNING]
 > This means that when you customise this addon's configuration, you should include your customisations **before** spreading the default config object, so that they have a higher priority.
 
-In the sidebar, the label and badge of an entry share a single line, and badges are aligned at the end of the rows, next to Storybook's status icons and context menu button. Rows that show two status icons place their badge further left, and it may shift when they're hovered. When a row is too narrow for both, they split its space evenly, unless one of them needs less, and their text is truncated with an ellipsis. Screen readers announce the badge's full text along with the entry's name.
+In the sidebar, the label and badge of an entry share a single line, and badges are aligned at the end of the rows, next to Storybook's status icons and context menu button. Rows that show two status icons place their badge further left.
+
+When a row is too narrow for the label and badge, space is split evenly and text truncated. If that happens a lot in your Storybook instance, consider using the `compactSidebar` option described below.
 
 ## 👀 Usage
 
