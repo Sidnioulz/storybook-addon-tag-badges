@@ -14,8 +14,8 @@ export const newBadge: TagBadgeParameter = {
 const PRE_RELEASE_SHORT_TEXTS: Record<string, string> = {
   alpha: 'α',
   beta: 'β',
-  rc: 'RC',
-  experimental: 'Exp',
+  rc: 'rc',
+  experimental: 'exp',
 }
 
 export const preReleaseBadge: TagBadgeParameter = {
@@ -36,7 +36,7 @@ export const deprecatedBadge: TagBadgeParameter = {
   tags: 'deprecated',
   badge: {
     text: 'Deprecated',
-    shortText: 'Depr',
+    shortText: 'depr',
     style: 'yellow',
   },
 }
@@ -45,7 +45,7 @@ export const outdatedBadge: TagBadgeParameter = {
   tags: 'outdated',
   badge: {
     text: 'Outdated',
-    shortText: 'Old',
+    shortText: 'old',
     style: 'orange',
   },
 }
@@ -64,7 +64,7 @@ export const codeOnlyBadge: TagBadgeParameter = {
   tags: ['code-only'],
   badge: {
     text: 'Code Only',
-    shortText: 'Code',
+    shortText: 'code',
     style: 'grey',
   },
 }
@@ -84,8 +84,6 @@ export const versionBadge: TagBadgeParameter = {
 
     return {
       text: `${version}`,
-      // The major and minor versions.
-      shortText: version?.split('.').slice(0, 2).join('.'),
       style: isExperimental ? 'turquoise' : 'blue',
     }
   },
