@@ -114,8 +114,8 @@ const FloatingBadge: FC<FloatingBadgeProps> = ({
         right: 'anchor(right)',
         top: 'anchor(center)',
         translate: '0 -50%',
-        // The pointer stays on the pill and its row, which keep their hover
-        // styles and receive presses.
+        // The pointer stays on the row, which keeps its hover styles and
+        // receives presses.
         pointerEvents: 'none',
       }}
     >
@@ -150,9 +150,9 @@ interface CompactBadgeProps {
 }
 
 /**
- * A sidebar badge shown as a fixed-width pill. Hovering the pill, or focusing
- * its tree row with the keyboard, shows the full badge over it, when the pill
- * doesn't already show all of it.
+ * A sidebar badge shown as a fixed-width pill. Hovering its tree row, or
+ * focusing the row with the keyboard, shows the full badge over the pill, when
+ * the pill doesn't already show all of it.
  */
 export const CompactBadge: FC<CompactBadgeProps> = ({
   extraStyle,
@@ -177,39 +177,50 @@ export const CompactBadge: FC<CompactBadgeProps> = ({
   }
 
   // Whether the pill hides part of its text. If so, measures the room the
-  // floating badge has to the left of the pill.
-  const prepareToOpen = useCallback(() => {
-    const pill = pillRef.current
-    const pillText = pillTextRef.current
-    if (!pill || !pillText || !supportsAnchorPositioning) {
-      return false
-    }
-    const showsFullText =
-      (shortText === undefined || shortText === text) &&
-      pillText.scrollWidth <= pillText.clientWidth
-    if (showsFullText) {
-      return false
-    }
-    const bounds = (pill.closest(ROW_SELECTOR) ?? pill.parentElement)!
-    setMaxWidth(
-      pill.getBoundingClientRect().right -
-        bounds.getBoundingClientRect().left -
-        4,
-    )
-    return true
-  }, [shortText, text])
+  // floating badge has between the pill and the start of its row.
+  const prepareToOpen = useCallback(
+    (row: HTMLElement) => {
+      const pill = pillRef.current
+      const pillText = pillTextRef.current
+      if (!pill || !pillText || !supportsAnchorPositioning) {
+        return false
+      }
+      const showsFullText =
+        (shortText === undefined || shortText === text) &&
+        pillText.scrollWidth <= pillText.clientWidth
+      if (showsFullText) {
+        return false
+      }
+      setMaxWidth(
+        pill.getBoundingClientRect().right -
+          row.getBoundingClientRect().left -
+          4,
+      )
+      return true
+    },
+    [shortText, text],
+  )
 
-  // The badge shows while its tree row itself has keyboard focus, which
-  // react-aria reports with an attribute. The browser's :focus-visible can
-  // also match a row focused by a press after keyboard navigation. Escape
-  // hides it until the row is focused again, and still reaches the sidebar.
+  // The badge shows while a mouse is over its tree row, and while the row
+  // itself has keyboard focus, which react-aria reports with an attribute.
+  // The browser's :focus-visible can also match a row focused by a press
+  // after keyboard navigation. Escape hides the badge of a focused row until
+  // the row is focused again, and still reaches the sidebar.
   useEffect(() => {
     const row = pillRef.current?.closest<HTMLElement>(ROW_SELECTOR)
     if (!row) {
       return
     }
     const update = () =>
-      setIsRowFocused(row.dataset.focusVisible !== undefined && prepareToOpen())
+      setIsRowFocused(
+        row.dataset.focusVisible !== undefined && prepareToOpen(row),
+      )
+    const onPointerEnter = (event: PointerEvent) => {
+      if (event.pointerType === 'mouse') {
+        setIsHovered(prepareToOpen(row))
+      }
+    }
+    const onPointerLeave = () => setIsHovered(false)
     const onKeyDown = (event: KeyboardEvent) => {
       if (event.key === 'Escape') {
         setIsRowFocused(false)
@@ -221,9 +232,13 @@ export const CompactBadge: FC<CompactBadgeProps> = ({
       attributes: true,
       attributeFilter: ['data-focus-visible'],
     })
+    row.addEventListener('pointerenter', onPointerEnter)
+    row.addEventListener('pointerleave', onPointerLeave)
     row.addEventListener('keydown', onKeyDown)
     return () => {
       observer.disconnect()
+      row.removeEventListener('pointerenter', onPointerEnter)
+      row.removeEventListener('pointerleave', onPointerLeave)
       row.removeEventListener('keydown', onKeyDown)
     }
   }, [prepareToOpen])
@@ -278,12 +293,6 @@ export const CompactBadge: FC<CompactBadgeProps> = ({
         opacity: isShown ? 0 : 1,
         anchorName: isShown ? anchorName : undefined,
       }}
-      onPointerEnter={(event) => {
-        if (event.pointerType === 'mouse') {
-          setIsHovered(prepareToOpen())
-        }
-      }}
-      onPointerLeave={() => setIsHovered(false)}
     >
       <PillText aria-hidden ref={pillTextRef}>
         {shortText ?? text}
