@@ -441,7 +441,7 @@ Global options apply to your whole Storybook. Set them with `tagBadgesOptions` i
 
 ### Compact Sidebar
 
-With `compactSidebar`, every sidebar badge renders as a 40px wide pill, so that badges line up and labels keep most of the row. The pill shows the badge's [`shortText`](#static-badge-object), or the start of its `text`. Hovering the pill shows the whole badge over it, on one line that ends with an ellipsis if the row is too narrow, and so does focusing its row with the keyboard. Toolbar and MDX badges are not affected.
+With `compactSidebar`, every sidebar badge renders as a 40px wide pill, so that badges line up and labels keep most of the row. The pill shows the badge's [`shortText`](#static-badge-object), or the start of its `text`. Hovering a row, or focusing it with the keyboard, shows its whole badge over the pill, on one line that ends with an ellipsis if the row is too narrow. Toolbar and MDX badges are not affected.
 
 ```ts
 // .storybook/manager.ts

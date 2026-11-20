@@ -201,13 +201,16 @@ const testOnly = ['!dev', '!autodocs']
 
 const getPill = (canvasElement: HTMLElement) =>
   canvasElement.querySelector<HTMLElement>('[data-tag-badge="pill"]')!
+// The tree row of a pill, which shows its badge while hovered.
+const rowOf = (pill: HTMLElement) =>
+  pill.closest<HTMLElement>('[data-item-id]')!
 const getFloating = () =>
   document.querySelector<HTMLElement>('[data-tag-badge="floating"]')
 const expectNoFloatingAfterHover = async (pill: HTMLElement) => {
-  await userEvent.hover(pill)
+  await userEvent.hover(rowOf(pill))
   await new Promise((resolve) => setTimeout(resolve, 500))
   await expect(getFloating()).toBeNull()
-  await userEvent.unhover(pill)
+  await userEvent.unhover(rowOf(pill))
 }
 const waitForFloating = (timeout?: number) =>
   waitFor(
@@ -229,7 +232,7 @@ const settled = async (floating: HTMLElement) => {
   return floating
 }
 const hoverUntilFloating = async (pill: HTMLElement) => {
-  await userEvent.hover(pill)
+  await userEvent.hover(rowOf(pill))
   return settled(await waitForFloating())
 }
 
@@ -264,14 +267,14 @@ export const CompactTruncated: Story = {
   },
 }
 
-export const CompactHoverShowsFullBadge: Story = {
+export const CompactRowHoverShowsFullBadge: Story = {
   tags: testOnly,
   decorators: [SidebarRow],
   args: deprecatedArgs,
   play: async ({ canvasElement }) => {
     const pill = getPill(canvasElement)
-    // It opens as soon as the pointer enters the pill.
-    await userEvent.hover(pill)
+    // It opens as soon as the pointer enters the row, anywhere.
+    await userEvent.hover(rowOf(pill))
     const floating = await waitForFloating(50)
     const timing = floating.getAnimations()[0].effect!.getTiming()
     await expect(timing.duration).toBeGreaterThanOrEqual(100)
@@ -288,7 +291,7 @@ export const CompactHoverShowsFullBadge: Story = {
     await expect(getComputedStyle(pill).opacity).toBe('0')
     // As soon as the pointer leaves, it rolls back into the pill, which shows
     // again once it has.
-    await userEvent.unhover(pill)
+    await userEvent.unhover(rowOf(pill))
     await waitFor(
       () => expect(floating.getAnimations()[0].playbackRate).toBeLessThan(0),
       { timeout: 50 },
@@ -326,7 +329,7 @@ export const CompactShortTextHover: Story = {
     const pill = getPill(canvasElement)
     const floating = await hoverUntilFloating(pill)
     await expect(floating).toHaveTextContent('Experimental')
-    await userEvent.unhover(pill)
+    await userEvent.unhover(rowOf(pill))
   },
 }
 
@@ -372,7 +375,7 @@ export const CompactLongTextHover: Story = {
     await expect(box.left).toBeGreaterThanOrEqual(
       row.getBoundingClientRect().left - 0.5,
     )
-    await userEvent.unhover(pill)
+    await userEvent.unhover(rowOf(pill))
   },
 }
 
@@ -408,7 +411,7 @@ export const CompactAtViewportEdge: Story = {
           centre(pill.getBoundingClientRect()),
       ),
     ).toBeLessThanOrEqual(1)
-    await userEvent.unhover(pill)
+    await userEvent.unhover(rowOf(pill))
   },
 }
 
@@ -423,7 +426,7 @@ export const CompactUnrollsFromPill: Story = {
   },
   play: async ({ canvasElement }) => {
     const pill = getPill(canvasElement)
-    await userEvent.hover(pill)
+    await userEvent.hover(rowOf(pill))
     const floating = await waitForFloating()
     const animations = floating.getAnimations({ subtree: true })
     await expect(animations.length).toBeGreaterThan(0)
@@ -440,7 +443,7 @@ export const CompactUnrollsFromPill: Story = {
     for (const animation of animations) {
       animation.finish()
     }
-    await userEvent.unhover(pill)
+    await userEvent.unhover(rowOf(pill))
   },
 }
 
@@ -487,8 +490,8 @@ export const CompactRowFocusSurvivesHover: Story = {
     const pill = getPill(canvasElement)
     const row = await focusRowWithKeyboard(pill)
     await waitFor(() => expect(getFloating()).not.toBeNull())
-    await userEvent.hover(pill)
-    await userEvent.unhover(pill)
+    await userEvent.hover(rowOf(pill))
+    await userEvent.unhover(rowOf(pill))
     await new Promise((resolve) => setTimeout(resolve, 400))
     await expect(getFloating()).not.toBeNull()
     row.blur()
@@ -576,15 +579,19 @@ export const CompactLetsPointerThrough: Story = {
     const pill = getPill(canvasElement)
     const floating = await hoverUntilFloating(pill)
     // The pointer reaches the row under the part of the badge left of the
-    // pill, so presses there select the row.
+    // pill, so presses there select the row, and the badge stays.
     const box = floating.getBoundingClientRect()
+    const coords = { clientX: box.left + 4, clientY: box.top + box.height / 2 }
     const target = document.elementFromPoint(
-      box.left + 4,
-      box.top + box.height / 2,
+      coords.clientX,
+      coords.clientY,
     ) as HTMLElement
     await expect(floating).not.toContainElement(target)
-    await expect(pill.closest('[data-item-id]')).toContainElement(target)
-    await userEvent.unhover(pill)
+    await expect(rowOf(pill)).toContainElement(target)
+    await userEvent.pointer({ target, coords })
+    await new Promise((resolve) => setTimeout(resolve, 200))
+    await expect(getFloating()).toBe(floating)
+    await userEvent.unhover(rowOf(pill))
   },
 }
 
@@ -595,21 +602,21 @@ export const CompactReopensWhileClosing: Story = {
   play: async ({ canvasElement }) => {
     const pill = getPill(canvasElement)
     const floating = await hoverUntilFloating(pill)
-    await userEvent.unhover(pill)
+    await userEvent.unhover(rowOf(pill))
     await waitFor(
       () => expect(floating.getAnimations()[0].playbackRate).toBeLessThan(0),
       { timeout: 50 },
     )
     // The pointer comes back before the badge has closed: it unrolls again
     // from where it was, and stays open.
-    await userEvent.hover(pill)
+    await userEvent.hover(rowOf(pill))
     await waitFor(
       () => expect(floating.getAnimations()[0].playbackRate).toBeGreaterThan(0),
       { timeout: 50 },
     )
     await new Promise((resolve) => setTimeout(resolve, 300))
     await expect(getFloating()).toBe(floating)
-    await userEvent.unhover(pill)
+    await userEvent.unhover(rowOf(pill))
     await waitFor(() => expect(getFloating()).toBeNull())
   },
 }
