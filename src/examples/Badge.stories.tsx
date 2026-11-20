@@ -447,6 +447,65 @@ export const CompactUnrollsFromPill: Story = {
   },
 }
 
+// Records the largest change of an animation's time between two frames of
+// the floating badge.
+const watchAnimationSteps = () => {
+  const times = new Map<Animation, number>()
+  let largestStep = 0
+  let watching = true
+  const onFrame = () => {
+    for (const animation of getFloating()?.getAnimations() ?? []) {
+      const time = Number(animation.currentTime)
+      const previous = times.get(animation)
+      if (previous !== undefined) {
+        largestStep = Math.max(largestStep, Math.abs(time - previous))
+      }
+      times.set(animation, time)
+    }
+    if (watching) {
+      requestAnimationFrame(onFrame)
+    }
+  }
+  requestAnimationFrame(onFrame)
+  return () => {
+    watching = false
+    return largestStep
+  }
+}
+
+const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms))
+
+export const CompactAnimatesFromWhereItIs: Story = {
+  tags: testOnly,
+  decorators: [SidebarRow],
+  args: deprecatedArgs,
+  play: async ({ canvasElement }) => {
+    const row = rowOf(getPill(canvasElement))
+    const stopWatching = watchAnimationSteps()
+    // The pointer brushes past the row: the badge closes from wherever it
+    // has opened, and never jumps to either end.
+    for (const [inside, outside] of [
+      [0, 30],
+      [20, 10],
+      [60, 0],
+    ]) {
+      await userEvent.hover(row)
+      await sleep(inside)
+      await userEvent.unhover(row)
+      await sleep(outside)
+    }
+    // Once fully open, leaving and coming back keeps it open.
+    await userEvent.hover(row)
+    await settled(await waitForFloating())
+    await userEvent.unhover(row)
+    await userEvent.hover(row)
+    await sleep(200)
+    await userEvent.unhover(row)
+    await waitFor(() => expect(getFloating()).toBeNull())
+    await expect(stopWatching()).toBeLessThanOrEqual(50)
+  },
+}
+
 const focusRowWithKeyboard = async (pill: HTMLElement) => {
   const row = pill.closest<HTMLElement>('[data-item-id]')!
   await userEvent.keyboard('{Escape}')
