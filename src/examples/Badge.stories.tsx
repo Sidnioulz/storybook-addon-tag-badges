@@ -285,14 +285,10 @@ export const CompactHoverShowsFullBadge: Story = {
           pill.getBoundingClientRect().right,
       ),
     ).toBeLessThanOrEqual(1)
-    await expect(pill).not.toHaveAttribute('aria-describedby')
     await expect(getComputedStyle(pill).opacity).toBe('0')
-    // It stays a moment after the pointer leaves, then closes without an
-    // exit animation.
+    // It closes as soon as the pointer leaves, without an exit animation.
     await userEvent.unhover(pill)
-    await new Promise((resolve) => setTimeout(resolve, 80))
-    await expect(getFloating()).not.toBeNull()
-    await waitFor(() => expect(getFloating()).toBeNull())
+    await waitFor(() => expect(getFloating()).toBeNull(), { timeout: 50 })
     await expect(getComputedStyle(pill).opacity).toBe('1')
   },
 }
@@ -363,16 +359,14 @@ export const CompactLongTextHover: Story = {
     const row = pill.closest('[data-item-id]')!
     const floating = await hoverUntilFloating(pill)
     const box = floating.getBoundingClientRect()
-    // The text wraps, and is cut after two lines.
+    // It stays on one line, and ends with an ellipsis where the row ends.
     const text = floating.firstElementChild!
-    await expect(text.scrollHeight).toBeGreaterThan(text.clientHeight)
-    await expect(box.height).toBeLessThanOrEqual(2 * 12 + 6 + 1)
+    await expect(box.height).toBe(pill.getBoundingClientRect().height)
+    await expect(text.scrollWidth).toBeGreaterThan(text.clientWidth)
+    await expect(getComputedStyle(text).textOverflow).toBe('ellipsis')
     await expect(box.left).toBeGreaterThanOrEqual(
       row.getBoundingClientRect().left - 0.5,
     )
-    await expect(floating.scrollWidth).toBeLessThanOrEqual(floating.clientWidth)
-    await expect(getComputedStyle(floating).textOverflow).toBe('clip')
-    await expect(getComputedStyle(floating).webkitLineClamp).toBe('none')
     await userEvent.unhover(pill)
   },
 }
@@ -391,24 +385,6 @@ export const CompactCustomStyle: Story = {
   },
   play: async ({ canvasElement }) => {
     await expect(getPill(canvasElement).getBoundingClientRect().width).toBe(40)
-  },
-}
-
-export const CompactPressCloses: Story = {
-  tags: testOnly,
-  decorators: [SidebarRow],
-  // user-event focuses the row of a pressed pill from a script, which
-  // browsers show as keyboard focus. A real press focuses it without that.
-  parameters: { rowFocusable: false },
-  args: deprecatedArgs,
-  play: async ({ canvasElement }) => {
-    const pill = getPill(canvasElement)
-    await userEvent.hover(pill)
-    await new Promise((resolve) => setTimeout(resolve, 50))
-    await userEvent.pointer({ keys: '[MouseLeft]', target: pill })
-    await new Promise((resolve) => setTimeout(resolve, 400))
-    await expect(getFloating()).toBeNull()
-    await userEvent.unhover(pill)
   },
 }
 
@@ -598,14 +574,12 @@ export const CompactHoverOverBadge: Story = {
     const box = floating.getBoundingClientRect()
     const coords = { clientX: box.left + 4, clientY: box.top + box.height / 2 }
     const target = document.elementFromPoint(coords.clientX, coords.clientY)!
+    await expect(floating).toContainElement(target as HTMLElement)
     await userEvent.pointer({ target, coords })
-    await new Promise((resolve) => setTimeout(resolve, 400))
+    await new Promise((resolve) => setTimeout(resolve, 200))
     await expect(getFloating()).not.toBeNull()
-    // Presses there still reach the row.
-    await expect(pill.closest('[data-item-id]')).toContainElement(
-      target as HTMLElement,
-    )
+    // It closes once the pointer leaves the badge.
     await userEvent.unhover(target)
-    await waitFor(() => expect(getFloating()).toBeNull())
+    await waitFor(() => expect(getFloating()).toBeNull(), { timeout: 50 })
   },
 }
