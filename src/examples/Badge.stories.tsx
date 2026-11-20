@@ -422,24 +422,45 @@ export const CompactUnrollsFromPill: Story = {
     context: 'sidebar',
     compact: true,
     text: 'Multi-word Badge',
+    shortText: 'mwb',
     style: 'pink',
   },
   play: async ({ canvasElement }) => {
     const pill = getPill(canvasElement)
     await userEvent.hover(rowOf(pill))
     const floating = await waitForFloating()
+    const [text, pillText] = Array.from(floating.children) as HTMLElement[]
     const animations = floating.getAnimations({ subtree: true })
     await expect(animations.length).toBeGreaterThan(0)
-    for (const animation of animations) {
-      animation.pause()
-      animation.currentTime = 0
+    const seek = (time: number) => {
+      for (const animation of animations) {
+        animation.pause()
+        animation.currentTime = time
+      }
     }
-    // On its first frame, the floating badge shows what the pill shows.
-    const text = floating.firstElementChild!.getBoundingClientRect()
+    const opacityOf = (element: HTMLElement) =>
+      Number(getComputedStyle(element).opacity)
+    // On its first frame, the floating badge shows what the pill shows, and
+    // its text starts where the pill's text does.
+    seek(0)
+    await expect(pillText).toHaveTextContent('mwb')
+    await expect(opacityOf(pillText)).toBe(1)
+    await expect(opacityOf(text)).toBe(0)
     const pillPadding = Number.parseFloat(getComputedStyle(pill).paddingLeft)
     await expect(
-      Math.abs(text.left - (pill.getBoundingClientRect().left + pillPadding)),
+      Math.abs(
+        text.getBoundingClientRect().left -
+          (pill.getBoundingClientRect().left + pillPadding),
+      ),
     ).toBeLessThanOrEqual(1)
+    // The two texts blend, and one of them always shows in full.
+    for (const time of [10, 25, 50, 75, 100, 125]) {
+      seek(time)
+      await expect(Math.max(opacityOf(text), opacityOf(pillText))).toBe(1)
+    }
+    seek(150)
+    await expect(opacityOf(pillText)).toBe(0)
+    await expect(opacityOf(text)).toBe(1)
     for (const animation of animations) {
       animation.finish()
     }
