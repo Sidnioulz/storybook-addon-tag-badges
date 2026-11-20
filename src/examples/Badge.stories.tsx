@@ -563,23 +563,22 @@ export const CompactRowFocusFollowsScroll: Story = {
   },
 }
 
-export const CompactHoverOverBadge: Story = {
+export const CompactLetsPointerThrough: Story = {
   tags: testOnly,
   decorators: [SidebarRow],
   args: deprecatedArgs,
   play: async ({ canvasElement }) => {
     const pill = getPill(canvasElement)
     const floating = await hoverUntilFloating(pill)
-    // The pointer moves onto the part of the badge left of the pill.
+    // The pointer reaches the row under the part of the badge left of the
+    // pill, so presses there select the row.
     const box = floating.getBoundingClientRect()
-    const coords = { clientX: box.left + 4, clientY: box.top + box.height / 2 }
-    const target = document.elementFromPoint(coords.clientX, coords.clientY)!
-    await expect(floating).toContainElement(target as HTMLElement)
-    await userEvent.pointer({ target, coords })
-    await new Promise((resolve) => setTimeout(resolve, 200))
-    await expect(getFloating()).not.toBeNull()
-    // It closes once the pointer leaves the badge.
-    await userEvent.unhover(target)
-    await waitFor(() => expect(getFloating()).toBeNull(), { timeout: 50 })
+    const target = document.elementFromPoint(
+      box.left + 4,
+      box.top + box.height / 2,
+    ) as HTMLElement
+    await expect(floating).not.toContainElement(target)
+    await expect(pill.closest('[data-item-id]')).toContainElement(target)
+    await userEvent.unhover(pill)
   },
 }
