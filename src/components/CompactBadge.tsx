@@ -2,7 +2,6 @@ import React, {
   type FC,
   type RefObject,
   useCallback,
-  useEffect,
   useId,
   useLayoutEffect,
   useRef,
@@ -319,7 +318,10 @@ export const CompactBadge: FC<CompactBadgeProps> = ({
   // The browser's :focus-visible can also match a row focused by a press
   // after keyboard navigation. Escape hides the badge of a focused row until
   // the row is focused again, and still reaches the sidebar.
-  useEffect(() => {
+  //
+  // The listeners are set as soon as the pill is in the DOM, so that a pointer
+  // that enters the row right after it renders isn't missed.
+  useLayoutEffect(() => {
     const row = pillRef.current?.closest<HTMLElement>(ROW_SELECTOR)
     if (!row) {
       return
