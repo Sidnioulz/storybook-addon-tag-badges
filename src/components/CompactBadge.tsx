@@ -18,77 +18,53 @@ import { BadgeUI } from './BadgeUI'
 const COMPACT_BADGE_WIDTH = 40
 
 const ANIMATION_DURATION = 150
-// Decelerates as the badge opens. Closing plays it backwards, so that the
-// badge speeds up into the pill.
+// Decelerates into place, whether the badge opens or closes.
 const EASING = 'cubic-bezier(0.2, 0.8, 0.2, 1)'
 
 const PILL_PADDING = 6
-// The inline padding of sidebar badges, in BadgeUI.
-const BADGE_PADDING = 8
 
 // The full badge is drawn over its pill, and follows it as the sidebar
 // scrolls, with CSS anchor positioning. Without it, only the pill shows.
 const supportsAnchorPositioning =
   typeof CSS !== 'undefined' && !!CSS.supports?.('anchor-name: --tag-badge')
 
-// The floating badge unrolls from the pill's area. Closing plays it backwards.
-const UNROLL: Keyframe[] = [
-  {
-    clipPath: `inset(0 0 0 calc(100% - ${COMPACT_BADGE_WIDTH}px) round 999px)`,
-  },
-  { clipPath: 'inset(0 round 999px)' },
-]
-
-// The text starts where and as the pill shows it, cut where the pill's
-// padding starts, and slides into place as the badge opens, so that the badge
-// unrolls from the pill rather than replacing it.
-const SLIDE_IN: Keyframe[] = [
-  {
-    transform: `translateX(calc(100% + ${BADGE_PADDING + PILL_PADDING - COMPACT_BADGE_WIDTH}px))`,
-    clipPath: `inset(0 calc(100% - ${COMPACT_BADGE_WIDTH - 2 * PILL_PADDING}px) 0 0)`,
-  },
-  { transform: 'none', clipPath: 'inset(0)' },
-]
-
-// A pill showing a short text blends it into the text: the text shows early,
-// while the short text fades out late, so that one of them always shows in
-// full, also as the badge closes.
-const FADE_IN: Keyframe[] = [
-  { opacity: 0 },
-  { opacity: 1, offset: 0.4 },
-  { opacity: 1 },
-]
-const FADE_OUT: Keyframe[] = [
-  { opacity: 1 },
-  { opacity: 1, offset: 0.3 },
-  { opacity: 0 },
-]
-
-const TIMING: KeyframeAnimationOptions = {
-  duration: ANIMATION_DURATION,
-  easing: EASING,
-  fill: 'both',
+// The box of the floating badge when it covers its pill exactly: what it
+// opens from, and closes to.
+const COLLAPSED = {
+  width: `${COMPACT_BADGE_WIDTH}px`,
+  paddingInline: `${PILL_PADDING}px`,
 }
 
-// Plays animations forwards (1) or backwards (-1) from where they are.
-// Unlike reverse(), setting the playback rate applies at once. play() would
-// restart an animation that already is at the end it plays towards, so it
-// finishes there instead.
-const playTowards = (animations: Animation[], playbackRate: 1 | -1) => {
-  for (const animation of animations) {
-    animation.playbackRate = playbackRate
-    const time = Number(animation.currentTime)
-    const isAtEnd = playbackRate > 0 ? time >= ANIMATION_DURATION : time <= 0
-    if (isAtEnd) {
-      animation.finish()
-    } else {
-      animation.play()
-    }
-  }
+const readBox = (badge: HTMLElement): typeof COLLAPSED => {
+  const { width, paddingInlineStart } = getComputedStyle(badge)
+  return { width, paddingInline: paddingInlineStart }
 }
+
+// A pill that shows a short text blends it with the text, over these parts of
+// the way the badge travels. The text that comes in shows in full before the
+// other one starts fading, so that one of them always does.
+const BLEND = {
+  open: { fadeIn: [0, 0.4], fadeOut: [0.4, 1] },
+  close: { fadeIn: [0, 0.6], fadeOut: [0.6, 1] },
+}
+
+const fade = (from: string, to: number, [start, end]: number[]): Keyframe[] => [
+  { opacity: from, offset: 0 },
+  { opacity: from, offset: start },
+  { opacity: to, offset: end },
+  { opacity: to, offset: 1 },
+]
 
 const prefersReducedMotion = () =>
   window.matchMedia?.('(prefers-reduced-motion: reduce)').matches ?? false
+
+// Cuts its text where the badge's padding starts, without an ellipsis, and
+// keeps it on one line.
+const Cut = styled.span({
+  display: 'block',
+  overflow: 'hidden',
+  whiteSpace: 'nowrap',
+})
 
 // One line, like the pill, so that the badge never covers other rows. Text
 // that doesn't fit before the row's start ends with an ellipsis.
@@ -99,22 +75,16 @@ const FloatingText = styled.span({
   textOverflow: 'ellipsis',
 })
 
-// Cuts the pill's text where its padding starts, without an ellipsis.
-const PillText = styled.span({
-  display: 'block',
-  overflow: 'hidden',
-  whiteSpace: 'nowrap',
-})
-
-// The pill's short text, over the pill's area of the floating badge.
-const FloatingPillText = styled(PillText)({
+// The pill's short text, laid out over the pill's area of the floating badge
+// the way the pill lays it out.
+const FloatingShortText = styled.span({
   position: 'absolute',
-  top: '50%',
+  insetBlock: 0,
   right: 0,
   width: COMPACT_BADGE_WIDTH,
+  paddingBlock: 'inherit',
   paddingInline: PILL_PADDING,
   boxSizing: 'border-box',
-  translate: '0 -50%',
   textAlign: 'center',
   opacity: 0,
 })
@@ -123,6 +93,7 @@ interface FloatingBadgeProps {
   anchorName: string
   badgeRef: RefObject<HTMLDivElement | null>
   extraStyle: CSSObject
+  isOpen: boolean
   maxWidth?: number
   shortText?: string
   shortTextRef: RefObject<HTMLSpanElement | null>
@@ -136,6 +107,7 @@ const FloatingBadge: FC<FloatingBadgeProps> = ({
   anchorName,
   badgeRef,
   extraStyle,
+  isOpen,
   maxWidth,
   shortText,
   shortTextRef,
@@ -147,27 +119,36 @@ const FloatingBadge: FC<FloatingBadgeProps> = ({
       ref={badgeRef}
       aria-hidden
       context="sidebar"
+      data-state={isOpen ? 'open' : 'closing'}
       data-tag-badge="floating"
       extraStyle={{
         ...extraStyle,
+        boxSizing: 'border-box',
         display: 'block',
         width: 'max-content',
         maxWidth,
+        whiteSpace: 'nowrap',
         position: 'fixed',
         zIndex: 100000,
         positionAnchor: anchorName,
         positionVisibility: 'anchors-visible',
+        // Its end and top edges are the pill's, so that it covers the pill
+        // exactly when it is as small. It takes no transform, which would
+        // draw its text differently from the pill's.
         right: 'anchor(right)',
-        top: 'anchor(center)',
-        translate: '0 -50%',
+        top: 'anchor(top)',
         // The pointer stays on the row, which keeps its hover styles and
         // receives presses.
         pointerEvents: 'none',
       }}
     >
-      <FloatingText ref={textRef}>{text}</FloatingText>
+      <Cut>
+        <FloatingText ref={textRef}>{text}</FloatingText>
+      </Cut>
       {shortText !== undefined && (
-        <FloatingPillText ref={shortTextRef}>{shortText}</FloatingPillText>
+        <FloatingShortText ref={shortTextRef}>
+          <Cut>{shortText}</Cut>
+        </FloatingShortText>
       )}
     </BadgeUI>,
     document.body,
@@ -181,6 +162,7 @@ const PILL_STYLE: CSSObject = {
   paddingInline: PILL_PADDING,
   boxSizing: 'border-box',
   textAlign: 'center',
+  whiteSpace: 'nowrap',
 }
 
 const HiddenText = styled.span(srOnlyStyles)
@@ -206,12 +188,12 @@ export const CompactBadge: FC<CompactBadgeProps> = ({
   const floatingRef = useRef<HTMLDivElement>(null)
   const floatingTextRef = useRef<HTMLSpanElement>(null)
   const floatingShortTextRef = useRef<HTMLSpanElement>(null)
-  const animationsRef = useRef<Animation[]>([])
+  const animationsRef = useRef<Animation[] | null>(null)
   const anchorName = `--tag-badge-${useId().replace(/[^\w-]/g, '')}`
   const [isHovered, setIsHovered] = useState(false)
   const [isRowFocused, setIsRowFocused] = useState(false)
   const [maxWidth, setMaxWidth] = useState<number>()
-  // The floating badge stays after it closes, until it has rolled back into
+  // The floating badge stays after it closes, until it has shrunk back onto
   // the pill.
   const [isShown, setIsShown] = useState(false)
   const isOpen = isHovered || isRowFocused
@@ -286,49 +268,82 @@ export const CompactBadge: FC<CompactBadgeProps> = ({
     }
   }, [prepareToOpen])
 
-  // Plays the animations forwards to open the badge, and backwards to close
-  // it, from wherever they are, so that the pointer may come back to the pill
-  // while the badge closes.
+  // The floating badge opens from its pill and closes back onto it: its box
+  // starts as the pill's and grows, and its text is laid out in it as usual,
+  // so that the badge is drawn exactly like the pill when it takes over from
+  // it and hands back to it. Opening and closing both start from wherever the
+  // badge is, as the pointer may come back while it closes.
   useLayoutEffect(() => {
     const badge = floatingRef.current
     const badgeText = floatingTextRef.current
-    const badgeShortText = floatingShortTextRef.current
     if (!isShown || !badge || !badgeText) {
       return
     }
-    const animations = animationsRef.current
-    if (isOpen) {
-      if (!animations.length && !prefersReducedMotion()) {
-        animationsRef.current = [
-          badge.animate(UNROLL, TIMING),
-          badgeText.animate(SLIDE_IN, TIMING),
-          ...(badgeShortText
-            ? [
-                badgeText.animate(FADE_IN, TIMING),
-                badgeShortText.animate(FADE_OUT, TIMING),
-              ]
-            : []),
-        ]
-      } else {
-        playTowards(animations, 1)
+    if (prefersReducedMotion()) {
+      if (!isOpen) {
+        setIsShown(false)
       }
       return
     }
-    if (!animations.length) {
-      setIsShown(false)
-      return
-    }
-    playTowards(animations, -1)
-    Promise.all(animations.map((animation) => animation.finished)).then(
-      () => {
-        if (animations.every((animation) => animation.playbackRate < 0)) {
-          animationsRef.current = []
-          setIsShown(false)
-        }
-      },
-      // Ignores animations cancelled before they finish.
-      () => {},
+    const badgeShortText = floatingShortTextRef.current
+    const previous = animationsRef.current
+    const from = previous ? readBox(badge) : COLLAPSED
+    const textOpacity = previous ? getComputedStyle(badgeText).opacity : '0'
+    const shortTextOpacity =
+      previous && badgeShortText
+        ? getComputedStyle(badgeShortText).opacity
+        : '1'
+    previous?.forEach((animation) => animation.cancel())
+
+    // Without animations, the badge is laid out open.
+    const open = readBox(badge)
+    const to = isOpen ? open : COLLAPSED
+    const travel = Number.parseFloat(open.width) - COMPACT_BADGE_WIDTH
+    const remaining = Math.abs(
+      Number.parseFloat(to.width) - Number.parseFloat(from.width),
     )
+    const timing: KeyframeAnimationOptions = {
+      duration:
+        travel > 0 ? ANIMATION_DURATION * Math.min(1, remaining / travel) : 0,
+      easing: EASING,
+      // Once open, the badge follows its styles again. Once closed, it stays
+      // on its pill until it is removed.
+      fill: isOpen ? 'none' : 'forwards',
+    }
+    // The text keeps its size while the badge's box cuts it.
+    const size = { width: `${badgeText.getBoundingClientRect().width}px` }
+    const { fadeIn, fadeOut } = isOpen ? BLEND.open : BLEND.close
+    const animations = [badge.animate([from, to], timing)]
+    if (badgeShortText) {
+      animations.push(
+        badgeText.animate(
+          fade(textOpacity, isOpen ? 1 : 0, isOpen ? fadeIn : fadeOut).map(
+            (keyframe) => ({ ...keyframe, ...size }),
+          ),
+          timing,
+        ),
+        badgeShortText.animate(
+          fade(shortTextOpacity, isOpen ? 0 : 1, isOpen ? fadeOut : fadeIn),
+          timing,
+        ),
+      )
+    } else {
+      animations.push(badgeText.animate([size, size], timing))
+    }
+    animationsRef.current = animations
+
+    if (!isOpen) {
+      Promise.all(animations.map((animation) => animation.finished)).then(
+        () => {
+          if (animationsRef.current === animations) {
+            animationsRef.current = null
+            setIsShown(false)
+          }
+        },
+        // The badge opened again before it had closed.
+        () => {},
+      )
+    }
   }, [isOpen, isShown])
 
   return (
@@ -344,15 +359,16 @@ export const CompactBadge: FC<CompactBadgeProps> = ({
         anchorName: isShown ? anchorName : undefined,
       }}
     >
-      <PillText aria-hidden ref={pillTextRef}>
+      <Cut aria-hidden ref={pillTextRef}>
         {shortText ?? text}
-      </PillText>
+      </Cut>
       <HiddenText>{text}</HiddenText>
       {isShown && (
         <FloatingBadge
           anchorName={anchorName}
           badgeRef={floatingRef}
           extraStyle={extraStyle}
+          isOpen={isOpen}
           maxWidth={maxWidth}
           // A pill without its own short text shows the start of the text,
           // which unrolls from there.
