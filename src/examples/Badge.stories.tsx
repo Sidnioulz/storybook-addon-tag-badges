@@ -211,6 +211,14 @@ const lineCount = (element: HTMLElement) => {
     Array.from(range.getClientRects(), (rect) => Math.round(rect.top)),
   ).size
 }
+// Freezes animations at a time of their own.
+const seek = (animations: Animation[], time: number) => {
+  for (const animation of animations) {
+    animation.pause()
+    animation.currentTime = time
+  }
+}
+const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms))
 const expectNoFloatingAfterHover = async (pill: HTMLElement) => {
   await userEvent.hover(rowOf(pill))
   await new Promise((resolve) => setTimeout(resolve, 500))
@@ -292,13 +300,11 @@ CompactTruncated.test(
       ),
     ).toBeLessThanOrEqual(1)
     await expect(getComputedStyle(pill).opacity).toBe('0')
-    // As soon as the pointer leaves, it rolls back into the pill, which shows
-    // again once it has.
-    const openWidth = floating.getBoundingClientRect().width
+    // As soon as the pointer leaves, it shrinks back onto the pill, which
+    // shows again once it has.
     await userEvent.unhover(rowOf(pill))
     await waitFor(
-      () =>
-        expect(floating.getBoundingClientRect().width).toBeLessThan(openWidth),
+      () => expect(floating).toHaveAttribute('data-state', 'closing'),
       { timeout: 50 },
     )
     await waitFor(() => expect(getFloating()).toBeNull())
@@ -414,17 +420,11 @@ CompactShortText.test(
     const pillText = floating.lastElementChild as HTMLElement
     const animations = floating.getAnimations({ subtree: true })
     await expect(animations.length).toBeGreaterThan(0)
-    const seek = (time: number) => {
-      for (const animation of animations) {
-        animation.pause()
-        animation.currentTime = time
-      }
-    }
     const opacityOf = (element: HTMLElement) =>
       Number(getComputedStyle(element).opacity)
     // On its first frame, the floating badge shows what the pill shows, and
     // its text starts where the pill's text does.
-    seek(0)
+    seek(animations, 0)
     await expect(pillText).toHaveTextContent('mwb')
     await expect(opacityOf(pillText)).toBe(1)
     await expect(opacityOf(text)).toBe(0)
@@ -436,11 +436,12 @@ CompactShortText.test(
       ),
     ).toBeLessThanOrEqual(1)
     // The two texts blend, and one of them always shows in full.
-    for (const time of [10, 25, 50, 75, 100, 125]) {
-      seek(time)
-      await expect(Math.max(opacityOf(text), opacityOf(pillText))).toBe(1)
-    }
-    seek(150)
+    const fullest = [10, 25, 50, 75, 100, 125].map((time) => {
+      seek(animations, time)
+      return Math.max(opacityOf(text), opacityOf(pillText))
+    })
+    await expect(fullest).toEqual(fullest.map(() => 1))
+    seek(animations, 150)
     await expect(opacityOf(pillText)).toBe(0)
     await expect(opacityOf(text)).toBe(1)
     for (const animation of animations) {
@@ -462,49 +463,54 @@ CompactTruncated.test(
     await expect(floating.children).toHaveLength(1)
     const text = textOf(floating)
     const animations = floating.getAnimations({ subtree: true })
-    const seek = (time: number) => {
-      for (const animation of animations) {
-        animation.pause()
-        animation.currentTime = time
-      }
-    }
     const padding = (element: HTMLElement) =>
       Number.parseFloat(getComputedStyle(element).paddingLeft)
-    for (const time of [0, 25, 50, 100, 149]) {
-      seek(time)
-      await expect(getComputedStyle(text).opacity).toBe('1')
-      // The text never wraps, and sticks to the start of the badge.
-      await expect(lineCount(text)).toBe(1)
-      await expect(
-        Math.abs(
-          text.getBoundingClientRect().left -
-            (floating.getBoundingClientRect().left + padding(floating)),
-        ),
-      ).toBeLessThanOrEqual(0.5)
-      // It is laid out and painted like the pill's text: moving or clipping
-      // it on its own would draw it differently while the badge animates.
-      for (const element of [floating, text.parentElement!, text]) {
-        const style = getComputedStyle(element)
-        await expect(style.transform).toBe('none')
-        await expect(style.translate).toBe('none')
-        await expect(style.clipPath).toBe('none')
+    const frames = [0, 25, 50, 100, 149].map((time) => {
+      seek(animations, time)
+      return {
+        opacity: getComputedStyle(text).opacity,
+        // The text never wraps, and sticks to the start of the badge.
+        lines: lineCount(text),
+        isAtStart:
+          Math.abs(
+            text.getBoundingClientRect().left -
+              (floating.getBoundingClientRect().left + padding(floating)),
+          ) <= 0.5,
+        // It is laid out and painted like the pill's text: moving or
+        // clipping it on its own would draw it differently while the badge
+        // animates.
+        effects: [floating, text.parentElement!, text].flatMap((element) => {
+          const { transform, translate, clipPath } = getComputedStyle(element)
+          return [transform, translate, clipPath]
+        }),
       }
-    }
+    })
+    await expect(frames).toEqual(
+      frames.map(() => ({
+        opacity: '1',
+        lines: 1,
+        isAtStart: true,
+        effects: new Array(9).fill('none'),
+      })),
+    )
     // On its first frame, the badge is the pill: same box, same padding,
     // and the same text cut at the same place.
-    seek(0)
+    seek(animations, 0)
     const pillBox = pill.getBoundingClientRect()
     const box = floating.getBoundingClientRect()
-    for (const side of ['left', 'top', 'width', 'height'] as const) {
-      await expect(Math.abs(box[side] - pillBox[side])).toBeLessThanOrEqual(
-        0.01,
-      )
-    }
-    await expect(padding(floating)).toBe(padding(pill))
     const cut = text.parentElement!.getBoundingClientRect()
     const pillCut = pill.firstElementChild!.getBoundingClientRect()
-    await expect(Math.abs(cut.left - pillCut.left)).toBeLessThanOrEqual(0.01)
-    await expect(Math.abs(cut.right - pillCut.right)).toBeLessThanOrEqual(0.01)
+    await expect(
+      Math.max(
+        Math.abs(box.left - pillBox.left),
+        Math.abs(box.top - pillBox.top),
+        Math.abs(box.width - pillBox.width),
+        Math.abs(box.height - pillBox.height),
+        Math.abs(cut.left - pillCut.left),
+        Math.abs(cut.right - pillCut.right),
+      ),
+    ).toBeLessThanOrEqual(0.01)
+    await expect(padding(floating)).toBe(padding(pill))
     await expect(lineCount(pill.firstElementChild as HTMLElement)).toBe(1)
     for (const animation of animations) {
       animation.finish()
@@ -571,11 +577,9 @@ const watchBadgeSize = () => {
   requestAnimationFrame(onFrame)
   return () => {
     watching = false
-    return { jumps, states: Array.from(states).sort() }
+    return { jumps, states }
   }
 }
-
-const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms))
 
 CompactTruncated.test(
   'animates from where it is',
@@ -584,16 +588,15 @@ CompactTruncated.test(
     const stopWatching = watchBadgeSize()
     // The pointer brushes past the row: the badge closes from wherever it
     // has opened, and never jumps to either end.
-    for (const [inside, outside] of [
-      [0, 30],
-      [20, 10],
-      [60, 0],
-    ]) {
+    const brushPast = async (inside: number, outside: number) => {
       await userEvent.hover(row)
       await sleep(inside)
       await userEvent.unhover(row)
       await sleep(outside)
     }
+    await brushPast(0, 30)
+    await brushPast(20, 10)
+    await brushPast(60, 0)
     // Once fully open, leaving and coming back keeps it open.
     await userEvent.hover(row)
     await settled(await waitForFloating())
@@ -604,7 +607,7 @@ CompactTruncated.test(
     await waitFor(() => expect(getFloating()).toBeNull())
     await expect(stopWatching()).toEqual({
       jumps: [],
-      states: ['closing', 'open'],
+      states: new Set(['open', 'closing']),
     })
   },
 )
