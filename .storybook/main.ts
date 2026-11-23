@@ -15,6 +15,9 @@ const config: StorybookConfig = {
     name: '@storybook/react-vite',
     options: {},
   },
+  features: {
+    experimentalTestSyntax: true,
+  },
   managerHead: async (head) => {
     return `
       ${head}
