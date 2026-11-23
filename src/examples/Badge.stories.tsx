@@ -200,6 +200,17 @@ const rowOf = (pill: HTMLElement) =>
   pill.closest<HTMLElement>('[data-item-id]')!
 const getFloating = () =>
   document.querySelector<HTMLElement>('[data-tag-badge="floating"]')
+// The text of the floating badge, inside the box that cuts it.
+const textOf = (floating: HTMLElement) =>
+  floating.firstElementChild!.firstElementChild as HTMLElement
+// The number of lines an element's text is laid out on.
+const lineCount = (element: HTMLElement) => {
+  const range = document.createRange()
+  range.selectNodeContents(element)
+  return new Set(
+    Array.from(range.getClientRects(), (rect) => Math.round(rect.top)),
+  ).size
+}
 const expectNoFloatingAfterHover = async (pill: HTMLElement) => {
   await userEvent.hover(rowOf(pill))
   await new Promise((resolve) => setTimeout(resolve, 500))
@@ -283,9 +294,11 @@ CompactTruncated.test(
     await expect(getComputedStyle(pill).opacity).toBe('0')
     // As soon as the pointer leaves, it rolls back into the pill, which shows
     // again once it has.
+    const openWidth = floating.getBoundingClientRect().width
     await userEvent.unhover(rowOf(pill))
     await waitFor(
-      () => expect(floating.getAnimations()[0].playbackRate).toBeLessThan(0),
+      () =>
+        expect(floating.getBoundingClientRect().width).toBeLessThan(openWidth),
       { timeout: 50 },
     )
     await waitFor(() => expect(getFloating()).toBeNull())
@@ -344,7 +357,8 @@ CompactLongText.test(
     const floating = await hoverUntilFloating(pill)
     const box = floating.getBoundingClientRect()
     // It stays on one line, and ends with an ellipsis where the row ends.
-    const text = floating.firstElementChild!
+    const text = textOf(floating)
+    await expect(lineCount(text)).toBe(1)
     await expect(box.height).toBe(pill.getBoundingClientRect().height)
     await expect(text.scrollWidth).toBeGreaterThan(text.clientWidth)
     await expect(getComputedStyle(text).textOverflow).toBe('ellipsis')
@@ -396,7 +410,8 @@ CompactShortText.test(
     const pill = getPill(canvasElement)
     await userEvent.hover(rowOf(pill))
     const floating = await waitForFloating()
-    const [text, pillText] = Array.from(floating.children) as HTMLElement[]
+    const text = textOf(floating)
+    const pillText = floating.lastElementChild as HTMLElement
     const animations = floating.getAnimations({ subtree: true })
     await expect(animations.length).toBeGreaterThan(0)
     const seek = (time: number) => {
@@ -445,15 +460,52 @@ CompactTruncated.test(
     // The pill shows the start of the text: the text itself unrolls from the
     // pill, and stays opaque, with no second text blending in.
     await expect(floating.children).toHaveLength(1)
-    const text = floating.firstElementChild as HTMLElement
+    const text = textOf(floating)
     const animations = floating.getAnimations({ subtree: true })
-    for (const time of [0, 25, 50, 100, 150]) {
+    const seek = (time: number) => {
       for (const animation of animations) {
         animation.pause()
         animation.currentTime = time
       }
-      await expect(getComputedStyle(text).opacity).toBe('1')
     }
+    const padding = (element: HTMLElement) =>
+      Number.parseFloat(getComputedStyle(element).paddingLeft)
+    for (const time of [0, 25, 50, 100, 149]) {
+      seek(time)
+      await expect(getComputedStyle(text).opacity).toBe('1')
+      // The text never wraps, and sticks to the start of the badge.
+      await expect(lineCount(text)).toBe(1)
+      await expect(
+        Math.abs(
+          text.getBoundingClientRect().left -
+            (floating.getBoundingClientRect().left + padding(floating)),
+        ),
+      ).toBeLessThanOrEqual(0.5)
+      // It is laid out and painted like the pill's text: moving or clipping
+      // it on its own would draw it differently while the badge animates.
+      for (const element of [floating, text.parentElement!, text]) {
+        const style = getComputedStyle(element)
+        await expect(style.transform).toBe('none')
+        await expect(style.translate).toBe('none')
+        await expect(style.clipPath).toBe('none')
+      }
+    }
+    // On its first frame, the badge is the pill: same box, same padding,
+    // and the same text cut at the same place.
+    seek(0)
+    const pillBox = pill.getBoundingClientRect()
+    const box = floating.getBoundingClientRect()
+    for (const side of ['left', 'top', 'width', 'height'] as const) {
+      await expect(Math.abs(box[side] - pillBox[side])).toBeLessThanOrEqual(
+        0.01,
+      )
+    }
+    await expect(padding(floating)).toBe(padding(pill))
+    const cut = text.parentElement!.getBoundingClientRect()
+    const pillCut = pill.firstElementChild!.getBoundingClientRect()
+    await expect(Math.abs(cut.left - pillCut.left)).toBeLessThanOrEqual(0.01)
+    await expect(Math.abs(cut.right - pillCut.right)).toBeLessThanOrEqual(0.01)
+    await expect(lineCount(pill.firstElementChild as HTMLElement)).toBe(1)
     for (const animation of animations) {
       animation.finish()
     }
@@ -461,20 +513,56 @@ CompactTruncated.test(
   },
 )
 
-// Records the largest change of an animation's time between two frames of
-// the floating badge.
-const watchAnimationSteps = () => {
-  const times = new Map<Animation, number>()
-  let largestStep = 0
+CompactTruncated.test(
+  'slows down into the pill as it closes',
+  async ({ canvasElement }) => {
+    const pill = getPill(canvasElement)
+    const floating = await hoverUntilFloating(pill)
+    const openWidth = floating.getBoundingClientRect().width
+    await userEvent.unhover(rowOf(pill))
+    await waitFor(() =>
+      expect(floating).toHaveAttribute('data-state', 'closing'),
+    )
+    // A quarter into closing, the badge has covered most of the way: it
+    // starts moving at once, rather than waiting and snapping shut.
+    const [closing] = floating.getAnimations()
+    closing.pause()
+    closing.currentTime = Number(closing.effect!.getTiming().duration) / 4
+    const pillWidth = pill.getBoundingClientRect().width
+    await expect(
+      floating.getBoundingClientRect().width - pillWidth,
+    ).toBeLessThan((openWidth - pillWidth) / 2)
+    closing.finish()
+    await waitFor(() => expect(getFloating()).toBeNull())
+  },
+)
+
+// Watches the floating badge on every frame: it only grows while it opens,
+// and only shrinks while it closes.
+const watchBadgeSize = () => {
+  const states = new Set<string>()
+  const jumps: string[] = []
+  let previous:
+    { badge: HTMLElement; state?: string; width: number } | undefined
   let watching = true
   const onFrame = () => {
-    for (const animation of getFloating()?.getAnimations() ?? []) {
-      const time = Number(animation.currentTime)
-      const previous = times.get(animation)
-      if (previous !== undefined) {
-        largestStep = Math.max(largestStep, Math.abs(time - previous))
+    const badge = getFloating()
+    if (badge) {
+      const state = badge.dataset.state
+      const { width } = badge.getBoundingClientRect()
+      if (state) {
+        states.add(state)
       }
-      times.set(animation, time)
+      if (previous?.badge === badge && previous.state === state) {
+        const change = width - previous.width
+        if (
+          (state === 'open' && change < -0.5) ||
+          (state === 'closing' && change > 0.5)
+        ) {
+          jumps.push(`${state}: ${previous.width} -> ${width}`)
+        }
+      }
+      previous = { badge, state, width }
     }
     if (watching) {
       requestAnimationFrame(onFrame)
@@ -483,7 +571,7 @@ const watchAnimationSteps = () => {
   requestAnimationFrame(onFrame)
   return () => {
     watching = false
-    return largestStep
+    return { jumps, states: Array.from(states).sort() }
   }
 }
 
@@ -493,7 +581,7 @@ CompactTruncated.test(
   'animates from where it is',
   async ({ canvasElement }) => {
     const row = rowOf(getPill(canvasElement))
-    const stopWatching = watchAnimationSteps()
+    const stopWatching = watchBadgeSize()
     // The pointer brushes past the row: the badge closes from wherever it
     // has opened, and never jumps to either end.
     for (const [inside, outside] of [
@@ -514,7 +602,10 @@ CompactTruncated.test(
     await sleep(200)
     await userEvent.unhover(row)
     await waitFor(() => expect(getFloating()).toBeNull())
-    await expect(stopWatching()).toBeLessThanOrEqual(50)
+    await expect(stopWatching()).toEqual({
+      jumps: [],
+      states: ['closing', 'open'],
+    })
   },
 )
 
@@ -657,16 +748,15 @@ CompactTruncated.test('reopens while closing', async ({ canvasElement }) => {
   const floating = await hoverUntilFloating(pill)
   await userEvent.unhover(rowOf(pill))
   await waitFor(
-    () => expect(floating.getAnimations()[0].playbackRate).toBeLessThan(0),
+    () => expect(floating).toHaveAttribute('data-state', 'closing'),
     { timeout: 50 },
   )
   // The pointer comes back before the badge has closed: it unrolls again
   // from where it was, and stays open.
   await userEvent.hover(rowOf(pill))
-  await waitFor(
-    () => expect(floating.getAnimations()[0].playbackRate).toBeGreaterThan(0),
-    { timeout: 50 },
-  )
+  await waitFor(() => expect(floating).toHaveAttribute('data-state', 'open'), {
+    timeout: 50,
+  })
   await new Promise((resolve) => setTimeout(resolve, 300))
   await expect(getFloating()).toBe(floating)
   await userEvent.unhover(rowOf(pill))
