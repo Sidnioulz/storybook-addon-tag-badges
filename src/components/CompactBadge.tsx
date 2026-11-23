@@ -40,20 +40,108 @@ const readBox = (badge: HTMLElement): typeof COLLAPSED => {
   return { width, paddingInline: paddingInlineStart }
 }
 
-// A pill that shows a short text blends it with the text, over these parts of
-// the way the badge travels. The text that comes in shows in full before the
-// other one starts fading, so that one of them always does.
-const BLEND = {
-  open: { fadeIn: [0, 0.4], fadeOut: [0.4, 1] },
-  close: { fadeIn: [0, 0.6], fadeOut: [0.6, 1] },
+interface Fade {
+  to: number
+  // The part of the way the badge travels over which the text fades.
+  over: [start: number, end: number]
 }
 
-const fade = (from: string, to: number, [start, end]: number[]): Keyframe[] => [
+// A pill that shows a short text blends it with the text. The text that
+// comes in shows in full before the other one starts fading, so that one of
+// them always does.
+const BLEND: Record<'open' | 'close', { text: Fade; shortText: Fade }> = {
+  open: {
+    text: { to: 1, over: [0, 0.4] },
+    shortText: { to: 0, over: [0.4, 1] },
+  },
+  close: {
+    text: { to: 0, over: [0.6, 1] },
+    shortText: { to: 1, over: [0, 0.6] },
+  },
+}
+
+const fade = (from: string, { to, over: [start, end] }: Fade): Keyframe[] => [
   { opacity: from, offset: 0 },
   { opacity: from, offset: start },
   { opacity: to, offset: end },
   { opacity: to, offset: 1 },
 ]
+
+interface FloatingBadgeParts {
+  badge: HTMLElement
+  text: HTMLElement
+  shortText: HTMLElement | null
+}
+
+// Where the animated parts of a floating badge are, before they have moved
+// and then at any time.
+const COLLAPSED_PARTS = {
+  box: COLLAPSED,
+  textOpacity: '0',
+  shortTextOpacity: '1',
+}
+
+const readParts = ({
+  badge,
+  text,
+  shortText,
+}: FloatingBadgeParts): typeof COLLAPSED_PARTS => ({
+  box: readBox(badge),
+  textOpacity: getComputedStyle(text).opacity,
+  shortTextOpacity: shortText ? getComputedStyle(shortText).opacity : '1',
+})
+
+/**
+ * Opens a floating badge from its pill, or closes it back onto it. The
+ * badge's box starts as the pill's and grows, and its text is laid out in it
+ * as usual, so that the badge is drawn exactly like the pill when it takes
+ * over from it and hands back to it.
+ *
+ * Opening and closing both start from wherever the previous animations left
+ * the badge, as the pointer may come back while it closes.
+ */
+function animateFloatingBadge(
+  parts: FloatingBadgeParts,
+  isOpen: boolean,
+  previous: Animation[] | null,
+): Animation[] {
+  const { badge, text, shortText } = parts
+  const from = previous ? readParts(parts) : COLLAPSED_PARTS
+  previous?.forEach((animation) => animation.cancel())
+
+  // Without animations, the badge is laid out open.
+  const open = readBox(badge)
+  const to = isOpen ? open : COLLAPSED
+  const travel = Number.parseFloat(open.width) - COMPACT_BADGE_WIDTH
+  const remaining = Math.abs(
+    Number.parseFloat(to.width) - Number.parseFloat(from.box.width),
+  )
+  const timing: KeyframeAnimationOptions = {
+    duration: ANIMATION_DURATION * Math.min(1, remaining / Math.max(1, travel)),
+    easing: EASING,
+    // Once open, the badge follows its styles again. Once closed, it stays
+    // on its pill until it is removed.
+    fill: isOpen ? 'none' : 'forwards',
+  }
+  // The text keeps its size while the badge's box cuts it.
+  const size = { width: `${text.getBoundingClientRect().width}px` }
+  const animations = [badge.animate([from.box, to], timing)]
+  if (!shortText) {
+    return [...animations, text.animate([size, size], timing)]
+  }
+  const blend = isOpen ? BLEND.open : BLEND.close
+  return [
+    ...animations,
+    text.animate(
+      fade(from.textOpacity, blend.text).map((keyframe) => ({
+        ...keyframe,
+        ...size,
+      })),
+      timing,
+    ),
+    shortText.animate(fade(from.shortTextOpacity, blend.shortText), timing),
+  ]
+}
 
 const prefersReducedMotion = () =>
   window.matchMedia?.('(prefers-reduced-motion: reduce)').matches ?? false
@@ -268,15 +356,12 @@ export const CompactBadge: FC<CompactBadgeProps> = ({
     }
   }, [prepareToOpen])
 
-  // The floating badge opens from its pill and closes back onto it: its box
-  // starts as the pill's and grows, and its text is laid out in it as usual,
-  // so that the badge is drawn exactly like the pill when it takes over from
-  // it and hands back to it. Opening and closing both start from wherever the
-  // badge is, as the pointer may come back while it closes.
+  // Animates the floating badge as it opens and closes, and removes it once
+  // it has closed.
   useLayoutEffect(() => {
     const badge = floatingRef.current
-    const badgeText = floatingTextRef.current
-    if (!isShown || !badge || !badgeText) {
+    const text = floatingTextRef.current
+    if (!isShown || !badge || !text) {
       return
     }
     if (prefersReducedMotion()) {
@@ -285,65 +370,25 @@ export const CompactBadge: FC<CompactBadgeProps> = ({
       }
       return
     }
-    const badgeShortText = floatingShortTextRef.current
-    const previous = animationsRef.current
-    const from = previous ? readBox(badge) : COLLAPSED
-    const textOpacity = previous ? getComputedStyle(badgeText).opacity : '0'
-    const shortTextOpacity =
-      previous && badgeShortText
-        ? getComputedStyle(badgeShortText).opacity
-        : '1'
-    previous?.forEach((animation) => animation.cancel())
-
-    // Without animations, the badge is laid out open.
-    const open = readBox(badge)
-    const to = isOpen ? open : COLLAPSED
-    const travel = Number.parseFloat(open.width) - COMPACT_BADGE_WIDTH
-    const remaining = Math.abs(
-      Number.parseFloat(to.width) - Number.parseFloat(from.width),
+    const animations = animateFloatingBadge(
+      { badge, text, shortText: floatingShortTextRef.current },
+      isOpen,
+      animationsRef.current,
     )
-    const timing: KeyframeAnimationOptions = {
-      duration:
-        travel > 0 ? ANIMATION_DURATION * Math.min(1, remaining / travel) : 0,
-      easing: EASING,
-      // Once open, the badge follows its styles again. Once closed, it stays
-      // on its pill until it is removed.
-      fill: isOpen ? 'none' : 'forwards',
-    }
-    // The text keeps its size while the badge's box cuts it.
-    const size = { width: `${badgeText.getBoundingClientRect().width}px` }
-    const { fadeIn, fadeOut } = isOpen ? BLEND.open : BLEND.close
-    const animations = [badge.animate([from, to], timing)]
-    if (badgeShortText) {
-      animations.push(
-        badgeText.animate(
-          fade(textOpacity, isOpen ? 1 : 0, isOpen ? fadeIn : fadeOut).map(
-            (keyframe) => ({ ...keyframe, ...size }),
-          ),
-          timing,
-        ),
-        badgeShortText.animate(
-          fade(shortTextOpacity, isOpen ? 0 : 1, isOpen ? fadeOut : fadeIn),
-          timing,
-        ),
-      )
-    } else {
-      animations.push(badgeText.animate([size, size], timing))
-    }
     animationsRef.current = animations
-
-    if (!isOpen) {
-      Promise.all(animations.map((animation) => animation.finished)).then(
-        () => {
-          if (animationsRef.current === animations) {
-            animationsRef.current = null
-            setIsShown(false)
-          }
-        },
-        // The badge opened again before it had closed.
-        () => {},
-      )
+    if (isOpen) {
+      return
     }
+    Promise.all(animations.map((animation) => animation.finished)).then(
+      () => {
+        if (animationsRef.current === animations) {
+          animationsRef.current = null
+          setIsShown(false)
+        }
+      },
+      // The badge opened again before it had closed.
+      () => {},
+    )
   }, [isOpen, isShown])
 
   return (
