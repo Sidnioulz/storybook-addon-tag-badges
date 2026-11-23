@@ -1,10 +1,11 @@
-import React, { type ReactNode, useState } from 'react'
-import type { Decorator, Meta, StoryObj } from '@storybook/react-vite'
+import React, { type ComponentProps, type ReactNode, useState } from 'react'
+import type { Decorator } from '@storybook/react-vite'
 import { expect, userEvent, waitFor } from 'storybook/test'
 
+import preview from '../../.storybook/preview'
 import { Badge } from '../components/Badge'
 
-const meta: Meta<typeof Badge> = {
+const meta = preview.meta({
   title: 'Addon/Badge',
   component: Badge,
   argTypes: {
@@ -39,19 +40,16 @@ const meta: Meta<typeof Badge> = {
   parameters: {
     layout: 'centered',
   },
-}
+})
 
-export default meta
-type Story = StoryObj<typeof Badge>
-
-export const Default: Story = {
+export const Default = meta.story({
   args: {
     context: 'toolbar',
     text: 'Text',
   },
-}
+})
 
-export const Colors: Story = {
+export const Colors = meta.story({
   args: {
     context: 'toolbar',
     text: 'Text',
@@ -60,9 +58,9 @@ export const Colors: Story = {
       color: 'hsl(110, 100%, 8%)',
     },
   },
-}
+})
 
-export const ColorAndBorders: Story = {
+export const ColorAndBorders = meta.story({
   args: {
     context: 'toolbar',
     text: 'Text',
@@ -72,17 +70,17 @@ export const ColorAndBorders: Story = {
       color: 'hsl(110, 100%, 8%)',
     },
   },
-}
+})
 
-export const SimpleTooltip: Story = {
+export const SimpleTooltip = meta.story({
   args: {
     context: 'toolbar',
     text: 'Text',
     tooltip: 'This badge has a simple string tooltip!',
   },
-}
+})
 
-export const RichTooltip: Story = {
+export const RichTooltip = meta.story({
   args: {
     context: 'toolbar',
     text: 'Text',
@@ -91,9 +89,9 @@ export const RichTooltip: Story = {
       desc: 'This badge uses a rich tooltip with title and description',
     },
   },
-}
+})
 
-export const RichTooltipWithLink: Story = {
+export const RichTooltipWithLink = meta.story({
   args: {
     context: 'toolbar',
     text: 'Text',
@@ -108,15 +106,15 @@ export const RichTooltipWithLink: Story = {
       ],
     },
   },
-}
+})
 
-export const SidebarBadge: Story = {
+export const SidebarBadge = meta.story({
   args: {
     context: 'sidebar',
     text: 'Text',
     tooltip: 'Tooltips are disabled in the sidebar',
   },
-}
+})
 
 interface MockRowProps {
   children: ReactNode
@@ -193,11 +191,7 @@ const deprecatedArgs = {
   compact: true,
   text: 'Deprecated',
   style: 'orange',
-} satisfies Story['args']
-
-// Stories that hover or focus a badge to test it, kept out of the sidebar and
-// docs so that browsing stories never shows their interactions.
-const testOnly = ['!dev', '!autodocs']
+} satisfies Partial<ComponentProps<typeof Badge>>
 
 const getPill = (canvasElement: HTMLElement) =>
   canvasElement.querySelector<HTMLElement>('[data-tag-badge="pill"]')!
@@ -236,7 +230,7 @@ const hoverUntilFloating = async (pill: HTMLElement) => {
   return settled(await waitForFloating())
 }
 
-export const CompactFits: Story = {
+export const CompactFits = meta.story({
   decorators: [SidebarRow],
   args: { context: 'sidebar', compact: true, text: 'New', style: 'green' },
   play: async ({ canvasElement }) => {
@@ -244,16 +238,16 @@ export const CompactFits: Story = {
     await expect(pill.getBoundingClientRect().width).toBe(40)
     await expectNoFloatingAfterHover(pill)
   },
-}
+})
 
-export const CompactTruncated: Story = {
+export const CompactTruncated = meta.story({
   decorators: [SidebarRow],
   args: deprecatedArgs,
-  play: async ({ canvasElement }) => {
+  play: async ({ args, canvasElement }) => {
     const pill = getPill(canvasElement)
     await expect(pill.getBoundingClientRect().width).toBe(40)
     await expect(pill.closest('[role="treeitem"]')).toHaveAccessibleName(
-      'Deprecated',
+      args.text,
     )
     await expect(pill).not.toHaveAttribute('tabindex')
     // The text is cut where the pill's padding starts.
@@ -265,13 +259,11 @@ export const CompactTruncated: Story = {
         0.5,
     )
   },
-}
+})
 
-export const CompactRowHoverShowsFullBadge: Story = {
-  tags: testOnly,
-  decorators: [SidebarRow],
-  args: deprecatedArgs,
-  play: async ({ canvasElement }) => {
+CompactTruncated.test(
+  'shows the full badge while its row is hovered',
+  async ({ canvasElement }) => {
     const pill = getPill(canvasElement)
     // It opens as soon as the pointer enters the row, anywhere.
     await userEvent.hover(rowOf(pill))
@@ -299,9 +291,9 @@ export const CompactRowHoverShowsFullBadge: Story = {
     await waitFor(() => expect(getFloating()).toBeNull())
     await expect(getComputedStyle(pill).opacity).toBe('1')
   },
-}
+)
 
-export const CompactShortText: Story = {
+export const CompactShortText = meta.story({
   decorators: [SidebarRow],
   args: {
     context: 'sidebar',
@@ -310,45 +302,30 @@ export const CompactShortText: Story = {
     shortText: 'Exp',
     style: 'purple',
   },
-  play: async ({ canvasElement }) => {
-    await expect(getPill(canvasElement)).toHaveTextContent('Exp')
+  play: async ({ args, canvasElement }) => {
+    await expect(getPill(canvasElement)).toHaveTextContent(args.shortText!)
   },
-}
+})
 
-export const CompactShortTextHover: Story = {
-  tags: testOnly,
-  decorators: [SidebarRow],
-  args: {
-    context: 'sidebar',
-    compact: true,
-    text: 'Experimental',
-    shortText: 'Exp',
-    style: 'purple',
-  },
-  play: async ({ canvasElement }) => {
+CompactShortText.test(
+  'shows the full text while hovered',
+  async ({ canvasElement }) => {
     const pill = getPill(canvasElement)
     const floating = await hoverUntilFloating(pill)
     await expect(floating).toHaveTextContent('Experimental')
     await userEvent.unhover(rowOf(pill))
   },
-}
+)
 
-export const CompactShortTextEqualsText: Story = {
-  tags: testOnly,
-  decorators: [SidebarRow],
-  args: {
-    context: 'sidebar',
-    compact: true,
-    text: 'Beta',
-    shortText: 'Beta',
-    style: 'purple',
-  },
-  play: async ({ canvasElement }) => {
+CompactShortText.test(
+  'shows no floating badge when the short text is the text',
+  { args: { text: 'Beta', shortText: 'Beta' } },
+  async ({ canvasElement }) => {
     await expectNoFloatingAfterHover(getPill(canvasElement))
   },
-}
+)
 
-export const CompactLongText: Story = {
+export const CompactLongText = meta.story({
   decorators: [SidebarRow],
   parameters: { rowWidth: 100 },
   args: {
@@ -357,12 +334,11 @@ export const CompactLongText: Story = {
     text: 'Multi-word Badge, badgeofmanyletters',
     style: 'pink',
   },
-}
+})
 
-export const CompactLongTextHover: Story = {
-  ...CompactLongText,
-  tags: testOnly,
-  play: async ({ canvasElement }) => {
+CompactLongText.test(
+  'stays on one line within the row while hovered',
+  async ({ canvasElement }) => {
     const pill = getPill(canvasElement)
     const row = pill.closest('[data-item-id]')!
     const floating = await hoverUntilFloating(pill)
@@ -377,9 +353,9 @@ export const CompactLongTextHover: Story = {
     )
     await userEvent.unhover(rowOf(pill))
   },
-}
+)
 
-export const CompactCustomStyle: Story = {
+export const CompactCustomStyle = meta.story({
   decorators: [SidebarRow],
   args: {
     context: 'sidebar',
@@ -394,14 +370,12 @@ export const CompactCustomStyle: Story = {
   play: async ({ canvasElement }) => {
     await expect(getPill(canvasElement).getBoundingClientRect().width).toBe(40)
   },
-}
+})
 
-export const CompactAtViewportEdge: Story = {
-  tags: testOnly,
-  decorators: [SidebarRow],
-  parameters: { atViewportBottom: true },
-  args: deprecatedArgs,
-  play: async ({ canvasElement }) => {
+CompactTruncated.test(
+  'stays centred on the pill at the viewport edge',
+  { parameters: { atViewportBottom: true } },
+  async ({ canvasElement }) => {
     const pill = getPill(canvasElement)
     const floating = await hoverUntilFloating(pill)
     const centre = (box: DOMRect) => box.top + box.height / 2
@@ -413,19 +387,12 @@ export const CompactAtViewportEdge: Story = {
     ).toBeLessThanOrEqual(1)
     await userEvent.unhover(rowOf(pill))
   },
-}
+)
 
-export const CompactUnrollsFromPill: Story = {
-  tags: testOnly,
-  decorators: [SidebarRow],
-  args: {
-    context: 'sidebar',
-    compact: true,
-    text: 'Multi-word Badge',
-    shortText: 'mwb',
-    style: 'pink',
-  },
-  play: async ({ canvasElement }) => {
+CompactShortText.test(
+  'unrolls from the pill',
+  { args: { text: 'Multi-word Badge', shortText: 'mwb', style: 'pink' } },
+  async ({ canvasElement }) => {
     const pill = getPill(canvasElement)
     await userEvent.hover(rowOf(pill))
     const floating = await waitForFloating()
@@ -466,18 +433,12 @@ export const CompactUnrollsFromPill: Story = {
     }
     await userEvent.unhover(rowOf(pill))
   },
-}
+)
 
-export const CompactUnrollsTruncatedText: Story = {
-  tags: testOnly,
-  decorators: [SidebarRow],
-  args: {
-    context: 'sidebar',
-    compact: true,
-    text: 'Multi-word Badge',
-    style: 'pink',
-  },
-  play: async ({ canvasElement }) => {
+CompactTruncated.test(
+  'unrolls the truncated text',
+  { args: { text: 'Multi-word Badge', style: 'pink' } },
+  async ({ canvasElement }) => {
     const pill = getPill(canvasElement)
     await userEvent.hover(rowOf(pill))
     const floating = await waitForFloating()
@@ -498,7 +459,7 @@ export const CompactUnrollsTruncatedText: Story = {
     }
     await userEvent.unhover(rowOf(pill))
   },
-}
+)
 
 // Records the largest change of an animation's time between two frames of
 // the floating badge.
@@ -528,11 +489,9 @@ const watchAnimationSteps = () => {
 
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms))
 
-export const CompactAnimatesFromWhereItIs: Story = {
-  tags: testOnly,
-  decorators: [SidebarRow],
-  args: deprecatedArgs,
-  play: async ({ canvasElement }) => {
+CompactTruncated.test(
+  'animates from where it is',
+  async ({ canvasElement }) => {
     const row = rowOf(getPill(canvasElement))
     const stopWatching = watchAnimationSteps()
     // The pointer brushes past the row: the badge closes from wherever it
@@ -557,7 +516,7 @@ export const CompactAnimatesFromWhereItIs: Story = {
     await waitFor(() => expect(getFloating()).toBeNull())
     await expect(stopWatching()).toBeLessThanOrEqual(50)
   },
-}
+)
 
 const focusRowWithKeyboard = async (pill: HTMLElement) => {
   const row = pill.closest<HTMLElement>('[data-item-id]')!
@@ -566,11 +525,9 @@ const focusRowWithKeyboard = async (pill: HTMLElement) => {
   return row
 }
 
-export const CompactRowFocus: Story = {
-  tags: testOnly,
-  decorators: [SidebarRow],
-  args: deprecatedArgs,
-  play: async ({ canvasElement }) => {
+CompactTruncated.test(
+  'shows the full badge while its row has keyboard focus',
+  async ({ canvasElement }) => {
     const pill = getPill(canvasElement)
     const row = await focusRowWithKeyboard(pill)
     await waitFor(() => expect(getFloating()).not.toBeNull(), {
@@ -580,25 +537,21 @@ export const CompactRowFocus: Story = {
     row.blur()
     await waitFor(() => expect(getFloating()).toBeNull())
   },
-}
+)
 
-export const CompactRowFocusFits: Story = {
-  tags: testOnly,
-  decorators: [SidebarRow],
-  args: { context: 'sidebar', compact: true, text: 'New', style: 'green' },
-  play: async ({ canvasElement }) => {
+CompactFits.test(
+  'shows no floating badge when its row has keyboard focus',
+  async ({ canvasElement }) => {
     const row = await focusRowWithKeyboard(getPill(canvasElement))
     await new Promise((resolve) => setTimeout(resolve, 100))
     await expect(getFloating()).toBeNull()
     row.blur()
   },
-}
+)
 
-export const CompactRowFocusSurvivesHover: Story = {
-  tags: testOnly,
-  decorators: [SidebarRow],
-  args: deprecatedArgs,
-  play: async ({ canvasElement }) => {
+CompactTruncated.test(
+  'stays open on keyboard focus after a hover',
+  async ({ canvasElement }) => {
     const pill = getPill(canvasElement)
     const row = await focusRowWithKeyboard(pill)
     await waitFor(() => expect(getFloating()).not.toBeNull())
@@ -609,13 +562,11 @@ export const CompactRowFocusSurvivesHover: Story = {
     row.blur()
     await waitFor(() => expect(getFloating()).toBeNull())
   },
-}
+)
 
-export const CompactRowFocusEscape: Story = {
-  tags: testOnly,
-  decorators: [SidebarRow],
-  args: deprecatedArgs,
-  play: async ({ canvasElement }) => {
+CompactTruncated.test(
+  'closes on Escape while its row has keyboard focus',
+  async ({ canvasElement }) => {
     const pill = getPill(canvasElement)
     const row = await focusRowWithKeyboard(pill)
     await waitFor(() => expect(getFloating()).not.toBeNull())
@@ -636,34 +587,30 @@ export const CompactRowFocusEscape: Story = {
     await expect(getFloating()).toBeNull()
     row.blur()
   },
-}
+)
 
-export const CompactRowFocusWithoutKeyboard: Story = {
-  tags: testOnly,
-  decorators: [SidebarRow],
-  // A row focused by a press, which react-aria doesn't report as keyboard
-  // focus even when the browser matches :focus-visible.
-  parameters: { rowReportsFocusVisible: false },
-  args: deprecatedArgs,
-  play: async ({ canvasElement }) => {
+// A row focused by a press, which react-aria doesn't report as keyboard
+// focus even when the browser matches :focus-visible.
+CompactTruncated.test(
+  'stays closed when its row is focused without a keyboard',
+  { parameters: { rowReportsFocusVisible: false } },
+  async ({ canvasElement }) => {
     const row = await focusRowWithKeyboard(getPill(canvasElement))
     await new Promise((resolve) => setTimeout(resolve, 100))
     await expect(getFloating()).toBeNull()
     row.blur()
   },
-}
+)
 
 const nextFrames = () =>
   new Promise((resolve) =>
     requestAnimationFrame(() => requestAnimationFrame(resolve)),
   )
 
-export const CompactRowFocusFollowsScroll: Story = {
-  tags: testOnly,
-  decorators: [SidebarRow],
-  parameters: { scrollable: true },
-  args: deprecatedArgs,
-  play: async ({ canvasElement }) => {
+CompactTruncated.test(
+  'follows its focused row as it scrolls',
+  { parameters: { scrollable: true } },
+  async ({ canvasElement }) => {
     const pill = getPill(canvasElement)
     const row = await focusRowWithKeyboard(pill)
     const floating = await waitForFloating()
@@ -681,13 +628,11 @@ export const CompactRowFocusFollowsScroll: Story = {
     ).toBeLessThanOrEqual(1)
     row.blur()
   },
-}
+)
 
-export const CompactLetsPointerThrough: Story = {
-  tags: testOnly,
-  decorators: [SidebarRow],
-  args: deprecatedArgs,
-  play: async ({ canvasElement }) => {
+CompactTruncated.test(
+  'lets the pointer through to its row',
+  async ({ canvasElement }) => {
     const pill = getPill(canvasElement)
     const floating = await hoverUntilFloating(pill)
     // The pointer reaches the row under the part of the badge left of the
@@ -705,30 +650,25 @@ export const CompactLetsPointerThrough: Story = {
     await expect(getFloating()).toBe(floating)
     await userEvent.unhover(rowOf(pill))
   },
-}
+)
 
-export const CompactReopensWhileClosing: Story = {
-  tags: testOnly,
-  decorators: [SidebarRow],
-  args: deprecatedArgs,
-  play: async ({ canvasElement }) => {
-    const pill = getPill(canvasElement)
-    const floating = await hoverUntilFloating(pill)
-    await userEvent.unhover(rowOf(pill))
-    await waitFor(
-      () => expect(floating.getAnimations()[0].playbackRate).toBeLessThan(0),
-      { timeout: 50 },
-    )
-    // The pointer comes back before the badge has closed: it unrolls again
-    // from where it was, and stays open.
-    await userEvent.hover(rowOf(pill))
-    await waitFor(
-      () => expect(floating.getAnimations()[0].playbackRate).toBeGreaterThan(0),
-      { timeout: 50 },
-    )
-    await new Promise((resolve) => setTimeout(resolve, 300))
-    await expect(getFloating()).toBe(floating)
-    await userEvent.unhover(rowOf(pill))
-    await waitFor(() => expect(getFloating()).toBeNull())
-  },
-}
+CompactTruncated.test('reopens while closing', async ({ canvasElement }) => {
+  const pill = getPill(canvasElement)
+  const floating = await hoverUntilFloating(pill)
+  await userEvent.unhover(rowOf(pill))
+  await waitFor(
+    () => expect(floating.getAnimations()[0].playbackRate).toBeLessThan(0),
+    { timeout: 50 },
+  )
+  // The pointer comes back before the badge has closed: it unrolls again
+  // from where it was, and stays open.
+  await userEvent.hover(rowOf(pill))
+  await waitFor(
+    () => expect(floating.getAnimations()[0].playbackRate).toBeGreaterThan(0),
+    { timeout: 50 },
+  )
+  await new Promise((resolve) => setTimeout(resolve, 300))
+  await expect(getFloating()).toBe(floating)
+  await userEvent.unhover(rowOf(pill))
+  await waitFor(() => expect(getFloating()).toBeNull())
+})
