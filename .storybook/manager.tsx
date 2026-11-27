@@ -30,5 +30,5 @@ addons.setConfig({
     },
   },
   tagBadges,
-  tagBadgesOptions: { compactSidebar: true },
+  tagBadgesOptions: { compactSidebar: true, legacyTagIntersection: true },
 })

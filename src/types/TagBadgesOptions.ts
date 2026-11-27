@@ -11,4 +11,13 @@ export interface TagBadgesOptions {
    * `false`.
    */
   compactSidebar?: boolean
+
+  /**
+   * Gives component and group entries the tags that all the docs, story and
+   * test entries below them have in common, instead of the tags Storybook
+   * gives them. A component or group then only shows a sidebar badge when
+   * every entry below it has the badge's tag, whether or not sidebar filters
+   * hide some of these entries. Defaults to `false`.
+   */
+  legacyTagIntersection?: boolean
 }

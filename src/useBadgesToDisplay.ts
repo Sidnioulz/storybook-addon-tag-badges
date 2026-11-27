@@ -2,6 +2,7 @@ import { useMemo } from 'react'
 import { type API, useStorybookApi } from 'storybook/manager-api'
 
 import { DisplayOutcome, getDisplayType, shouldDisplay } from './utils/display'
+import { getEntryTags } from './utils/entryTags'
 import { matchTags } from './utils/tag'
 import type { API_HashEntry } from 'storybook/internal/types'
 import { TagBadgeParameters } from './types/TagBadgeParameters'
@@ -10,6 +11,11 @@ import type { DisplayEntryType } from './types/DisplayOptions'
 
 interface UseBadgesToDisplayOptions {
   context: 'mdx' | 'sidebar' | 'toolbar'
+  /**
+   * The `legacyTagIntersection` option of the addon, which changes the tags
+   * of the ancestors that inherited badges are checked against.
+   */
+  legacyTagIntersection?: boolean
   parameters: TagBadgeParameters
   parent?: string
   refId?: string
@@ -33,6 +39,7 @@ export function getBadgesToDisplay({
   api,
   context,
   includeInherited = false,
+  legacyTagIntersection,
   parameters,
   parent,
   refId,
@@ -55,7 +62,7 @@ export function getBadgesToDisplay({
     // it undefined preserves the existing local resolution behavior.
     resolvedParent = api.resolveStory(parent, refId)
     if (resolvedParent && resolvedParent.type !== 'root') {
-      parentTags = resolvedParent.tags
+      parentTags = getEntryTags(resolvedParent, { api, legacyTagIntersection })
     }
   }
 
@@ -83,6 +90,7 @@ export function getBadgesToDisplay({
           api,
           context,
           includeInherited: true,
+          legacyTagIntersection,
           parameters,
           parent: resolvedParent.parent,
           refId,
@@ -107,6 +115,7 @@ export function getBadgesToDisplay({
 
 export function useBadgesToDisplay({
   context,
+  legacyTagIntersection,
   parameters,
   parent,
   refId,
@@ -120,12 +129,13 @@ export function useBadgesToDisplay({
       getBadgesToDisplay({
         api,
         context,
+        legacyTagIntersection,
         parameters,
         parent,
         refId,
         tags,
         type,
       }),
-    [context, parameters, parent, refId, tags, type],
+    [context, legacyTagIntersection, parameters, parent, refId, tags, type],
   )
 }

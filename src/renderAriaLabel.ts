@@ -4,8 +4,9 @@ import type { API_HashEntry } from 'storybook/internal/types'
 import { getBadgeProps } from './components/Badge'
 import { canShowBadge, type LabelContext } from './renderLabel'
 import { getBadgesToDisplay } from './useBadgesToDisplay'
-import { readConfig } from './utils/config'
+import { readConfig, readOptions } from './utils/config'
 import { getDisplayType } from './utils/display'
+import { getEntryTags } from './utils/entryTags'
 
 /**
  * Returns the accessible name of a sidebar entry: its name, followed by the
@@ -24,13 +25,15 @@ export function renderAriaLabel(
     return item.name
   }
 
+  const { legacyTagIntersection } = readOptions()
   const [firstBadge] = getBadgesToDisplay({
     api,
     context: 'sidebar',
+    legacyTagIntersection,
     parameters: readConfig(),
     parent: 'parent' in item ? item.parent : undefined,
     refId: item.refId,
-    tags: item.tags,
+    tags: getEntryTags(item, { api, legacyTagIntersection }),
     type: getDisplayType(item),
   })
   if (!firstBadge) {

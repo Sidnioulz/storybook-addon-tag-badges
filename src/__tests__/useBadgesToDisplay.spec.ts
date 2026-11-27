@@ -21,6 +21,22 @@ vi.mock('storybook/manager-api', () => ({
       if (id === 'mock-composed-component' && refId === 'child-ref') {
         return { type: 'component', tags: ['test2'] }
       }
+      // A component whose meta sets `new`, which Storybook gives it, and one
+      // of whose stories removes it.
+      if (id === 'mixed-component') {
+        return {
+          id,
+          type: 'component',
+          tags: ['new'],
+          children: ['mixed-component--new', 'mixed-component--old'],
+        }
+      }
+      if (id === 'mixed-component--new') {
+        return { id, type: 'story', parent: 'mixed-component', tags: ['new'] }
+      }
+      if (id === 'mixed-component--old') {
+        return { id, type: 'story', parent: 'mixed-component', tags: [] }
+      }
       return { type: 'component', tags: [] }
     }),
   })),
@@ -448,6 +464,46 @@ describe('useBadgesToDisplay', () => {
       )
 
       expect(result.current).toHaveLength(1)
+    })
+  })
+
+  describe('legacyTagIntersection', () => {
+    const parameters: TagBadgeParameters = [
+      { tags: ['new'], badge: { text: 'New' } },
+    ]
+    const story: Parameters<typeof useBadgesToDisplay>[0] = {
+      context: 'sidebar',
+      parameters,
+      parent: 'mixed-component',
+      tags: ['new'],
+      type: 'story',
+    }
+
+    it('skips the badge of a story whose component Storybook gives its tag by default', () => {
+      const { result } = renderHook(() => useBadgesToDisplay(story))
+
+      expect(result.current).toHaveLength(0)
+    })
+
+    it('shows the badge of a story when a sibling story lacks its tag', () => {
+      const { result } = renderHook(() =>
+        useBadgesToDisplay({ ...story, legacyTagIntersection: true }),
+      )
+
+      expect(result.current.map(({ tag }) => tag)).toEqual(['new'])
+    })
+
+    it('updates badges when the option changes', () => {
+      const { result, rerender } = renderHook(
+        (legacyTagIntersection: boolean) =>
+          useBadgesToDisplay({ ...story, legacyTagIntersection }),
+        { initialProps: false },
+      )
+      expect(result.current).toHaveLength(0)
+
+      rerender(true)
+
+      expect(result.current.map(({ tag }) => tag)).toEqual(['new'])
     })
   })
 
