@@ -456,6 +456,27 @@ addons.setConfig({
 
 Touch screens only show the pill.
 
+### Legacy Tag Intersection
+
+Sidebar badges for `component` and `group` entries match the tags Storybook gives these entries. With `legacyTagIntersection`, the addon computes these tags itself instead: a component or group has the tags that all the docs, story and test entries below it have in common.
+
+A component or group then only shows a badge when every entry below it has the badge's tag. If a story removes a tag set in its component's `meta` (e.g. with `!new`), the component has no badge for that tag, and its other stories show the badge instead.
+
+```ts
+// .storybook/manager.ts
+import { addons } from 'storybook/manager-api'
+
+addons.setConfig({
+  tagBadgesOptions: {
+    legacyTagIntersection: true,
+  },
+})
+```
+
+Entries hidden by sidebar filters count too, so filtering the sidebar never changes badges. Toolbar and MDX badges are not affected, and [dynamic badge functions](#dynamic-badge-functions) still receive entries with the tags Storybook gives them.
+
+The option changes nothing on Storybook versions that already compute the tags of components and groups this way.
+
 ## Sidebar Config
 
 This addon uses the [sidebar `renderLabel` and `renderAriaLabel` options](https://storybook.js.org/docs/configure/user-interface/sidebar-and-urls) to display badges in the sidebar. `renderLabel` shows the badge next to the entry's name, and `renderAriaLabel` adds the badge's text to the entry's accessible name, e.g. "Button. Deprecated", so that screen readers announce it.
@@ -580,7 +601,9 @@ As a result, we need to create sidebar tags without access to story-specific dat
 
 In Storybook, your MDX and CSF files are converted to `docs`, `component`, `group` and `story` entries to render the sidebar, each with their own semantics. `docs` and `story` entries directly inherit the tags defined in `parameters.docs.tags` and in the [CSF `meta`](https://storybook.js.org/docs/api/csf#default-export), respectively.
 
-For `component` entries, tags are computed indirectly: they are the intersection of tags present on all of the component's stories. For example, for a component that defines the tag `version:1.2.0` in its `meta`, and has one story that defines an additional tag `deprecated`, the component entry will only have the `version:1.2.0` tag defined.
+`component` and `group` entries get their tags from Storybook, and this addon shows badges for whichever tags Storybook gives them. Depending on how your Storybook version computes them, the tags of a component may not be those of its `meta`.
+
+When Storybook intersects the tags of the entries inside a component, or when the [`legacyTagIntersection`](#legacy-tag-intersection) option is on, a component only has the tags present on all of its stories. For example, for a component that defines the tag `version:1.2.0` in its `meta`, and has one story that defines an additional tag `deprecated`, the component entry will only have the `version:1.2.0` tag defined.
 
 In particular, if a component `meta` defines two tags `outdated` and `version:1.1.0`, but one story explicitly removes the tag `outdated` (by adding `!outdated`), then the component entry will only have tag `version:1.1.0`.
 

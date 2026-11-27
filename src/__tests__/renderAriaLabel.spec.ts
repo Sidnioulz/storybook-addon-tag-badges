@@ -117,4 +117,52 @@ describe('renderAriaLabel', () => {
 
     expect(renderAriaLabel(root, api, sidebar)).toBe('Example')
   })
+
+  describe('legacyTagIntersection', () => {
+    // A component whose meta sets `inherited`, which Storybook gives it, and
+    // one of whose stories removes it.
+    const card = {
+      id: 'example-card',
+      type: 'component',
+      name: 'Card',
+      tags: ['inherited'],
+      depth: 1,
+      children: ['example-card--plain', 'example-card--old'],
+    } as unknown as API_HashEntry
+    const plain = entry(['inherited'], {
+      id: 'example-card--plain',
+      name: 'Plain',
+      parent: 'example-card',
+    })
+    const old = entry([], {
+      id: 'example-card--old',
+      name: 'Old',
+      parent: 'example-card',
+    })
+    const hash: Record<string, API_HashEntry> = {
+      [card.id]: card,
+      [plain.id]: plain,
+      [old.id]: old,
+    }
+    const cardApi = {
+      resolveStory: (id: string) => hash[id],
+    } as unknown as API
+
+    afterEach(() => {
+      delete config.tagBadgesOptions
+    })
+
+    it('names the badges of the tags Storybook gives a component by default', () => {
+      expect(renderAriaLabel(card, cardApi, sidebar)).toBe('Card. Inherited')
+      expect(renderAriaLabel(plain, cardApi, sidebar)).toBe('Plain')
+    })
+
+    it('leaves a badge to the stories of a component when one of them lacks its tag', () => {
+      config.tagBadgesOptions = { legacyTagIntersection: true }
+
+      expect(renderAriaLabel(card, cardApi, sidebar)).toBe('Card')
+      expect(renderAriaLabel(plain, cardApi, sidebar)).toBe('Plain. Inherited')
+      expect(renderAriaLabel(old, cardApi, sidebar)).toBe('Old')
+    })
+  })
 })
